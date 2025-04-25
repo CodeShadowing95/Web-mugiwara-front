@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-// import { motion } from "framer-motion"
+import { motion } from "framer-motion"
 import {
   ChevronLeft,
   ChevronRight,
@@ -22,6 +22,7 @@ import {
   Info,
   ShoppingCart,
   ArrowLeft,
+  ChevronRightIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -84,6 +85,20 @@ type ProductProps = {
     price: number
     unit: string
   }[]
+  recipes: RecipeProps[]
+}
+
+type RecipeProps = {
+  id: number
+  title: string
+  image: string
+  description: string
+  prepTime: string
+  cookTime: string
+  difficulty: "Facile" | "Moyen" | "Difficile"
+  servings: number
+  author: string
+  authorImage?: string
 }
 
 export default function ProductDetail() {
@@ -178,6 +193,60 @@ export default function ProductDetail() {
         image: "/placeholder.svg?height=200&width=200",
         price: 4.5,
         unit: "400g",
+      },
+    ],
+    recipes: [
+      {
+        id: 1,
+        title: "Salade de tomates anciennes et burrata",
+        image: "/placeholder.svg?height=300&width=400",
+        description:
+          "Une salade fraîche et colorée, parfaite pour l'été, qui met en valeur la saveur des tomates anciennes.",
+        prepTime: "15 min",
+        cookTime: "0 min",
+        difficulty: "Facile",
+        servings: 4,
+        author: "Chef Marie",
+        authorImage: "/placeholder.svg?height=50&width=50",
+      },
+      {
+        id: 2,
+        title: "Tarte rustique aux tomates anciennes",
+        image: "/placeholder.svg?height=300&width=400",
+        description:
+          "Une tarte savoureuse avec une pâte croustillante et des tomates juteuses, parfumée au basilic et à l'huile d'olive.",
+        prepTime: "20 min",
+        cookTime: "35 min",
+        difficulty: "Moyen",
+        servings: 6,
+        author: "Chef Thomas",
+        authorImage: "/placeholder.svg?height=50&width=50",
+      },
+      {
+        id: 3,
+        title: "Gazpacho de tomates anciennes",
+        image: "/placeholder.svg?height=300&width=400",
+        description:
+          "Une soupe froide rafraîchissante, idéale pour les journées chaudes d'été, qui concentre toutes les saveurs des tomates.",
+        prepTime: "15 min",
+        cookTime: "0 min",
+        difficulty: "Facile",
+        servings: 4,
+        author: "Chef Sophie",
+        authorImage: "/placeholder.svg?height=50&width=50",
+      },
+      {
+        id: 4,
+        title: "Pâtes fraîches sauce tomates anciennes",
+        image: "/placeholder.svg?height=300&width=400",
+        description:
+          "Des pâtes al dente nappées d'une sauce tomate maison aux herbes fraîches et à l'ail, un classique revisité.",
+        prepTime: "10 min",
+        cookTime: "25 min",
+        difficulty: "Moyen",
+        servings: 4,
+        author: "Chef Marco",
+        authorImage: "/placeholder.svg?height=50&width=50",
       },
     ],
   }
@@ -471,6 +540,118 @@ export default function ProductDetail() {
           </div>
         </div>
 
+        {/* Section Recettes */}
+        <section className="mb-12 mt-12 bg-white dark:bg-gray-800 rounded-2xl p-8 border border-farm-beige-dark dark:border-gray-700 overflow-hidden relative">
+          {/* Décoration d'arrière-plan */}
+          <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-farm-beige-light dark:bg-gray-900/50 z-0"></div>
+          <div className="absolute -left-16 -bottom-16 w-48 h-48 rounded-full bg-farm-beige-light dark:bg-gray-900/50 z-0"></div>
+
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl font-bold text-farm-green-dark dark:text-white">Idées de recettes</h2>
+                <p className="text-farm-green dark:text-gray-300 mt-1">
+                  Découvrez des recettes délicieuses avec nos tomates anciennes bio
+                </p>
+              </div>
+              <Button className="bg-farm-orange hover:bg-farm-orange-dark text-white">Toutes les recettes</Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {product.recipes.map((recipe) => (
+                <motion.div
+                  key={recipe.id}
+                  whileHover={{ y: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="bg-farm-beige-light dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group"
+                >
+                  <div className="relative h-48 overflow-hidden">
+                    <Image
+                      // src={recipe.image || "/placeholder.svg"}
+                      src="/sample.png"
+                      alt={recipe.title}
+                      width={400}
+                      height={300}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute top-2 right-2">
+                      <Badge
+                        className={cn(
+                          "px-2 py-1",
+                          recipe.difficulty === "Facile"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                            : recipe.difficulty === "Moyen"
+                              ? "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
+                              : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+                        )}
+                      >
+                        {recipe.difficulty}
+                      </Badge>
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                      <div className="relative">
+                        <h3 className="font-medium text-white text-lg leading-tight">{recipe.title}</h3>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4">
+                    <p className="text-farm-green dark:text-gray-300 text-sm line-clamp-2 mb-4">{recipe.description}</p>
+
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex flex-col items-center">
+                          <span className="text-xs text-farm-green-light dark:text-farm-green-light font-medium">
+                            Préparation
+                          </span>
+                          <span className="text-farm-green-dark dark:text-white font-medium">{recipe.prepTime}</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <span className="text-xs text-farm-green-light dark:text-farm-green-light font-medium">
+                            Cuisson
+                          </span>
+                          <span className="text-farm-green-dark dark:text-white font-medium">{recipe.cookTime}</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <span className="text-xs text-farm-green-light dark:text-farm-green-light font-medium">
+                            Personnes
+                          </span>
+                          <span className="text-farm-green-dark dark:text-white font-medium">{recipe.servings}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-6 h-6 rounded-full overflow-hidden">
+                          <Image
+                            // src={recipe.authorImage || "/cook.jpg"}
+                            src="/cook.jpg"
+                            alt={recipe.author}
+                            width={24}
+                            height={24}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <span className="text-xs text-farm-green dark:text-gray-400">{recipe.author}</span>
+                      </div>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-farm-green-dark text-xs dark:text-white hover:text-farm-green-light dark:hover:text-farm-green-light p-0"
+                      >
+                        Consulter
+                        <ChevronRightIcon className="ml-1 h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Onglets d'information */}
         <Tabs defaultValue="description" className="mb-12">
           <TabsList className="w-full bg-farm-beige dark:bg-gray-800 p-0 h-auto border-b border-farm-beige-dark dark:border-gray-700">
@@ -664,13 +845,16 @@ export default function ProductDetail() {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {product.relatedProducts.map((item) => (
-              <div
+              <motion.div
+                whileHover={{ y: -5 }}
+                transition={{ duration: 0.2 }}
                 key={item.id}
                 className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-farm-beige-dark dark:border-gray-700 hover:shadow-md transition-shadow"
               >
                 <div className="aspect-square rounded-lg bg-farm-beige-light dark:bg-gray-900 mb-3 flex items-center justify-center p-2">
                   <Image
-                    src={item.image || "/placeholder.svg"}
+                    // src={item.image || "/placeholder.svg"}
+                    src="/vegetable2.png"
                     alt={item.name}
                     width={150}
                     height={150}
@@ -690,7 +874,7 @@ export default function ProductDetail() {
                     <Plus size={16} />
                   </Button>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>

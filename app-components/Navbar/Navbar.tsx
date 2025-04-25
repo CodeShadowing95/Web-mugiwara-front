@@ -15,7 +15,7 @@ import { ThemeToggle } from '../ThemeToggle';
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
-    const [lastScrollY, setLastScrollY] = useState(1000);
+    const [lastScrollY, setLastScrollY] = useState(0);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [actualScrollValue, setActualScrollValue] = useState(0);
 
@@ -35,7 +35,7 @@ const Navbar = () => {
 
             // Update scroll position
             setLastScrollY(currentScrollY);
-            setIsScrolled(currentScrollY > 2000);
+            setIsScrolled(currentScrollY > 12000);
         };
 
         window.addEventListener("scroll", handleScroll);

@@ -2,13 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 export default function FarmNav() {
     const [isScrolled, setIsScrolled] = useState(false);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -55,8 +51,8 @@ export default function FarmNav() {
 
             {/* Promo Banner */}
             <div className="bg-[#8fb573] dark:bg-emerald-600 text-white py-2 px-4 text-center font-medium">
-                🌱 Offre spéciale : -15% sur votre premier panier avec le code
-                MUGIWARA 🥦
+                🌱🥩 Offre spéciale : -15% sur votre premier panier avec le code
+                MUGIWARA 🥦🧀
             </div>
         </div>
     );
