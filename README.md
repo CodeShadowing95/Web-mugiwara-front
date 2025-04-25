@@ -49,7 +49,7 @@
 
 ## 📸 Aperçu visuel
 
-*(Ajouter ici quelques captures d’écran du site – accueil, produit, panier, tableau de bord...)*
+*Quelques captures d’écran du siteà à ajouter – accueil, produit, panier, tableau de bord...*
 
 ---
 
