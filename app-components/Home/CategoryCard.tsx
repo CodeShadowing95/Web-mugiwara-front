@@ -5,14 +5,14 @@ import Link from 'next/link'
 import { Categorie } from '@/types';
 import { genRandKey } from '@/utils/utilities';
 
-const CategoryCard = ({ index, categorie }: { index: number, categorie: Categorie }) => {
+const CategoryCard = ({ index, categorie }: { index: number, categorie: any }) => {
     return (
         <div className="bg-white rounded-xl p-6 shadow-sm border border-[#e8e1d4]">
-            <h2 className="text-xl font-bold text-[#3c5a3e] mb-4">{categorie.categorie}</h2>
+            <h2 className="text-xl font-bold text-[#3c5a3e] mb-4">{categorie.name}</h2>
             <div className="grid grid-cols-2 gap-4">
-                {categorie.produits.map((item: any) => {
+                {categorie.parent.slice(0,4).map((item: any) => {
                     const key = genRandKey();
-                    const normalizedItem = item.toLowerCase()
+                    const normalizedItem = item.name.toLowerCase()
                         .normalize('NFD')
                         .replace(/[\u0300-\u036f]/g, '') // Remove accents
                         .replace(/\s+/g, '-'); // Replace spaces with hyphens
@@ -27,7 +27,7 @@ const CategoryCard = ({ index, categorie }: { index: number, categorie: Categori
                                     className="h-full w-full object-contain transition-transform group-hover:scale-105"
                                 />
                             </div>
-                            <span className="text-sm text-[#5a7052]">{item}</span>
+                            <span className="text-sm text-[#5a7052]">{item.name}</span>
                         </Link>
                     )
                 })}

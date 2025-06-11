@@ -6,8 +6,12 @@ import CategoryCard from "./CategoryCard"
 import { Categorie } from "@/types"
 import { genRandKey } from "@/utils/utilities"
 import BannerCarousel from "./BannerCarousel"
+import { getCategories } from "@/lib/productCategory"
 
-export default function FarmHomepage() {
+export default async function  FarmHomepage() {
+
+  const productCategories = await getCategories();
+
   return (
     <div className="min-h-screen bg-[#f9f7f2]">
       <main className="w-full px-8 py-4">
@@ -67,7 +71,7 @@ export default function FarmHomepage() {
 
         {/* Category Grid 1 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {categories.slice(0, 3).map((categorie: Categorie, index: number) => {
+          {productCategories.slice(0, 3).map((categorie: any, index: number) => {
             const key = genRandKey();
 
             return (
@@ -101,7 +105,7 @@ export default function FarmHomepage() {
 
         {/* Category Grid 2 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {categories.slice(3, 7).map((categorie: Categorie, index: number) => {
+          {productCategories.slice(3, 7).map((categorie: any, index: number) => {
             const key = genRandKey();
 
             return (

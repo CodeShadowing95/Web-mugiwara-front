@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   ChevronLeft,
   ChevronRight,
@@ -17,49 +17,82 @@ import {
   Carrot,
   Truck,
   Clock,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { categories } from "@/constants"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { categories } from "@/constants";
 
 export default function CategoryPage() {
-const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
-const item = searchParams.get('item') ?? "1"
-const query = searchParams.get('q') ?? "produits-de-saison"
-const sort = searchParams.get('sort')
-const filters = {
-  bio: searchParams.get('bio') === 'true',
-  local: searchParams.get('local') === 'true',
-  price_min: searchParams.get('price_min'),
-  price_max: searchParams.get('price_max'),
-  season: searchParams.get('season'),
-}
+  const searchParams =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search)
+      : new URLSearchParams();
+  const item = searchParams.get("item") ?? "1";
+  const query = searchParams.get("q") ?? "produits-de-saison";
+  const sort = searchParams.get("sort");
+  const filters = {
+    bio: searchParams.get("bio") === "true",
+    local: searchParams.get("local") === "true",
+    price_min: searchParams.get("price_min"),
+    price_max: searchParams.get("price_max"),
+    season: searchParams.get("season"),
+  };
 
   const [family, setFamily] = useState("");
   const [category, setCategory] = useState("");
+  const [ products, setProducts ] = useState([]);
   const [filtersOpen, setFiltersOpen] = useState({
     saison: true,
     provenance: true,
     prix: true,
     bio: true,
-  })
+  });
 
   const toggleFilter = (filter: string) => {
     setFiltersOpen((prev: any) => ({
       ...prev,
       [filter]: !prev[filter],
-    }))
-  }
+    }));
+  };
+  const fetchProducts = async () => {
+    try {
+      // Use HTTP for local development instead of HTTPS
+      const url = "http://localhost:8080/api/public/v1/products";
+      const options = {
+        method: "GET",
+        // You can add headers here if needed
+        headers: {
+          'Accept': 'application/json'
+        }
+      };
+
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setProducts(data);
+      console.log(data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      // Handle the error gracefully - can setProducts([]) if needed
+    }
+  };
 
   useEffect(() => {
     const fetchFamilyCategoryFromURL = () => {
-      const idItem = parseInt(item)-1;
-      setFamily(categories[idItem].categorie)
-      setCategory(query.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '))
-    }
-
-    fetchFamilyCategoryFromURL()
-  }, [item, query])
+      const idItem = parseInt(item) - 1;
+      setFamily(categories[idItem]?.categorie);
+      setCategory(
+        query
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ")
+      );
+    };
+    fetchProducts();
+    fetchFamilyCategoryFromURL();
+  }, [item, query]);
 
   const produits = [
     {
@@ -128,7 +161,7 @@ const filters = {
       bio: true,
       local: true,
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-[#f9f7f2] dark:bg-zinc-950">
@@ -139,7 +172,9 @@ const filters = {
           Accueil
         </Link>
         <ChevronRight size={14} />
-        <span className="font-medium">{family} - {category}</span>
+        <span className="font-medium">
+          {family} - {category}
+        </span>
       </div>
 
       <main className="max-w-7xl mx-auto px-4 md:px-8 pb-12">
@@ -147,7 +182,9 @@ const filters = {
           {/* Filtres */}
           <aside className="md:w-64 flex-shrink-0">
             <div className="bg-white dark:bg-zinc-900 rounded-xl p-4 shadow-sm border border-[#e8e1d4] dark:border-zinc-700 mb-4">
-              <h2 className="font-bold text-[#3c5a3e] dark:text-zinc-100 text-lg mb-4">Affiner par</h2>
+              <h2 className="font-bold text-[#3c5a3e] dark:text-zinc-100 text-lg mb-4">
+                Affiner par
+              </h2>
 
               {/* Filter sections with updated colors */}
               <div className="mb-4 border-b border-[#e8e1d4] dark:border-zinc-700 pb-3">
@@ -156,12 +193,19 @@ const filters = {
                   onClick={() => toggleFilter("saison")}
                 >
                   Saison
-                  {filtersOpen.saison ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                  {filtersOpen.saison ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
                 </button>
                 {filtersOpen.saison && (
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <Checkbox id="saison-printemps" className="border-[#e8e1d4] dark:border-zinc-700" />
+                      <Checkbox
+                        id="saison-printemps"
+                        className="border-[#e8e1d4] dark:border-zinc-700"
+                      />
                       <label
                         htmlFor="saison-printemps"
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#5a7052] dark:text-zinc-400"
@@ -207,7 +251,11 @@ const filters = {
                   onClick={() => toggleFilter("provenance")}
                 >
                   Provenance
-                  {filtersOpen.provenance ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                  {filtersOpen.provenance ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
                 </button>
                 {filtersOpen.provenance && (
                   <div className="space-y-2">
@@ -249,7 +297,11 @@ const filters = {
                   onClick={() => toggleFilter("prix")}
                 >
                   Prix
-                  {filtersOpen.prix ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                  {filtersOpen.prix ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
                 </button>
                 {filtersOpen.prix && (
                   <div className="space-y-2">
@@ -300,7 +352,11 @@ const filters = {
                   onClick={() => toggleFilter("bio")}
                 >
                   Certification
-                  {filtersOpen.bio ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                  {filtersOpen.bio ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
                 </button>
                 {filtersOpen.bio && (
                   <div className="space-y-2">
@@ -359,25 +415,34 @@ const filters = {
                 {family}
               </h1>
               <p className="text-[#5a7052] dark:text-zinc-500 mb-4">
-                Découvrez notre sélection de fruits et légumes frais, cultivés avec passion par nos producteurs locaux.
-                Tous nos produits sont récoltés à maturité pour vous garantir une fraîcheur et une saveur optimales.
+                Découvrez notre sélection de fruits et légumes frais, cultivés
+                avec passion par nos producteurs locaux. Tous nos produits sont
+                récoltés à maturité pour vous garantir une fraîcheur et une
+                saveur optimales.
               </p>
               <div className="flex flex-wrap gap-2">
                 <span className="bg-[#5a7052] dark:bg-emerald-700 text-[#f7f4eb] dark:text-emerald-50 px-3 py-1 rounded-full text-sm font-bold flex items-center">
                   {category}
                 </span>
                 <span className="bg-[#f7f4eb] dark:bg-zinc-800 text-[#5a7052] dark:text-zinc-100 px-3 py-1 rounded-full text-sm font-medium flex items-center">
-                  <Leaf size={14} className="mr-1 text-[#8fb573] dark:text-emerald-400" />
+                  <Leaf
+                    size={14}
+                    className="mr-1 text-[#8fb573] dark:text-emerald-400"
+                  />
                   Bio
                 </span>
-                <span className="bg-[#f7f4eb] dark:bg-zinc-800 text-[#5a7052] dark:text-zinc-100 px-3 py-1 rounded-full text-sm font-medium">Local</span>
+                <span className="bg-[#f7f4eb] dark:bg-zinc-800 text-[#5a7052] dark:text-zinc-100 px-3 py-1 rounded-full text-sm font-medium">
+                  Local
+                </span>
               </div>
             </div>
 
             {/* Produits mis en avant */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-[#3c5a3e] dark:text-zinc-100">Meilleures ventes</h2>
+                <h2 className="text-xl font-bold text-[#3c5a3e] dark:text-zinc-100">
+                  Meilleures ventes
+                </h2>
                 <div className="flex space-x-2">
                   <button className="p-1.5 rounded-full bg-white dark:bg-zinc-800 border border-[#e8e1d4] dark:border-zinc-700 text-[#5a7052] dark:text-zinc-100 hover:bg-[#f7f4eb] dark:hover:bg-zinc-700">
                     <ChevronLeft size={18} />
@@ -390,7 +455,6 @@ const filters = {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {produits.slice(0, 3).map((produit) => {
-
                   return (
                     <Link
                       href={`/product/${produit.id}`}
@@ -421,31 +485,50 @@ const filters = {
                               <span key={i}>
                                 {i < Math.floor(produit.note) ? (
                                   <Star size={14} className="fill-current" />
-                                ) : produit.note % 1 > 0 && i === Math.floor(produit.note) ? (
-                                  <StarHalf size={14} className="fill-current" />
+                                ) : produit.note % 1 > 0 &&
+                                  i === Math.floor(produit.note) ? (
+                                  <StarHalf
+                                    size={14}
+                                    className="fill-current"
+                                  />
                                 ) : (
-                                  <Star size={14} className="text-gray-300 dark:text-zinc-600" />
+                                  <Star
+                                    size={14}
+                                    className="text-gray-300 dark:text-zinc-600"
+                                  />
                                 )}
                               </span>
                             ))}
-                          <span className="text-xs text-[#5a7052] dark:text-zinc-100 ml-1">({produit.avis})</span>
+                          <span className="text-xs text-[#5a7052] dark:text-zinc-100 ml-1">
+                            ({produit.avis})
+                          </span>
                         </div>
-                        <h3 className="font-medium text-[#3c5a3e] dark:text-zinc-100">{produit.nom}</h3>
-                        <p className="text-sm text-[#5a7052] dark:text-zinc-500">{produit.producteur}</p>
+                        <h3 className="font-medium text-[#3c5a3e] dark:text-zinc-100">
+                          {produit.nom}
+                        </h3>
+                        <p className="text-sm text-[#5a7052] dark:text-zinc-500">
+                          {produit.producteur}
+                        </p>
                       </div>
                       <div className="flex items-center justify-between mt-3">
-                        <span className="font-bold text-[#3c5a3e] dark:text-zinc-100">{produit.prix.toFixed(2)} €</span>
-                        <Button size="sm" className="bg-[#8fb573] hover:bg-[#7a9c62] dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white" onClick={(e: any) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          alert('OK');
-                        }}>
+                        <span className="font-bold text-[#3c5a3e] dark:text-zinc-100">
+                          {produit.prix.toFixed(2)} €
+                        </span>
+                        <Button
+                          size="sm"
+                          className="bg-[#8fb573] hover:bg-[#7a9c62] dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
+                          onClick={(e: any) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            alert("OK");
+                          }}
+                        >
                           <ShoppingCart size={14} className="mr-1" />
                           Ajouter
                         </Button>
                       </div>
                     </Link>
-                  )
+                  );
                 })}
               </div>
             </div>
@@ -453,9 +536,13 @@ const filters = {
             {/* Tous les produits */}
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-[#3c5a3e] dark:text-zinc-100">Tous nos produits</h2>
+                <h2 className="text-xl font-bold text-[#3c5a3e] dark:text-zinc-100">
+                  Tous nos produits
+                </h2>
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm text-[#5a7052] dark:text-zinc-300">Trier par:</span>
+                  <span className="text-sm text-[#5a7052] dark:text-zinc-300">
+                    Trier par:
+                  </span>
                   <select className="text-sm border border-[#e8e1d4] dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 px-2 py-1 text-[#5a7052] dark:text-zinc-300">
                     <option>Popularité</option>
                     <option>Prix croissant</option>
@@ -496,21 +583,36 @@ const filters = {
                             <span key={i}>
                               {i < Math.floor(produit.note) ? (
                                 <Star size={14} className="fill-current" />
-                              ) : produit.note % 1 > 0 && i === Math.floor(produit.note) ? (
+                              ) : produit.note % 1 > 0 &&
+                                i === Math.floor(produit.note) ? (
                                 <StarHalf size={14} className="fill-current" />
                               ) : (
-                                <Star size={14} className="text-gray-300 dark:text-zinc-600" />
+                                <Star
+                                  size={14}
+                                  className="text-gray-300 dark:text-zinc-600"
+                                />
                               )}
                             </span>
                           ))}
-                        <span className="text-xs text-[#5a7052] dark:text-zinc-100 ml-1">({produit.avis})</span>
+                        <span className="text-xs text-[#5a7052] dark:text-zinc-100 ml-1">
+                          ({produit.avis})
+                        </span>
                       </div>
-                      <h3 className="font-medium text-[#3c5a3e] dark:text-zinc-100">{produit.nom}</h3>
-                      <p className="text-sm text-[#5a7052] dark:text-zinc-500">{produit.producteur}</p>
+                      <h3 className="font-medium text-[#3c5a3e] dark:text-zinc-100">
+                        {produit.nom}
+                      </h3>
+                      <p className="text-sm text-[#5a7052] dark:text-zinc-500">
+                        {produit.producteur}
+                      </p>
                     </div>
                     <div className="flex items-center justify-between mt-3">
-                      <span className="font-bold text-[#3c5a3e] dark:text-zinc-100">{produit.prix.toFixed(2)} €</span>
-                      <Button size="sm" className="bg-[#8fb573] hover:bg-[#7a9c62] dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white">
+                      <span className="font-bold text-[#3c5a3e] dark:text-zinc-100">
+                        {produit.prix.toFixed(2)} €
+                      </span>
+                      <Button
+                        size="sm"
+                        className="bg-[#8fb573] hover:bg-[#7a9c62] dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
+                      >
                         <ShoppingCart size={14} className="mr-1" />
                         Ajouter
                       </Button>
@@ -550,14 +652,20 @@ const filters = {
             <div className="flex items-center mb-4 md:mb-0">
               <Truck size={24} className="mr-3" />
               <div>
-                <p className="font-medium">Livraison gratuite à partir de 35€ d'achat</p>
-                <p className="text-sm text-white/80">Livraison en 24-48h ou retrait en point relais</p>
+                <p className="font-medium">
+                  Livraison gratuite à partir de 35€ d'achat
+                </p>
+                <p className="text-sm text-white/80">
+                  Livraison en 24-48h ou retrait en point relais
+                </p>
               </div>
             </div>
-            <Button className="bg-white text-[#3c5a3e] hover:bg-[#f7f4eb]">Voir les conditions</Button>
+            <Button className="bg-white text-[#3c5a3e] hover:bg-[#f7f4eb]">
+              Voir les conditions
+            </Button>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
