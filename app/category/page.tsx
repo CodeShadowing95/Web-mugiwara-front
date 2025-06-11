@@ -57,7 +57,7 @@ export default function CategoryPage() {
   const fetchProducts = async () => {
     try {
       // Use HTTP for local development instead of HTTPS
-      const url = "http://localhost:8080/api/public/v1/products";
+      const url = "https://localhost:8080/api/public/v1/products";
       const options = {
         method: "GET",
         // You can add headers here if needed
