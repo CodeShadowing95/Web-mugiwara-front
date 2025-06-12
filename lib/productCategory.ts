@@ -1,6 +1,6 @@
 export const getCategories = async () => {
     // WARNING: This is only for development. Do not use in production!
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
     const url = 'https://localhost/api/public/v1/product-categories';
     const options = { method: 'GET' };

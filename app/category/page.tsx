@@ -40,7 +40,7 @@ export default function CategoryPage() {
 
   const [family, setFamily] = useState("");
   const [category, setCategory] = useState("");
-  const [ products, setProducts ] = useState([]);
+  const [ products, setProducts ] = useState([] as any[]);
   const [filtersOpen, setFiltersOpen] = useState({
     saison: true,
     provenance: true,
@@ -57,7 +57,7 @@ export default function CategoryPage() {
   const fetchProducts = async () => {
     try {
       // Use HTTP for local development instead of HTTPS
-      const url = "https://localhost:8080/api/public/v1/products";
+      const url = "https://localhost/api/public/v1/products";
       const options = {
         method: "GET",
         // You can add headers here if needed
@@ -454,7 +454,7 @@ export default function CategoryPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {produits.slice(0, 3).map((produit) => {
+                {products.slice(0, 3).map((produit) => {
                   return (
                     <Link
                       href={`/product/${produit.id}`}
@@ -470,7 +470,7 @@ export default function CategoryPage() {
                       <div className="relative mb-3 bg-[#f7f4eb] dark:bg-zinc-800 rounded-lg p-4 flex items-center justify-center h-48">
                         <img
                           src="vegetable.png"
-                          alt={produit.nom}
+                          alt={produit.name}
                           className="h-48 w-48 object-contain transition-transform group-hover:scale-105"
                         />
                         <button className="absolute bottom-2 right-2 p-1.5 rounded-full bg-white dark:bg-zinc-700 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-[#5a7052] dark:text-zinc-100 hover:text-[#3c5a3e] dark:hover:text-zinc-500">
@@ -483,10 +483,10 @@ export default function CategoryPage() {
                             .fill(0)
                             .map((_, i) => (
                               <span key={i}>
-                                {i < Math.floor(produit.note) ? (
+                                {i < Math.floor(4.4) ? (
                                   <Star size={14} className="fill-current" />
-                                ) : produit.note % 1 > 0 &&
-                                  i === Math.floor(produit.note) ? (
+                                ) :4 % 1 > 0 &&
+                                  i === Math.floor(4.4) ? (
                                   <StarHalf
                                     size={14}
                                     className="fill-current"
@@ -504,7 +504,7 @@ export default function CategoryPage() {
                           </span>
                         </div>
                         <h3 className="font-medium text-[#3c5a3e] dark:text-zinc-100">
-                          {produit.nom}
+                          {produit.name}
                         </h3>
                         <p className="text-sm text-[#5a7052] dark:text-zinc-500">
                           {produit.producteur}
@@ -512,7 +512,7 @@ export default function CategoryPage() {
                       </div>
                       <div className="flex items-center justify-between mt-3">
                         <span className="font-bold text-[#3c5a3e] dark:text-zinc-100">
-                          {produit.prix.toFixed(2)} €
+                          {produit.price.toFixed(2)} €
                         </span>
                         <Button
                           size="sm"
