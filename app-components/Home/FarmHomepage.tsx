@@ -6,72 +6,21 @@ import CategoryCard from "./CategoryCard"
 import { Categorie } from "@/types"
 import { genRandKey } from "@/utils/utilities"
 import BannerCarousel from "./BannerCarousel"
-import { getCategories } from "@/lib/productCategory"
+// import { getCategories } from "@/lib/productCategory"
 
 export default async function  FarmHomepage() {
 
-  const productCategories = await getCategories();
+  // const productCategories = await getCategories();
 
   return (
     <div className="min-h-screen bg-[#f9f7f2]">
       <main className="w-full px-8 py-4">
-        {/* Hero Banner Carousel */}
-        {/* <div className="relative rounded-xl overflow-hidden mb-8 bg-gradient-to-r from-[#5a7052] to-[#8fb573]">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 rounded-full bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </Button>
-          </div>
-
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 rounded-full bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </Button>
-          </div>
-
-          <div className="flex items-center h-[200px] md:h-[300px] px-16 md:px-20">
-            <div className="w-1/2 pr-8">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-                Des produits frais qui ont du goût.
-              </h1>
-              <div className="mb-6">
-                <img src="/placeholder.svg?height=60&width=180" alt="Marché Fermier" className="h-10 object-contain" />
-              </div>
-            </div>
-            <div className="w-1/2 flex justify-end items-center">
-              <div className="relative">
-                <div className="absolute -top-20 right-10 w-32 h-32 rounded-full bg-[#e8e1d4]/30"></div>
-                <div className="absolute -bottom-10 left-10 w-40 h-40 rounded-full bg-[#e8e1d4]/20"></div>
-                <div className="absolute top-10 left-0 w-24 h-24 rounded-full bg-[#e8e1d4]/20"></div>
-
-                <img
-                  src="/placeholder.svg?height=200&width=200"
-                  alt="Panier de légumes"
-                  className="relative z-10 h-48 w-48 object-contain"
-                />
-
-                <img
-                  src="/placeholder.svg?height=150&width=150"
-                  alt="Fruits frais"
-                  className="absolute right-0 bottom-0 z-20 h-32 w-32 object-contain"
-                />
-              </div>
-            </div>
-          </div>
-        </div> */}
+        
         <BannerCarousel />
 
         {/* Category Grid 1 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {productCategories.slice(0, 3).map((categorie: any, index: number) => {
+          {categories.slice(0, 3).map((categorie: any, index: number) => {
             const key = genRandKey();
 
             return (
@@ -105,7 +54,7 @@ export default async function  FarmHomepage() {
 
         {/* Category Grid 2 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {productCategories.slice(3, 7).map((categorie: any, index: number) => {
+          {categories.slice(3, 7).map((categorie: any, index: number) => {
             const key = genRandKey();
 
             return (

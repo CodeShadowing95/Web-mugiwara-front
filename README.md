@@ -1,6 +1,6 @@
 # 🌾 CocotteConnect – Vente directe fermier ↔ client
 
-**FarmConnect** est une plateforme web moderne qui connecte directement les producteurs agricoles aux consommateurs finaux. L’objectif : faciliter l’accès à des produits frais, locaux et de qualité, tout en valorisant le travail des fermiers.
+**CocotteConnect** est une plateforme web moderne qui connecte directement les producteurs agricoles aux consommateurs finaux. L’objectif : faciliter l’accès à des produits frais, locaux et de qualité, tout en valorisant le travail des fermiers.
 
 ---
 
