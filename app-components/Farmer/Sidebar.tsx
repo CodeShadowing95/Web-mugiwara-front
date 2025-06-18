@@ -4,9 +4,15 @@ import React, { useState } from 'react'
 import Link from 'next/link';
 import { BarChart3, ChevronDown, Home, Leaf, LogOut, Package, Settings, ShoppingBasket, Truck, Users, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
+interface SidebarProps {
+    hasFarms: boolean
+}
 
-const Sidebar = () => {
+const Sidebar = ({ hasFarms } : SidebarProps) => {
+    const router = useRouter()
     const [sidebarOpen, setSidebarOpen] = useState(false)
 
     return (
@@ -41,41 +47,45 @@ const Sidebar = () => {
                         <Home className="w-5 h-5 mr-3" />
                         Tableau de bord
                     </Link>
-                    <Link
-                        href="/fermier/orders"
-                        className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
-                    >
-                        <Package className="w-5 h-5 mr-3" />
-                        Commandes
-                    </Link>
-                    <Link
-                        href="/fermier/products"
-                        className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
-                    >
-                        <ShoppingBasket className="w-5 h-5 mr-3" />
-                        Produits
-                    </Link>
-                    <Link
-                        href="/fermier/customers"
-                        className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
-                    >
-                        <Users className="w-5 h-5 mr-3" />
-                        Clients
-                    </Link>
-                    <Link
-                        href="/fermier/deliveries"
-                        className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
-                    >
-                        <Truck className="w-5 h-5 mr-3" />
-                        Livraisons
-                    </Link>
-                    <Link
-                        href="/fermier/analytics"
-                        className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
-                    >
-                        <BarChart3 className="w-5 h-5 mr-3" />
-                        Statistiques
-                    </Link>
+                    {hasFarms && (
+                        <>
+                        <Link
+                            href="/fermier/orders"
+                            className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
+                        >
+                            <Package className="w-5 h-5 mr-3" />
+                            Commandes
+                        </Link>
+                        <Link
+                            href="/fermier/products"
+                            className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
+                        >
+                            <ShoppingBasket className="w-5 h-5 mr-3" />
+                            Produits
+                        </Link>
+                        <Link
+                            href="/fermier/customers"
+                            className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
+                        >
+                            <Users className="w-5 h-5 mr-3" />
+                            Clients
+                        </Link>
+                        <Link
+                            href="/fermier/deliveries"
+                            className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
+                        >
+                            <Truck className="w-5 h-5 mr-3" />
+                            Livraisons
+                        </Link>
+                        <Link
+                            href="/fermier/analytics"
+                            className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
+                        >
+                            <BarChart3 className="w-5 h-5 mr-3" />
+                            Statistiques
+                        </Link>
+                        </>
+                    )}
 
                     <div className="px-4 mt-6 mb-2 text-xs font-semibold text-white/60 uppercase tracking-wider">
                         Paramètres
@@ -87,29 +97,50 @@ const Sidebar = () => {
                         <Settings className="w-5 h-5 mr-3" />
                         Profil
                     </Link>
-                    <Link
-                        href="/fermier/logout"
-                        className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
+                    <div
+                        onClick={() => {
+                            // localStorage.removeItem("newFarmData");
+                            localStorage.clear();
+                            router.push('/fermier/login');
+                        }}
+                        className="cursor-pointer flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
                     >
                         <LogOut className="w-5 h-5 mr-3" />
                         Déconnexion
-                    </Link>
+                    </div>
                 </nav>
 
+                
                 {/* Profil fermier */}
-                <div className="p-4 border-t border-white/10">
-                    <div className="flex items-center">
-                        <Avatar className="h-10 w-10 mr-3">
-                            <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Ferme des Oliviers" />
-                            <AvatarFallback className="bg-farm-orange text-white">FO</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-white truncate">Ferme des Oliviers</p>
-                            <p className="text-xs text-white/60 truncate">Pierre Durand</p>
+                {hasFarms ? (
+                    <div className="p-4 border-t border-white/10">
+                        <div className="flex items-center">
+                            <Avatar className="h-10 w-10 mr-3">
+                                <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Ferme des Oliviers" />
+                                <AvatarFallback className="bg-farm-orange text-white">FO</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-white truncate">Ferme des Oliviers</p>
+                                <p className="text-xs text-white/60 truncate">Pierre Durand</p>
+                            </div>
+                            <ChevronDown className="w-4 h-4 ml-2 text-white/60" />
                         </div>
-                        <ChevronDown className="w-4 h-4 ml-2 text-white/60" />
                     </div>
-                </div>
+                ) : (
+                    <div className="p-4 border-t border-white/10">
+                        <div className="flex items-center">
+                            <Avatar className="h-10 w-10 mr-3">
+                                <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Ferme des Oliviers" />
+                                <AvatarFallback className="bg-farm-orange text-white font-bold">--</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-white truncate">Aucune ferme</p>
+                                <p className="text-xs text-white/60 truncate">Pierre Durand</p>
+                            </div>
+                            <ChevronDown className="w-4 h-4 ml-2 text-white/60" />
+                        </div>
+                    </div>
+                )}
             </div>
         </aside>
     )

@@ -10,8 +10,8 @@ import { Bell, ChevronDown, Menu, Plus, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const Navbar = () => {
-    const [sidebarOpen, setSidebarOpen] = useState(false)
     const router = useRouter();
+    const [sidebarOpen, setSidebarOpen] = useState(false)
 
     // Données des fermes de l'utilisateur
     const userFarms = [
@@ -42,7 +42,6 @@ const Navbar = () => {
     ]
 
     const activeFarm = userFarms.find((farm) => farm.isActive) || userFarms[0]
-
 
     return (
         <header className="bg-white border-b border-gray-200 sticky top-0 z-30">

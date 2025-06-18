@@ -40,7 +40,7 @@ export default function AddFarmPage() {
         name: "",
         description: "",
         farmType: "",
-        certifications: [] as string[],
+        // certifications: [] as string[],
 
         // Localisation
         address: "",
@@ -56,7 +56,7 @@ export default function AddFarmPage() {
 
         // Détails de production
         farmSize: "",
-        productionMethods: [] as string[],
+        // productionMethods: [] as string[],
         mainProducts: [] as string[],
         seasonality: "",
 
@@ -141,11 +141,25 @@ export default function AddFarmPage() {
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files
         if (files) {
-            // Simulation d'upload d'images
-            const newImages = Array.from(files).map(
-                (file, index) => `/placeholder.svg?height=200&width=300&text=Image${uploadedImages.length + index + 1}`,
-            )
-            setUploadedImages((prev) => [...prev, ...newImages])
+            const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"]
+            
+            const newImages = Array.from(files)
+                .filter(file => {
+                    const extension = "."+file.name.split(".").pop()?.toLowerCase()
+                    return allowedExtensions.includes(extension)
+                })
+                .map(file => {
+                    // En production, on utiliserait une URL signée du serveur
+                    // Pour la simulation, on utilise le nom réel du fichier
+                    return `/placeholder.svg?height=200&width=300&text=${encodeURIComponent(file.name)}`
+                })
+
+            if (newImages.length > 0) {
+                setUploadedImages((prev) => [...prev, ...newImages])
+            } else {
+                // Optionnel : Afficher un message d'erreur si aucune image valide n'a été sélectionnée
+                console.warn("Aucune image valide sélectionnée. Extensions autorisées : ", allowedExtensions.join(", "))
+            }
         }
     }
 
@@ -155,10 +169,11 @@ export default function AddFarmPage() {
 
     const handleSubmit = async () => {
         setIsLoading(true)
+        localStorage.setItem("newFarmData", JSON.stringify(formData))
         // Simulation de l'envoi des données
         setTimeout(() => {
             setIsLoading(false)
-            router.push("/fermier/dashboard?new-farm=success")
+            router.push("/fermier")
         }, 2000)
     }
 
@@ -183,7 +198,8 @@ export default function AddFarmPage() {
             case 3:
                 return formData.phone && formData.email
             case 4:
-                return formData.farmSize && formData.productionMethods.length > 0
+                // return formData.farmSize && formData.productionMethods.length > 0
+                return formData.farmSize
             case 5:
                 return formData.deliveryMethods.length > 0
             case 6:
@@ -276,7 +292,7 @@ export default function AddFarmPage() {
                                     </Select>
                                 </div>
 
-                                <div>
+                                {/* <div>
                                     <Label className="text-base font-medium text-farm-green-dark">Certifications et labels</Label>
                                     <div className="mt-2 grid grid-cols-2 gap-3">
                                         {certifications.map((cert) => (
@@ -292,7 +308,7 @@ export default function AddFarmPage() {
                                             </div>
                                         ))}
                                     </div>
-                                </div>
+                                </div> */}
 
                                 <div>
                                     <Label htmlFor="description" className="text-base font-medium text-farm-green-dark">
@@ -475,7 +491,7 @@ export default function AddFarmPage() {
                                     </Select>
                                 </div>
 
-                                <div>
+                                {/* <div>
                                     <Label className="text-base font-medium text-farm-green-dark">Méthodes de production *</Label>
                                     <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
                                         {productionMethods.map((method) => (
@@ -491,7 +507,7 @@ export default function AddFarmPage() {
                                             </div>
                                         ))}
                                     </div>
-                                </div>
+                                </div> */}
 
                                 <div>
                                     <Label htmlFor="mainProducts" className="text-base font-medium text-farm-green-dark">
