@@ -23,7 +23,7 @@ const Navbar = () => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
             setActualScrollValue(currentScrollY);
-            
+
             // Determine if we're scrolling up or down
             if (currentScrollY > lastScrollY) {
                 // Scrolling down
@@ -66,7 +66,9 @@ const Navbar = () => {
                 )}>
                 <div className="w-full flex justify-between items-center gap-8 bg-zinc-200 dark:bg-zinc-800 px-8 py-4">
                     {/* Logo */}
-                    <a href="/" className="text-zinc-800 dark:text-zinc-100 font-bold text-xl">Logo</a>
+                    <a href="/" className="text-zinc-800 dark:text-zinc-100 font-bold text-xl">
+                        <img src={"./logo/logo_transparent.svg"} alt="Marché Fermier Logo" width="258px" height="45px" />
+                    </a>
 
                     {/* Barre de recherche */}
                     <SearchbarNav />
