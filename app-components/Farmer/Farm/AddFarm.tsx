@@ -4,7 +4,6 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import {
     ArrowLeft,
     Upload,
@@ -29,7 +28,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function AddFarmPage() {
-    const router = useRouter()
     const [currentStep, setCurrentStep] = useState(1)
     const [isLoading, setIsLoading] = useState(false)
     const [uploadedImages, setUploadedImages] = useState<string[]>([])
@@ -173,7 +171,7 @@ export default function AddFarmPage() {
         // Simulation de l'envoi des données
         setTimeout(() => {
             setIsLoading(false)
-            router.push("/fermier")
+            window.location.href = "/fermier"
         }, 2000)
     }
 

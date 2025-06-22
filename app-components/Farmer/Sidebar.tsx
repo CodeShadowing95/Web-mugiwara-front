@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link';
-import { BarChart3, ChevronDown, Home, Leaf, LogOut, Package, Settings, ShoppingBasket, Truck, Users, X } from 'lucide-react';
+import { BarChart3, ChevronDown, Home, Leaf, LogOut, Package, Settings, ShoppingBasket, Tractor, Truck, Users, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 
 interface SidebarProps {
@@ -14,6 +13,45 @@ interface SidebarProps {
 const Sidebar = ({ hasFarms } : SidebarProps) => {
     const router = useRouter()
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [selectedMenu, setSelectedMenu] = useState(typeof window !== "undefined" ? localStorage.getItem("selectedMenu") || "dashboard" : "dashboard")
+    const [hasRedirected, setHasRedirected] = useState(false) // ← pour éviter double redirection
+
+    const handleSelectedMenu = (menu: string) => {
+        setSelectedMenu(menu)
+        localStorage.setItem("selectedMenu", menu)
+    }
+
+    // Chargement initial
+    useEffect(() => {
+      const menu = localStorage.getItem('selectedMenu') || 'dashboard'
+      setSelectedMenu(menu)
+    }, [])
+
+    useEffect(() => {
+        if(!hasRedirected) {
+            switch (selectedMenu) {
+                case "dashboard":
+                    router.push("/fermier")
+                    break;
+                case "farms":
+                    router.push("/fermier/mes-fermes")
+                    break;
+                case "products":
+                    router.push("/fermier/produits")
+                    break;
+                case "orders":
+                    router.push("/fermier/commandes")
+                    break;
+                case "profile":
+                    router.push("/fermier/profile")
+                    break;
+                default:
+                    router.push("/fermier")
+                    break;
+            }
+            setHasRedirected(true)
+        }
+    }, [selectedMenu, hasRedirected])
 
     return (
         <aside
@@ -42,7 +80,8 @@ const Sidebar = ({ hasFarms } : SidebarProps) => {
                     <div className="px-4 mb-2 text-xs font-semibold text-white/60 uppercase tracking-wider">Principal</div>
                     <Link
                         href="/fermier"
-                        className="flex items-center px-4 py-3 text-white bg-white/10 border-l-4 border-white"
+                        className={`flex items-center px-4 py-3 text-white ${selectedMenu === "dashboard" ? "bg-white/10 border-l-4 border-white" : "hover:bg-white/5 border-l-4 border-transparent"}`}
+                        onClick={() => handleSelectedMenu("dashboard")}
                     >
                         <Home className="w-5 h-5 mr-3" />
                         Tableau de bord
@@ -50,36 +89,61 @@ const Sidebar = ({ hasFarms } : SidebarProps) => {
                     {hasFarms && (
                         <>
                         <Link
-                            href="/fermier/orders"
-                            className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
+                            href="/fermier/mes-fermes"
+                            className={`flex items-center px-4 py-3 text-white ${selectedMenu === "farms" ? "bg-white/10 border-l-4 border-white" : "hover:bg-white/5 border-l-4 border-transparent"}`}
+                            onClick={() => handleSelectedMenu("farms")}
                         >
-                            <Package className="w-5 h-5 mr-3" />
-                            Commandes
+                            <Tractor className="w-5 h-5 mr-3" />
+                            Mes fermes
                         </Link>
                         <Link
-                            href="/fermier/products"
-                            className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
+                            href="/fermier/produits"
+                            className={`flex items-center px-4 py-3 text-white ${selectedMenu === "products" ? "bg-white/10 border-l-4 border-white" : "hover:bg-white/5 border-l-4 border-transparent"}`}
+                            onClick={() => handleSelectedMenu("products")}
                         >
                             <ShoppingBasket className="w-5 h-5 mr-3" />
                             Produits
                         </Link>
                         <Link
+                            href="/fermier/commandes"
+                            className={`flex items-center px-4 py-3 text-white ${selectedMenu === "orders" ? "bg-white/10 border-l-4 border-white" : "hover:bg-white/5 border-l-4 border-transparent"}`}
+                            onClick={() => handleSelectedMenu("orders")}
+                        >
+                            <Package className="w-5 h-5 mr-3" />
+                            Commandes
+                        </Link>
+                        {/* <Link
                             href="/fermier/customers"
-                            className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
+                            className={`flex items-center px-4 py-3 text-white ${selectedMenu === "customers" ? "bg-white/10 border-l-4 border-white" : "hover:bg-white/5 border-l-4 border-transparent"}`}
+                            onClick={() => handleSelectedMenu("customers")}
                         >
                             <Users className="w-5 h-5 mr-3" />
                             Clients
-                        </Link>
-                        <Link
+                        </Link> */}
+                        <div
+                            className={`flex items-center px-4 py-3 text-white/50 border-l-4 border-transparent cursor-not-allowed`}
+                        >
+                            <Users className="w-5 h-5 mr-3" />
+                            Clients (Inactif)
+                        </div>
+                        {/* <Link
                             href="/fermier/deliveries"
-                            className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
+                            className={`flex items-center px-4 py-3 text-white ${selectedMenu === "deliveries" ? "bg-white/10 border-l-4 border-white" : "hover:bg-white/5 border-l-4 border-transparent"}`}
+                            onClick={() => handleSelectedMenu("deliveries")}
                         >
                             <Truck className="w-5 h-5 mr-3" />
                             Livraisons
-                        </Link>
+                        </Link> */}
+                        <div
+                            className={`flex items-center px-4 py-3 text-white/50 border-l-4 border-transparent cursor-not-allowed`}
+                        >
+                            <Truck className="w-5 h-5 mr-3" />
+                            Livraisons (Inactif)
+                        </div>
                         <Link
                             href="/fermier/analytics"
-                            className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
+                            className={`flex items-center px-4 py-3 text-white ${selectedMenu === "analytics" ? "bg-white/10 border-l-4 border-white" : "hover:bg-white/5 border-l-4 border-transparent"}`}
+                            onClick={() => handleSelectedMenu("analytics")}
                         >
                             <BarChart3 className="w-5 h-5 mr-3" />
                             Statistiques
@@ -92,7 +156,8 @@ const Sidebar = ({ hasFarms } : SidebarProps) => {
                     </div>
                     <Link
                         href="/fermier/profile"
-                        className="flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
+                        className={`flex items-center px-4 py-3 text-white ${selectedMenu === "profile" ? "bg-white/10 border-l-4 border-white" : "hover:bg-white/5 border-l-4 border-transparent"}`}
+                        onClick={() => handleSelectedMenu("profile")}
                     >
                         <Settings className="w-5 h-5 mr-3" />
                         Profil

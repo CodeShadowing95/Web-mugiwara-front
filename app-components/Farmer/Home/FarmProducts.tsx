@@ -15,6 +15,7 @@ import {
     AlertTriangle,
     Edit,
     Trash2,
+    List,
 } from "lucide-react"
 import Paginate from '@/app-components/Paginate';
 
@@ -229,8 +230,8 @@ const FarmProducts = () => {
                         size="sm"
                         className="text-farm-green border-farm-green hover:bg-farm-green/10"
                     >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Ajouter un produit
+                        <List className="w-4 h-4 mr-1" />
+                        Tous les produits
                     </Button>
                 </div>
             </CardHeader>

@@ -6,6 +6,8 @@ import {
     Calendar,
     Leaf,
     Euro,
+    PackageOpen,
+    Megaphone,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,32 +21,32 @@ export default function FarmerHomepage() {
     const stats = [
         {
             title: "Chiffre d'affaires",
-            value: "€2,847",
-            change: "+12.5%",
+            value: "€0",
+            change: "Aucune donnée",
             period: "Ce mois",
             icon: Euro,
             bgColor: "bg-farm-green-dark",
         },
         {
             title: "Commandes",
-            value: "127",
-            change: "+8.2%",
+            value: "0",
+            change: "Aucune donnée",
             period: "Cette semaine",
             icon: ShoppingBasket,
             bgColor: "bg-farm-orange",
         },
         {
             title: "Produits actifs",
-            value: "24",
-            change: "+3",
+            value: "0",
+            change: "Aucune donnée",
             period: "En stock",
             icon: Package,
             bgColor: "bg-farm-green-dark",
         },
         {
             title: "Clients fidèles",
-            value: "89",
-            change: "+15.3%",
+            value: "0",
+            change: "Aucune donnée",
             period: "Actifs ce mois",
             icon: Users,
             bgColor: "bg-farm-orange",
@@ -160,7 +162,7 @@ export default function FarmerHomepage() {
                     <CardHeader className="pb-2">
                         <div className="flex items-center justify-between">
                             <CardTitle className="text-lg font-semibold text-farm-green-dark">Commandes récentes</CardTitle>
-                            <Button variant="ghost" size="sm" className="text-farm-green hover:text-farm-green-dark">
+                            <Button variant="ghost" size="sm" className="hidden text-farm-green hover:text-farm-green-dark">
                                 Voir tout
                             </Button>
                         </div>
@@ -179,7 +181,28 @@ export default function FarmerHomepage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
-                                    {recentOrders.map((order, index) => (
+                                    {/* Aucune commande pour le moment */}
+                                    <tr>
+                                        <td colSpan={5}>
+                                            <div className="px-6 py-8 text-center">
+                                                <div className="flex flex-col items-center justify-center space-y-4">
+                                                    <div className="relative">
+                                                        <div className="absolute inset-0 bg-[var(--farm-green-dark)] rounded-full animate-pulse"></div>
+                                                        <div className="relative bg-farm-beige-light rounded-full p-4">
+                                                            <PackageOpen className="w-16 h-16 text-gray-500" />
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-gray-600 font-medium text-lg">
+                                                        Aucune commande pour le moment
+                                                    </p>
+                                                    <p className="text-gray-400 text-sm">
+                                                        Les nouvelles commandes apparaîtront ici
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {/* {recentOrders.map((order, index) => (
                                         <tr key={index} className="hover:bg-gray-50">
                                             <td className="px-4 py-3 text-sm font-medium text-gray-900">{order.id}</td>
                                             <td className="px-4 py-3 text-sm text-gray-600">{order.customer}</td>
@@ -195,7 +218,7 @@ export default function FarmerHomepage() {
                                                 </span>
                                             </td>
                                         </tr>
-                                    ))}
+                                    ))} */}
                                 </tbody>
                             </table>
                         </div>
@@ -207,7 +230,7 @@ export default function FarmerHomepage() {
                     <CardHeader className="pb-2">
                         <div className="flex items-center justify-between">
                             <CardTitle className="text-lg font-semibold text-farm-green-dark">Prochaines livraisons</CardTitle>
-                            <Button variant="ghost" size="sm" className="text-farm-green hover:text-farm-green-dark">
+                            <Button variant="ghost" size="sm" className="hidden text-farm-green hover:text-farm-green-dark">
                                 Calendrier
                             </Button>
                         </div>
@@ -215,7 +238,25 @@ export default function FarmerHomepage() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            {upcomingDeliveries.map((delivery, index) => (
+                            {/* Aucune livraison pour le moment */}
+                            <div className="px-6 py-8 text-center">
+                                <div className="flex flex-col items-center justify-center space-y-4">
+                                    <div className="relative">
+                                        <div className="absolute inset-0 bg-[var(--farm-green-dark)] rounded-full animate-pulse"></div>
+                                        <div className="relative bg-farm-beige-light rounded-full p-4">
+                                            <PackageOpen className="w-20 h-20 text-gray-500" />
+                                        </div>
+                                    </div>
+                                    <p className="text-gray-500 font-medium text-lg">
+                                        Aucune livraison pour le moment
+                                    </p>
+                                    <p className="text-gray-400 text-sm">
+                                        Les nouvelles livraisons apparaîtront ici
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* {upcomingDeliveries.map((delivery, index) => (
                                 <div key={index} className="flex items-start p-3 rounded-lg bg-farm-beige">
                                     <div className="w-12 h-12 rounded-lg bg-farm-green-dark flex flex-col items-center justify-center text-white mr-4">
                                         <span className="text-xs">MAI</span>
@@ -233,7 +274,7 @@ export default function FarmerHomepage() {
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+                            ))} */}
                         </div>
                     </CardContent>
                 </Card>
@@ -244,7 +285,7 @@ export default function FarmerHomepage() {
                 <CardContent className="p-6">
                     <div className="flex items-start">
                         <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mr-4">
-                            <Leaf className="w-6 h-6 text-white" />
+                            <Megaphone className="w-6 h-6 text-white" />
                         </div>
                         <div className="flex-1">
                             <h3 className="text-lg font-semibold mb-2">Conseil du jour</h3>
