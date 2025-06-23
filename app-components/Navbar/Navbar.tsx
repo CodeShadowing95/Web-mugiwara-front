@@ -67,7 +67,7 @@ const Navbar = () => {
                 <div className="w-full flex justify-between items-center gap-8 bg-zinc-200 dark:bg-zinc-800 px-8 py-4">
                     {/* Logo */}
                     <a href="/" className="text-zinc-800 dark:text-zinc-100 font-bold text-xl">
-                        <img src={"./logo/logo_transparent.svg"} alt="Marché Fermier Logo" width="258px" height="45px" />
+                        <img src={"./logo/coco-logo.png"} alt="Marché Fermier Logo" className="w-44" />
                     </a>
 
                     {/* Barre de recherche */}
