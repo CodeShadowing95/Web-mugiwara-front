@@ -77,10 +77,10 @@ export default function AccountDropdown() {
         ) : (
           <div className="flex flex-col gap-4 p-6 bg-gradient-to-br from-[#f7f4eb] to-white text-sm">
             <div className="space-y-2">
-              <Link href="/auth/login">
-                <Button 
-                  variant="default" 
-                  size="sm" 
+              <Link href="/login">
+                <Button
+                  variant="default"
+                  size="sm"
                   className="w-full bg-[#5a7052] hover:bg-[#3c5a3e] text-white font-medium transition-all duration-300 transform hover:scale-[1.02] flex items-center gap-2 shadow-sm"
                 >
                   <User className="h-4 w-4" />
@@ -88,9 +88,9 @@ export default function AccountDropdown() {
                 </Button>
               </Link>
               <Link href="/fermier/login">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full mt-2 border-[#5a7052] text-[#5a7052] hover:bg-[#f7f4eb] hover:text-[#3c5a3e] font-medium transition-all duration-300 transform hover:scale-[1.02] flex items-center gap-2"
                 >
                   <Tractor className="h-4 w-4" />
@@ -98,7 +98,7 @@ export default function AccountDropdown() {
                 </Button>
               </Link>
             </div>
-            
+
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-[#e8e1d4]" />
@@ -110,10 +110,10 @@ export default function AccountDropdown() {
 
             <div className="text-center text-xs">
               <span className="text-sm text-[#5a7052]">
-                Nouveau client ? 
+                Nouveau client ?
               </span>
-              <Link 
-                href="/auth/register" 
+              <Link
+                href="/register"
                 className="ml-1 text-sm font-semibold text-[#3c5a3e] hover:text-[#8fb573] transition-colors duration-200"
               >
                 Créez votre compte

@@ -512,7 +512,7 @@ export default function CategoryPage() {
                       </div>
                       <div className="flex items-center justify-between mt-3">
                         <span className="font-bold text-[#3c5a3e] dark:text-zinc-100">
-                          {produit.price.toFixed(2)} €
+                          {/*{produit.price.toFixed(2)} €*/}
                         </span>
                         <Button
                           size="sm"

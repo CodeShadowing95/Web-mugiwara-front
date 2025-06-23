@@ -4,8 +4,8 @@ import type { NextRequest } from 'next/server';
 // Liste des routes autorisées
 const allowedRoutes = [
   '/',
-  '/auth/login',
-  '/auth/register',
+  '/login',
+  '/register',
   '/category',
   '/product',
   '/fermier/login',
@@ -21,7 +21,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Vérifier si le chemin commence par une route autorisée
-  const isAllowedRoute = allowedRoutes.some(route => 
+  const isAllowedRoute = allowedRoutes.some(route =>
     pathname === route || pathname.startsWith(`${route}/`)
   );
 
@@ -39,8 +39,8 @@ export const config = {
   // matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
   matcher: [
     '/',
-    '/auth/login',
-    '/auth/register',
+    '/login',
+    '/register',
     '/category',
     '/product',
     '/fermier/login',
