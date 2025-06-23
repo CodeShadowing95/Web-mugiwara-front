@@ -182,7 +182,7 @@ export default function FermierProfilePage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* En-tête du profil */}
         <div className="mb-8">
-          <Card className="border-0 shadow-lg bg-gradient-to-r from-[var(--farm-green)] to-[var(--farm-green-dark)] text-white">
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-[var(--farm-green)] to-[var(--farm-green-dark)] text-white p-0">
             <CardContent className="p-8">
               <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
                 {/* Avatar */}
