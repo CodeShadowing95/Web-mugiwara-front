@@ -20,19 +20,49 @@ export default function AccountDropdown() {
   }
 
   useEffect(() => {
-    const user = typeof window !== "undefined" ? localStorage.getItem("user") : null;
-    user && setCurrentUser(JSON.parse(user));
+    const fetchCurrentUser = async () => {
+      const token = typeof window !== "undefined" ? localStorage.getItem("jwt_token") : null;
+      if (token) {
+        try {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+          const res = await fetch(`${apiUrl}/api/current-user`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (res.ok) {
+            const user = await res.json();
+            setCurrentUser(user);
+          } else {
+            setCurrentUser(null);
+          }
+        } catch (e) {
+          setCurrentUser(null);
+        }
+      } else {
+        setCurrentUser(null);
+      }
+    };
+    fetchCurrentUser();
   }, [])
 
   return (
     <div ref={containerRef} className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      <Button variant="ghost" size="sm" className="h-10 flex items-end gap-1 text-[#5a7052] hover:bg-[#f7f4eb] hover:text-[#3c5a3e]">
-        <div className="flex flex-col text-gray-800 dark:text-gray-200">
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-nowrap">Bonjour, identifiez-vous</p>
-          <p className="text-sm font-semibold self-start">Comptes & Listes</p>
-        </div>
-        <ChevronDown className="w-5 h-5 flex shrink-0" />
-      </Button>
+      {currentUser ? (
+        <Button variant="ghost" size="sm" className="h-10 flex items-end gap-1 text-[#5a7052] hover:bg-[#f7f4eb] hover:text-[#3c5a3e]">
+          <div className="flex flex-col text-gray-800 dark:text-gray-200">
+            <p className="text-xs text-gray-500 dark:text-gray-400 text-nowrap">Bonjour, {currentUser.persona.firstName + ' ' + currentUser.persona.lastName}</p>
+            <p className="text-sm font-semibold self-start">Comptes & Listes</p>
+          </div>
+          <ChevronDown className="w-5 h-5 flex shrink-0" />
+        </Button>
+      ) : (
+        <Link href="/login">
+          <Button variant="outline" size="sm" className="h-10 text-[#5a7052] border-[#5a7052]">
+            Se connecter
+          </Button>
+        </Link>
+      )}
 
       <div
         className={cn(
@@ -44,8 +74,8 @@ export default function AccountDropdown() {
         {currentUser ? (
           <>
           <div className="p-3 border-b border-[#e8e1d4]">
-            <div className="font-medium text-[#3c5a3e]">Pierre Dupont</div>
-            <div className="text-sm text-[#6b6b6b]">pierre@example.com</div>
+            <div className="font-medium text-[#3c5a3e]">{currentUser.persona.firstName + ' ' + currentUser.persona.lastName}</div>
+            <div className="text-sm text-[#6b6b6b]">{currentUser.persona.email}</div>
           </div>
 
           <div className="py-1">
@@ -77,10 +107,10 @@ export default function AccountDropdown() {
         ) : (
           <div className="flex flex-col gap-4 p-6 bg-gradient-to-br from-[#f7f4eb] to-white text-sm">
             <div className="space-y-2">
-              <Link href="/auth/login">
-                <Button 
-                  variant="default" 
-                  size="sm" 
+              <Link href="/login">
+                <Button
+                  variant="default"
+                  size="sm"
                   className="w-full bg-[#5a7052] hover:bg-[#3c5a3e] text-white font-medium transition-all duration-300 transform hover:scale-[1.02] flex items-center gap-2 shadow-sm"
                 >
                   <User className="h-4 w-4" />
@@ -88,9 +118,9 @@ export default function AccountDropdown() {
                 </Button>
               </Link>
               <Link href="/fermier/login">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full mt-2 border-[#5a7052] text-[#5a7052] hover:bg-[#f7f4eb] hover:text-[#3c5a3e] font-medium transition-all duration-300 transform hover:scale-[1.02] flex items-center gap-2"
                 >
                   <Tractor className="h-4 w-4" />
@@ -98,7 +128,7 @@ export default function AccountDropdown() {
                 </Button>
               </Link>
             </div>
-            
+
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-[#e8e1d4]" />
@@ -110,10 +140,10 @@ export default function AccountDropdown() {
 
             <div className="text-center text-xs">
               <span className="text-sm text-[#5a7052]">
-                Nouveau client ? 
+                Nouveau client ?
               </span>
-              <Link 
-                href="/auth/register" 
+              <Link
+                href="/register"
                 className="ml-1 text-sm font-semibold text-[#3c5a3e] hover:text-[#8fb573] transition-colors duration-200"
               >
                 Créez votre compte

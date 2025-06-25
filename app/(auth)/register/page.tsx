@@ -10,7 +10,8 @@ export default function RegisterPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -27,14 +28,29 @@ export default function RegisterPage() {
     }
 
     try {
-      // Simulation d'une requête d'inscription
-      // À remplacer par votre véritable appel API
-      const user = {
-        id: 1,
-        name: formData.name,
-        email: formData.email,
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      const response = await fetch(`${apiUrl}/api/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+        }),
+      })
+      if (!response.ok) {
+        if (response.status === 400) {
+          setError("Erreur ! Des champs sont manquants")
+        } else {
+          setError("Une erreur est survenue lors de l'inscription. Veuillez réessayer.")
+        }
+        return
       }
-      localStorage.setItem("user", JSON.stringify(user))
+      const res = await response.json()
+      localStorage.setItem("jwt_token", res.token)
       router.push("/")
     } catch (err) {
       setError("Une erreur est survenue lors de l'inscription. Veuillez réessayer.")
@@ -68,16 +84,31 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-[#3c5a3e] dark:text-zinc-200 mb-2">
-                Nom complet
+                Prénom
               </label>
               <input
                 type="text"
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                id="firstName"
+                value={formData.firstName}
+                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                 className="w-full px-4 py-2.5 rounded-lg border border-[#e8e1d4] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#3c5a3e] dark:text-zinc-200 placeholder-[#a3a3a3] dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#8fb573] dark:focus:ring-emerald-600 focus:border-transparent transition-colors"
                 placeholder="Pierre Dupont"
                 required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-[#3c5a3e] dark:text-zinc-200 mb-2">
+                Nom
+              </label>
+              <input
+                  type="text"
+                  id="lastName"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-lg border border-[#e8e1d4] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#3c5a3e] dark:text-zinc-200 placeholder-[#a3a3a3] dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#8fb573] dark:focus:ring-emerald-600 focus:border-transparent transition-colors"
+                  placeholder="Pierre Dupont"
+                  required
               />
             </div>
 
@@ -151,7 +182,7 @@ export default function RegisterPage() {
             <p className="text-[#6b6b6b] dark:text-zinc-400">
               Vous avez déjà un compte ?{" "}
               <Link
-                href="/auth/login"
+                href="/login"
                 className="font-semibold text-[#3c5a3e] hover:text-[#8fb573] dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors"
               >
                 Connectez-vous
