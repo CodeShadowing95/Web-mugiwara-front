@@ -12,8 +12,8 @@ interface ModalProps {
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onConfirm, title, children, confirmText }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 min-w-[300px]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-lg shadow-lg p-8 min-w-[400px] max-w-2xl w-full">
         {title && <h2 className="text-lg font-bold mb-4">{title}</h2>}
         <div className="mb-4">{children}</div>
         <div className="flex justify-end gap-2">
@@ -26,4 +26,3 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onConfirm, title, childr
 };
 
 export default Modal;
-

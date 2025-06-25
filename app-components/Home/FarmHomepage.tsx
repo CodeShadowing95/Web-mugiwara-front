@@ -5,7 +5,9 @@ import CategoryCard from "./CategoryCard"
 import { genRandKey } from "@/utils/utilities"
 import BannerCarousel from "./BannerCarousel"
 import { getCategories, getCategoryChildren } from "@/lib/productCategory"
+import { getFarms} from "@/lib/farm";
 import {CategoryWithChildren} from "@/types";
+import {Ferme} from "@/types";
 
 export default async function  FarmHomepage() {
   const productCategories = await getCategories();
@@ -16,6 +18,7 @@ export default async function  FarmHomepage() {
       return { ...cat, children };
     })
   );
+  const farms = await getFarms();
 
   return (
     <div className="min-h-screen bg-[#f9f7f2]">
@@ -70,27 +73,27 @@ export default async function  FarmHomepage() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-[#3c5a3e] mb-6">Nos producteurs à l'honneur</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((item) => (
+            {farms.slice(0, 4).map((farm: Ferme) => (
               <div
-                key={item}
+                key={genRandKey()}
                 className="bg-white rounded-xl overflow-hidden shadow-sm border border-[#e8e1d4] hover:shadow-md transition-shadow group"
               >
                 <div className="aspect-video relative overflow-hidden">
                   <img
                     src="farm.jpg"
-                    alt={`Producteur ${item}`}
+                    alt={`${farm.name}`}
                     className="w-full h-full object-cover transition-transform group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
                     <div>
-                      <h3 className="font-medium text-white">Ferme des Collines {item}</h3>
-                      <p className="text-sm text-white/80">Producteur depuis 1985</p>
+                      <h3 className="font-medium text-white">{farm.name}</h3>
+                      <p className="text-sm text-white/80">{farm.zipCode}, {farm.city}</p>
                     </div>
                   </div>
                 </div>
                 <div className="p-4">
                   <p className="text-sm text-[#6b6b6b] mb-3">
-                    Découvrez nos produits cultivés avec passion dans le respect des traditions.
+                    {farm.description}
                   </p>
                   <Link href="#" className="text-sm font-medium text-[#8fb573] hover:text-[#7a9c62] hover:underline">
                     Découvrir les produits

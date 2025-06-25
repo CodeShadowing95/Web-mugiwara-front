@@ -10,7 +10,7 @@ export interface Ferme {
     certifications: string[];
     address: string;
     city: string;
-    postalCode: string;
+    zipCode: string;
     region: string;
     coordinates: { lat: string; lng: string };
     phone: string;
