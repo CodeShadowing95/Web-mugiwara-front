@@ -230,6 +230,10 @@ export default function FermierLoginPage() {
                                         backgroundColor: "var(--farm-green-dark)",
                                     }}
                                     disabled={isLoading}
+                                    onClick={() => {
+                                        // router.push('/fermier');
+                                        window.location.href = '/fermier';
+                                    }}
                                 >
                                     {isLoading ? (
                                         <div className="flex items-center space-x-2">

@@ -167,6 +167,7 @@ export default function AddFarmPage() {
 
     const handleSubmit = async () => {
         setIsLoading(true)
+
         localStorage.setItem("newFarmData", JSON.stringify(formData))
         // Simulation de l'envoi des données
         setTimeout(() => {
