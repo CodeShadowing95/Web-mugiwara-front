@@ -16,12 +16,44 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // Simulate login process
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    setError("")
+    setSuccess("")
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      const response = await fetch(`${apiUrl}/api/login_check`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: email,
+          password: password,
+        }),
+      })
+      if (!response.ok) {
+        setIsLoading(false)
+        if (response.status === 401) {
+          setError("Identifiants invalides.")
+        } else {
+          setError("Erreur interne du serveur.")
+        }
+        return
+      }
+      const res = await response.json()
+      localStorage.setItem("jwt_token", res.token)
+      setSuccess("Connexion réussie ! Redirection...")
+      setTimeout(() => {
+        window.location.href = "/"
+      }, 1200)
+    } catch (err) {
+      setError("Erreur de connexion. Veuillez réessayer.")
+    }
     setIsLoading(false)
   }
 
@@ -76,10 +108,10 @@ export default function LoginPage() {
           <div className="text-center animate-slide-in">
             <div className="mb-8">
               <div className="mx-auto mb-6 rounded-2xl flex items-center justify-center grow-animation">
-                <img 
-                  src="/logo/coco-logo.png" 
-                  alt="Marché Fermier Logo" 
-                  width={400} 
+                <img
+                  src="/logo/coco-logo.png"
+                  alt="Marché Fermier Logo"
+                  width={400}
                   height={400}
                   className="w-52"
                   loading="eager"
@@ -212,6 +244,13 @@ export default function LoginPage() {
                   </Link>
                 </div>
 
+                {error && (
+                  <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm text-center">{error}</div>
+                )}
+
+                {success && (
+                  <div className="mb-4 p-3 bg-green-100 text-green-700 rounded text-sm text-center">{success}</div>
+                )}
                 <Button
                   type="submit"
                   className="w-full h-12 text-white font-medium transition-all duration-200 hover:shadow-lg hover:bg-[var(--farm-green-dark)]"

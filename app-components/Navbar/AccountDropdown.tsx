@@ -1,15 +1,16 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { User, Settings, LogOut, ShoppingCart, Heart, Package, ChevronDown, Tractor } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { useUser } from "@/app/UserContext";
 
 export default function AccountDropdown() {
   const [isOpen, setIsOpen] = useState(false)
-  const [currentUser, setCurrentUser] = useState(null);
   const containerRef = useRef<HTMLDivElement>(null)
+  const { currentUser, setCurrentUser } = useUser();
 
   const handleMouseEnter = () => {
     setIsOpen(true)
@@ -19,32 +20,11 @@ export default function AccountDropdown() {
     setIsOpen(false)
   }
 
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      const token = typeof window !== "undefined" ? localStorage.getItem("jwt_token") : null;
-      if (token) {
-        try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-          const res = await fetch(`${apiUrl}/api/current-user`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          if (res.ok) {
-            const user = await res.json();
-            setCurrentUser(user);
-          } else {
-            setCurrentUser(null);
-          }
-        } catch (e) {
-          setCurrentUser(null);
-        }
-      } else {
-        setCurrentUser(null);
-      }
-    };
-    fetchCurrentUser();
-  }, [])
+  const logout = () => {
+    localStorage.removeItem("jwt_token");
+    setCurrentUser(null);
+    window.location.href = "/login";
+  }
 
   return (
     <div ref={containerRef} className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
@@ -98,7 +78,7 @@ export default function AccountDropdown() {
               <Settings className="h-4 w-4 text-[#8fb573]" />
               Paramètres
             </button>
-            <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[#5a7052] hover:bg-[#f7f4eb] rounded-sm text-left">
+            <button onClick={logout} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[#5a7052] hover:bg-[#f7f4eb] rounded-sm text-left">
               <LogOut className="h-4 w-4 text-[#8fb573]" />
               Déconnexion
             </button>
