@@ -191,7 +191,8 @@ export default function FermierLoginPage() {
                                     }}
                                     disabled={isLoading}
                                     onClick={() => {
-                                        router.push('/fermier');
+                                        // router.push('/fermier');
+                                        window.location.href = '/fermier';
                                     }}
                                 >
                                     {isLoading ? (
