@@ -108,13 +108,12 @@ export default function LoginPage() {
           <div className="text-center animate-slide-in">
             <div className="mb-8">
               <div
-                className="w-24 h-24 mx-auto mb-6 rounded-2xl flex items-center justify-center grow-animation"
-                style={{ backgroundColor: "var(--farm-green)" }}
+                className="flex items-center justify-center grow-animation"
               >
-                <Leaf className="w-12 h-12 text-white" />
+                <img src={"./logo/coco-logo.png"} alt="Marché Fermier Logo" className="w-60" />
               </div>
-              <h1 className="text-4xl font-bold mb-4" style={{ color: "var(--farm-green-dark)" }}>
-                CocotteConnect
+              <h1 className="text-4xl mt-10 font-bold mb-4" style={{ color: "var(--farm-green-dark)" }}>
+                Connexion
               </h1>
               <p className="text-xl text-gray-600 mb-8 max-w-md">
                 Connectez-vous directement avec les producteurs locaux pour des produits frais et de qualité

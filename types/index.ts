@@ -26,3 +26,11 @@ export interface Ferme {
     profileImage: string;
     galleryImages: string[];
 }
+
+export interface CategoryWithChildren {
+    id: number;
+    name: string;
+    description?: string;
+    parent?: any;
+    children: Array<{ id: number; name: string; description?: string; parent?: any }>;
+}

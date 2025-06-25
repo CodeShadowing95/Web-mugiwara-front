@@ -1,28 +1,32 @@
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { categories } from "@/constants"
 import CategoryCard from "./CategoryCard"
-import { Categorie } from "@/types"
 import { genRandKey } from "@/utils/utilities"
 import BannerCarousel from "./BannerCarousel"
-// import { getCategories } from "@/lib/productCategory"
+import { getCategories, getCategoryChildren } from "@/lib/productCategory"
+import {CategoryWithChildren} from "@/types";
 
 export default async function  FarmHomepage() {
-
-  // const productCategories = await getCategories();
+  const productCategories = await getCategories();
+  // Récupérer les children pour chaque catégorie en parallèle
+  const categoriesWithChildren: CategoryWithChildren[] = await Promise.all(
+    productCategories.map(async (cat: any) => {
+      let children = await getCategoryChildren(cat.id);
+      return { ...cat, children };
+    })
+  );
 
   return (
     <div className="min-h-screen bg-[#f9f7f2]">
       <main className="w-full px-8 py-4">
-        
+
         <BannerCarousel />
 
         {/* Category Grid 1 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {categories.slice(0, 3).map((categorie: any, index: number) => {
+          {categoriesWithChildren.slice(0, 3).map((categorie, index) => {
             const key = genRandKey();
-
             return (
               <CategoryCard key={key} index={index+1} categorie={categorie} />
             )
@@ -32,9 +36,9 @@ export default async function  FarmHomepage() {
           <div className="grid grid-rows-2 gap-6">
             <div className="flex flex-col justify-between bg-white rounded-xl p-6 shadow-sm border border-[#e8e1d4]">
               <h2 className="text-xl font-bold text-[#3c5a3e] mb-3">Identifiez-vous pour une meilleure expérience</h2>
-              <Button className="w-full bg-[#ffd84d] hover:bg-[#ffc91a] text-[#3c5a3e] font-medium">
+              <a href={"/login"}><Button className="w-full cursor-pointer bg-[#ffd84d] hover:bg-[#ffc91a] text-[#3c5a3e] font-medium">
                 Se connecter en toute sécurité
-              </Button>
+              </Button></a>
             </div>
 
             <div className="bg-[#ffd84d] rounded-xl p-6 shadow-sm border border-[#e8e1d4] relative overflow-hidden">
@@ -54,9 +58,8 @@ export default async function  FarmHomepage() {
 
         {/* Category Grid 2 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {categories.slice(3, 7).map((categorie: any, index: number) => {
+          {categoriesWithChildren.slice(3, 7).map((categorie, index) => {
             const key = genRandKey();
-
             return (
               <CategoryCard key={key} index={index} categorie={categorie} />
             )
