@@ -5,7 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
-import { UserProvider } from "@/context/UserContext";
+import { UserProvider } from "@/app/UserContext";
 
 export default function RootLayout({
   children,

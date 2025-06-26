@@ -1,28 +1,35 @@
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { categories } from "@/constants"
 import CategoryCard from "./CategoryCard"
-import { Categorie } from "@/types"
 import { genRandKey } from "@/utils/utilities"
 import BannerCarousel from "./BannerCarousel"
-// import { getCategories } from "@/lib/productCategory"
+import { getCategories, getCategoryChildren } from "@/lib/productCategory"
+import { getFarms} from "@/lib/farm";
+import {CategoryWithChildren} from "@/types";
+import {Ferme} from "@/types";
 
 export default async function  FarmHomepage() {
-
-  // const productCategories = await getCategories();
+  const productCategories = await getCategories();
+  // Récupérer les children pour chaque catégorie en parallèle
+  const categoriesWithChildren: CategoryWithChildren[] = await Promise.all(
+    productCategories.map(async (cat: any) => {
+      let children = await getCategoryChildren(cat.id);
+      return { ...cat, children };
+    })
+  );
+  const farms = await getFarms();
 
   return (
     <div className="min-h-screen bg-[#f9f7f2]">
       <main className="w-full px-8 py-4">
-        
+
         <BannerCarousel />
 
         {/* Category Grid 1 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {categories.slice(0, 3).map((categorie: any, index: number) => {
+          {categoriesWithChildren.slice(0, 3).map((categorie, index) => {
             const key = genRandKey();
-
             return (
               <CategoryCard key={key} index={index+1} categorie={categorie} />
             )
@@ -32,9 +39,9 @@ export default async function  FarmHomepage() {
           <div className="grid grid-rows-2 gap-6">
             <div className="flex flex-col justify-between bg-white rounded-xl p-6 shadow-sm border border-[#e8e1d4]">
               <h2 className="text-xl font-bold text-[#3c5a3e] mb-3">Identifiez-vous pour une meilleure expérience</h2>
-              <Button className="w-full bg-[#ffd84d] hover:bg-[#ffc91a] text-[#3c5a3e] font-medium">
+              <a href={"/login"}><Button className="w-full cursor-pointer bg-[#ffd84d] hover:bg-[#ffc91a] text-[#3c5a3e] font-medium">
                 Se connecter en toute sécurité
-              </Button>
+              </Button></a>
             </div>
 
             <div className="bg-[#ffd84d] rounded-xl p-6 shadow-sm border border-[#e8e1d4] relative overflow-hidden">
@@ -54,9 +61,8 @@ export default async function  FarmHomepage() {
 
         {/* Category Grid 2 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {categories.slice(3, 7).map((categorie: any, index: number) => {
+          {categoriesWithChildren.slice(3, 7).map((categorie, index) => {
             const key = genRandKey();
-
             return (
               <CategoryCard key={key} index={index} categorie={categorie} />
             )
@@ -67,27 +73,27 @@ export default async function  FarmHomepage() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-[#3c5a3e] mb-6">Nos producteurs à l'honneur</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((item) => (
+            {farms.slice(0, 4).map((farm: Ferme) => (
               <div
-                key={item}
+                key={genRandKey()}
                 className="bg-white rounded-xl overflow-hidden shadow-sm border border-[#e8e1d4] hover:shadow-md transition-shadow group"
               >
                 <div className="aspect-video relative overflow-hidden">
                   <img
                     src="farm.jpg"
-                    alt={`Producteur ${item}`}
+                    alt={`${farm.name}`}
                     className="w-full h-full object-cover transition-transform group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
                     <div>
-                      <h3 className="font-medium text-white">Ferme des Collines {item}</h3>
-                      <p className="text-sm text-white/80">Producteur depuis 1985</p>
+                      <h3 className="font-medium text-white">{farm.name}</h3>
+                      <p className="text-sm text-white/80">{farm.zipCode}, {farm.city}</p>
                     </div>
                   </div>
                 </div>
                 <div className="p-4">
                   <p className="text-sm text-[#6b6b6b] mb-3">
-                    Découvrez nos produits cultivés avec passion dans le respect des traditions.
+                    {farm.description}
                   </p>
                   <Link href="#" className="text-sm font-medium text-[#8fb573] hover:text-[#7a9c62] hover:underline">
                     Découvrir les produits

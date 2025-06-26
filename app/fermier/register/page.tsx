@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 
 export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false)
@@ -21,14 +20,66 @@ export default function RegisterPage() {
     const [confirmPassword, setConfirmPassword] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [acceptTerms, setAcceptTerms] = useState(false)
+    const [error, setError] = useState("")
+    const [success, setSuccess] = useState("")
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        setIsLoading(true)
-        // Simulate registration process
-        setTimeout(() => {
-            setIsLoading(false)
-        }, 2000)
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError("");
+        setSuccess("");
+
+        if (!firstName || !lastName || !email || !password || !confirmPassword) {
+            setError("Veuillez remplir tous les champs");
+            setIsLoading(false);
+            return;
+        }
+        if (!acceptTerms) {
+            setError("Veuillez accepter les conditions d'utilisation");
+            setIsLoading(false);
+            return;
+        }
+        if (password !== confirmPassword) {
+            setError("Les mots de passe ne correspondent pas");
+            setIsLoading(false);
+            return;
+        }
+
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL
+        try {
+            const response = await fetch(`${apiUrl}/api/register`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                    firstName,
+                    lastName,
+                    farmer: true,
+                }),
+            })
+            if (!response.ok) {
+                setIsLoading(false)
+                const errorData = await response.json().catch(() => null)
+                if (errorData && errorData.error) {
+                    setError(errorData.error)
+                } else {
+                    setError("Erreur lors de l'inscription. Veuillez vérifier vos informations.")
+                }
+                return
+            }
+            const res = await response.json()
+            localStorage.setItem("jwt_token", res.token)
+            setSuccess("Inscription réussie ! Redirection...")
+            setTimeout(() => {
+                window.location.href = "/"
+            }, 1200)
+        } catch (err) {
+            setError("Une erreur est survenue. Veuillez réessayer plus tard.")
+        }
+        setIsLoading(false)
     }
 
     return (
@@ -214,6 +265,13 @@ export default function RegisterPage() {
                                         J'accepte les <Link href="/" className="text-farm-green hover:underline">conditions d'utilisation</Link> et la <Link href="/" className="text-farm-green hover:underline">politique de confidentialité</Link>
                                     </label>
                                 </div>
+
+                                {error && (
+                                    <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm text-center">{error}</div>
+                                )}
+                                {success && (
+                                    <div className="mb-4 p-3 bg-green-100 text-green-700 rounded text-sm text-center">{success}</div>
+                                )}
 
                                 <Button
                                     type="submit"

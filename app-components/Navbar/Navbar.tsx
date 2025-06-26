@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
+import Modal from '../Modal';
+import MapSearch from './MapSearch';
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -18,6 +20,9 @@ const Navbar = () => {
     const [lastScrollY, setLastScrollY] = useState(0);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [actualScrollValue, setActualScrollValue] = useState(0);
+    const [city, setCity] = useState<string | null>(null);
+    const [geoError, setGeoError] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -41,6 +46,29 @@ const Navbar = () => {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, [lastScrollY]);
+
+    useEffect(() => {
+        if (!navigator.geolocation) return;
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+                    const data = await response.json();
+                    if (data.address && (data.address.city || data.address.town || data.address.village)) {
+                        setCity(data.address.city || data.address.town || data.address.village);
+                    } else {
+                        setCity(null);
+                    }
+                } catch (e) {
+                    setCity(null);
+                }
+            },
+            (error) => {
+                setGeoError(true);
+            }
+        );
+    }, []);
 
     const navItems = [
         { name: "Tous les produits", href: "#" },
@@ -77,8 +105,14 @@ const Navbar = () => {
                     <div className="flex items-center gap-1 text-gray-800 dark:text-gray-200">
                         <MapPin className="w-5 h-5 flex shrink-0" />
                         <div className="flex flex-col text-gray-800 dark:text-gray-200">
-                            <p className="text-xs text-gray-500 dark:text-gray-400 text-nowrap">Livraison à 69008 Lyon</p>
-                            <p className="text-sm font-semibold">Modifier</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 text-nowrap">
+                                {city
+                                    ? `À proximité de ${city}`
+                                    : geoError
+                                        ? "Saisissez votre ville"
+                                        : "Détection de la ville..."}
+                            </p>
+                            <p className="text-sm font-semibold cursor-pointer" onClick={() => setIsModalOpen(true)}>Modifier</p>
                         </div>
                     </div>
 
@@ -183,6 +217,18 @@ const Navbar = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Modal pour la ville */}
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onConfirm={() => {}}>
+                <div className="p-4">
+                    <h2 className="text-lg font-bold mb-4">Choisissez votre ville</h2>
+                    <MapSearch onSelect={(city, lat, lon) => {
+                        setCity(city);
+                        setGeoError(false);
+                        setIsModalOpen(false);
+                    }} />
+                </div>
+            </Modal>
         </>
     )
 }

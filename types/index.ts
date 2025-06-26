@@ -10,7 +10,7 @@ export interface Ferme {
     certifications: string[];
     address: string;
     city: string;
-    postalCode: string;
+    zipCode: string;
     region: string;
     coordinates: { lat: string; lng: string };
     phone: string;
@@ -38,4 +38,12 @@ export interface Persona {
     phone_number: string;
     birth_date: string;
     gender: string;
+}
+
+export interface CategoryWithChildren {
+    id: number;
+    name: string;
+    description?: string;
+    parent?: any;
+    children: Array<{ id: number; name: string; description?: string; parent?: any }>;
 }

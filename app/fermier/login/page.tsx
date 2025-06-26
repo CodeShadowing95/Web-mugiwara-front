@@ -12,19 +12,51 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function FermierLoginPage() {
+    const router = useRouter()
+
     const [showPassword, setShowPassword] = useState(false)
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState("")
+    const [success, setSuccess] = useState("")
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
-
-        
-        // Simulate login process
-        // await new Promise((resolve) => setTimeout(resolve, 2000))
-        // setIsLoading(false)
+        setError("")
+        setSuccess("")
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL
+            const response = await fetch(`${apiUrl}/api/login_check`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username: email,
+                    password: password,
+                }),
+            })
+            if (!response.ok) {
+                setIsLoading(false)
+                if (response.status === 401) {
+                    setError("Identifiants invalides.")
+                } else {
+                    setError("Erreur interne du serveur.")
+                }
+                return
+            }
+            const res = await response.json()
+            localStorage.setItem("jwt_token", res.token)
+            setSuccess("Connexion réussie ! Redirection...")
+            setTimeout(() => {
+                router.push("/fermier")
+            }, 1200)
+        } catch (err) {
+            setError("Erreur de connexion. Veuillez réessayer.")
+        }
+        setIsLoading(false)
     }
 
     return (
@@ -108,8 +140,8 @@ export default function FermierLoginPage() {
                             </CardTitle>
                             <CardDescription className="text-center text-gray-600">
                                 Accédez à votre espace producteur CocotteConnect ou
-                                <Link 
-                                    href="/fermier/register" 
+                                <Link
+                                    href="/fermier/register"
                                     className="ml-1 text-[var(--farm-green)] hover:text-[var(--farm-green-dark)] transition-colors duration-200 font-semibold hover:underline inline-flex items-center gap-1"
                                 >
                                     créez votre compte ici
@@ -182,6 +214,14 @@ export default function FermierLoginPage() {
                                         Mot de passe oublié ?
                                     </Link>
                                 </div>
+
+                                {error && (
+                                    <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm text-center">{error}</div>
+                                )}
+
+                                {success && (
+                                    <div className="mb-4 p-3 bg-green-100 text-green-700 rounded text-sm text-center">{success}</div>
+                                )}
 
                                 <Button
                                     type="submit"
