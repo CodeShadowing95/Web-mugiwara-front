@@ -26,3 +26,16 @@ export interface Ferme {
     profileImage: string;
     galleryImages: string[];
 }
+
+export interface Persona {
+    user_id: number;
+    email: string;
+    first_name: string;
+    last_name: string;
+    address: string;
+    zip_code: number;
+    city: string;
+    phone_number: string;
+    birth_date: string;
+    gender: string;
+}

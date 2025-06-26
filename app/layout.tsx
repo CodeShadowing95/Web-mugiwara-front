@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
+import { UserProvider } from "@/context/UserContext";
 
 export default function RootLayout({
   children,
@@ -20,31 +21,33 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-    <head>
-      <title>Cocotte Connect - De la ferme à l'assiette !</title>
-      <meta name="viewport" content="width=device-width, initial-scale=1"/>
-      <meta name="description" content="Commandez vos produits locaux en ligne et venez chercher votre commande au plus proche des producteurs !"/>
-      <link rel="apple-touch-icon" sizes="180x180" href="/ico/apple-touch-icon.png"/>
-      <link rel="icon" type="image/png" sizes="32x32" href="/ico/favicon-32x32.png"/>
-      <link rel="icon" type="image/png" sizes="16x16" href="/ico/favicon-16x16.png"/>
-      <link rel="manifest" href="/ico/site.webmanifest"/>
-      <meta name="msapplication-TileColor" content="#8fb573"/>
-      <meta name="theme-color" content="#8fb573"/>
-    </head>
+      <head>
+        <title>Cocotte Connect - De la ferme à l'assiette !</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="Commandez vos produits locaux en ligne et venez chercher votre commande au plus proche des producteurs !" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/ico/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/ico/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/ico/favicon-16x16.png" />
+        <link rel="manifest" href="/ico/site.webmanifest" />
+        <meta name="msapplication-TileColor" content="#8fb573" />
+        <meta name="theme-color" content="#8fb573" />
+      </head>
 
-    <body className="max-w-screen min-h-screen bg-[#f9f7f2] dark:bg-zinc-950 overflow-x-hidden"
-          cz-shortcut-listen="true">
-    <ThemeProvider
-        attribute="class"
-        defaultTheme="light"
-        enableSystem
-        disableTransitionOnChange
-      >
-        {pagesWithoutNavbar && <Navbar/>}
-        <Toaster richColors closeButton toastOptions={{duration: 5000}} position="top-right"/>
-        {children}
-      </ThemeProvider>
+      <body className="max-w-screen min-h-screen bg-[#f9f7f2] dark:bg-zinc-950 overflow-x-hidden"
+        cz-shortcut-listen="true">
+          <UserProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {pagesWithoutNavbar && <Navbar />}
+              <Toaster richColors closeButton toastOptions={{ duration: 5000 }} position="top-right" />
+              {children}
+            </ThemeProvider>
+          </UserProvider>
       </body>
     </html>
-);
+  );
 }

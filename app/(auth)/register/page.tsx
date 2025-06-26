@@ -51,7 +51,8 @@ export default function RegisterPage() {
       }
       const res = await response.json()
       localStorage.setItem("jwt_token", res.token)
-      router.push("/")
+      // router.push("/")
+      window.location.href = "/"
     } catch (err) {
       setError("Une erreur est survenue lors de l'inscription. Veuillez réessayer.")
     }

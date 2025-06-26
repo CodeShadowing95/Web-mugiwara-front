@@ -17,14 +17,14 @@ export default function FermierLoginPage() {
     const [password, setPassword] = useState("")
     const [isLoading, setIsLoading] = useState(false)
 
-    const router = useRouter();
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
+
+        
         // Simulate login process
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-        setIsLoading(false)
+        // await new Promise((resolve) => setTimeout(resolve, 2000))
+        // setIsLoading(false)
     }
 
     return (
