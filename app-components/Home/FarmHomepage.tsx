@@ -6,13 +6,13 @@ import { genRandKey } from "@/utils/utilities"
 import BannerCarousel from "./BannerCarousel"
 import { getCategories, getCategoryChildren } from "@/lib/productCategory"
 import { getFarms} from "@/lib/farm";
-import {CategoryWithChildren} from "@/types";
+import {Category} from "@/types";
 import {Ferme} from "@/types";
 
 export default async function  FarmHomepage() {
   const productCategories = await getCategories();
   // Récupérer les children pour chaque catégorie en parallèle
-  const categoriesWithChildren: CategoryWithChildren[] = await Promise.all(
+  const categoriesWithChildren: Category[] = await Promise.all(
     productCategories.map(async (cat: any) => {
       let children = await getCategoryChildren(cat.id);
       return { ...cat, children };
@@ -31,7 +31,7 @@ export default async function  FarmHomepage() {
           {categoriesWithChildren.slice(0, 3).map((categorie, index) => {
             const key = genRandKey();
             return (
-              <CategoryCard key={key} index={index+1} categorie={categorie} />
+              <CategoryCard key={key} categorie={categorie} />
             )
           })}
 
@@ -64,7 +64,7 @@ export default async function  FarmHomepage() {
           {categoriesWithChildren.slice(3, 7).map((categorie, index) => {
             const key = genRandKey();
             return (
-              <CategoryCard key={key} index={index} categorie={categorie} />
+              <CategoryCard key={key} categorie={categorie} />
             )
           })}
         </div>
