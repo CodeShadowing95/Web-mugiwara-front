@@ -5,10 +5,12 @@ import { Eye, EyeOff, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useUser } from "@/app/UserContext"
 
 export default function RegisterPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
+  const { refreshUser } = useUser()
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -51,7 +53,7 @@ export default function RegisterPage() {
       }
       const res = await response.json()
       localStorage.setItem("jwt_token", res.token)
-      // router.push("/")
+      await refreshUser(true);
       window.location.href = "/"
     } catch (err) {
       setError("Une erreur est survenue lors de l'inscription. Veuillez réessayer.")

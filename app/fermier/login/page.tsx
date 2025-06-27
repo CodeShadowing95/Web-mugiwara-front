@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {useUser} from "@/app/UserContext";
 
 export default function FermierLoginPage() {
     const router = useRouter()
@@ -20,6 +21,7 @@ export default function FermierLoginPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState("")
     const [success, setSuccess] = useState("")
+    const { refreshUser } = useUser();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -48,11 +50,16 @@ export default function FermierLoginPage() {
                 return
             }
             const res = await response.json()
-            localStorage.setItem("jwt_token", res.token)
-            setSuccess("Connexion réussie ! Redirection...")
-            setTimeout(() => {
-                router.push("/fermier")
-            }, 1200)
+            if (res.token) {
+                localStorage.setItem("jwt_token", res.token)
+                await refreshUser(true);
+                setSuccess("Connexion réussie ! Redirection...")
+                setTimeout(() => {
+                    router.push("/fermier")
+                }, 1200)
+            } else {
+                setError("Erreur lors de la récupération du token.")
+            }
         } catch (err) {
             setError("Erreur de connexion. Veuillez réessayer.")
         }
@@ -230,10 +237,6 @@ export default function FermierLoginPage() {
                                         backgroundColor: "var(--farm-green-dark)",
                                     }}
                                     disabled={isLoading}
-                                    onClick={() => {
-                                        // router.push('/fermier');
-                                        window.location.href = '/fermier';
-                                    }}
                                 >
                                     {isLoading ? (
                                         <div className="flex items-center space-x-2">

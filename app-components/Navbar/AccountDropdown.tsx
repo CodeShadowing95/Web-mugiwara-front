@@ -22,6 +22,7 @@ export default function AccountDropdown() {
 
   const logout = () => {
     localStorage.removeItem("jwt_token");
+    localStorage.removeItem('user');
     setCurrentUser(null);
     window.location.href = "/login";
   }

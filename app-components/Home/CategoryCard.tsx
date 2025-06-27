@@ -36,7 +36,7 @@ const CategoryCard = ({ index, categorie }: { index: number, categorie: Category
                 )}
             </div>
             <Link
-                href="#"
+                href={`/category?item=${index}&q=${categorie.name.toLowerCase().normalize('NFD').replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')}`}
                 className="inline-block mt-4 text-sm font-medium text-[#8fb573] hover:text-[#7a9c62] hover:underline"
             >
                 Voir plus

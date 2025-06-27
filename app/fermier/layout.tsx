@@ -22,7 +22,7 @@ const FermierLayout = ({ children }: { children: React.ReactNode }) => {
     if (!isAuthPage) {
       const token = localStorage.getItem("jwt_token");
       if (!token) {
-        window.location.href = "/fermier/login";
+        // window.location.href = "/fermier/login";
       }
     }
   }, [isAuthPage]);

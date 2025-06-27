@@ -12,7 +12,10 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ThemeToggle } from '../ThemeToggle';
 import Modal from '../Modal';
-import MapSearch from './MapSearch';
+import dynamic from "next/dynamic";
+
+// Remplacer l'import direct de MapSearch par un import dynamique sans SSR
+const MapSearch = dynamic(() => import("./MapSearch"), { ssr: false });
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);

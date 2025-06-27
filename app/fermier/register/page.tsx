@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {useUser} from "@/app/UserContext";
 
 export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false)
@@ -22,6 +23,7 @@ export default function RegisterPage() {
     const [acceptTerms, setAcceptTerms] = useState(false)
     const [error, setError] = useState("")
     const [success, setSuccess] = useState("")
+    const { refreshUser } = useUser()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -72,9 +74,10 @@ export default function RegisterPage() {
             }
             const res = await response.json()
             localStorage.setItem("jwt_token", res.token)
+            await refreshUser(true);
             setSuccess("Inscription réussie ! Redirection...")
             setTimeout(() => {
-                window.location.href = "/"
+                window.location.href = "/fermier"
             }, 1200)
         } catch (err) {
             setError("Une erreur est survenue. Veuillez réessayer plus tard.")

@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { categories } from "@/constants";
+import { getProductsByCategory } from "@/lib/productCategory";
 
 export default function CategoryPage() {
   const searchParams =
@@ -40,7 +41,9 @@ export default function CategoryPage() {
 
   const [family, setFamily] = useState("");
   const [category, setCategory] = useState("");
-  const [ products, setProducts ] = useState([] as any[]);
+  const [products, setProducts] = useState([] as any[]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [filtersOpen, setFiltersOpen] = useState({
     saison: true,
     provenance: true,
@@ -54,28 +57,20 @@ export default function CategoryPage() {
       [filter]: !prev[filter],
     }));
   };
-  const fetchProducts = async () => {
-    try {
-      // Use HTTP for local development instead of HTTPS
-      const url = "https://localhost/api/public/v1/products";
-      const options = {
-        method: "GET",
-        // You can add headers here if needed
-        headers: {
-          'Accept': 'application/json'
-        }
-      };
 
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      setProducts(data);
-      console.log(data);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      // Handle the error gracefully - can setProducts([]) if needed
+  // Nouvelle fonction pour charger dynamiquement les produits selon la catégorie
+  const fetchProducts = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      // On suppose que l'item correspond à l'ID de la catégorie (à adapter si besoin)
+      const data = await getProductsByCategory(item);
+      setProducts(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      setError("Erreur lors du chargement des produits.");
+      setProducts([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -93,75 +88,6 @@ export default function CategoryPage() {
     fetchProducts();
     fetchFamilyCategoryFromURL();
   }, [item, query]);
-
-  const produits = [
-    {
-      id: 1,
-      nom: "Fraises de saison Bio",
-      producteur: "Ferme des Collines",
-      prix: 4.95,
-      note: 4.8,
-      avis: 127,
-      image: "/placeholder.svg?height=200&width=200",
-      bio: true,
-      local: true,
-    },
-    {
-      id: 2,
-      nom: "Tomates anciennes variées",
-      producteur: "Potager du Sud",
-      prix: 3.75,
-      note: 4.5,
-      avis: 98,
-      image: "/placeholder.svg?height=200&width=200",
-      bio: true,
-      local: true,
-    },
-    {
-      id: 3,
-      nom: "Panier légumes de saison",
-      producteur: "Ferme des Quatre Vents",
-      prix: 18.9,
-      note: 4.9,
-      avis: 203,
-      image: "/placeholder.svg?height=200&width=200",
-      bio: true,
-      local: true,
-    },
-    {
-      id: 4,
-      nom: "Pommes Golden Bio",
-      producteur: "Vergers du Soleil",
-      prix: 3.5,
-      note: 4.2,
-      avis: 87,
-      image: "/placeholder.svg?height=200&width=200",
-      bio: true,
-      local: true,
-    },
-    {
-      id: 5,
-      nom: "Courgettes fraîches",
-      producteur: "Jardins de Provence",
-      prix: 2.8,
-      note: 4.6,
-      avis: 56,
-      image: "/placeholder.svg?height=200&width=200",
-      bio: false,
-      local: true,
-    },
-    {
-      id: 6,
-      nom: "Assortiment de baies",
-      producteur: "Ferme des Collines",
-      prix: 5.9,
-      note: 4.7,
-      avis: 73,
-      image: "/placeholder.svg?height=200&width=200",
-      bio: true,
-      local: true,
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-[#f9f7f2] dark:bg-zinc-950">
@@ -452,85 +378,87 @@ export default function CategoryPage() {
                   </button>
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {products.slice(0, 3).map((produit) => {
-                  return (
-                    <Link
-                      href={`/product/${produit.id}`}
-                      key={produit.id}
-                      className="bg-white dark:bg-zinc-900 rounded-xl p-4 border border-[#e8e1d4] dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow relative group"
-                    >
-                      {produit.bio && (
-                        <span className="absolute top-3 left-3 bg-[#8fb573] dark:bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-full flex items-center z-10">
-                          <Leaf size={10} className="mr-0.5" />
-                          Bio
-                        </span>
-                      )}
-                      <div className="relative mb-3 bg-[#f7f4eb] dark:bg-zinc-800 rounded-lg p-4 flex items-center justify-center h-48">
-                        <img
-                          src="vegetable.png"
-                          alt={produit.name}
-                          className="h-48 w-48 object-contain transition-transform group-hover:scale-105"
-                        />
-                        <button className="absolute bottom-2 right-2 p-1.5 rounded-full bg-white dark:bg-zinc-700 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-[#5a7052] dark:text-zinc-100 hover:text-[#3c5a3e] dark:hover:text-zinc-500">
-                          <Heart size={16} />
-                        </button>
-                      </div>
-                      <div className="mb-2">
-                        <div className="flex items-center text-[#e4a14e] dark:text-amber-400 mb-1">
-                          {Array(5)
-                            .fill(0)
-                            .map((_, i) => (
-                              <span key={i}>
-                                {i < Math.floor(4.4) ? (
-                                  <Star size={14} className="fill-current" />
-                                ) :4 % 1 > 0 &&
-                                  i === Math.floor(4.4) ? (
-                                  <StarHalf
-                                    size={14}
-                                    className="fill-current"
-                                  />
-                                ) : (
-                                  <Star
-                                    size={14}
-                                    className="text-gray-300 dark:text-zinc-600"
-                                  />
-                                )}
-                              </span>
-                            ))}
-                          <span className="text-xs text-[#5a7052] dark:text-zinc-100 ml-1">
-                            ({produit.avis})
+              {loading ? (
+                <div className="text-center py-8">Chargement...</div>
+              ) : error ? (
+                <div className="text-center text-red-500 py-8">{error}</div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {products.slice(0, 3).map((produit) => {
+                    return (
+                      <Link
+                        href={`/product/${produit.id}`}
+                        key={produit.id}
+                        className="bg-white dark:bg-zinc-900 rounded-xl p-4 border border-[#e8e1d4] dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow relative group"
+                      >
+                        {produit.bio && (
+                          <span className="absolute top-3 left-3 bg-[#8fb573] dark:bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-full flex items-center z-10">
+                            <Leaf size={10} className="mr-0.5" />
+                            Bio
                           </span>
+                        )}
+                        <div className="relative mb-3 bg-[#f7f4eb] dark:bg-zinc-800 rounded-lg p-4 flex items-center justify-center h-48">
+                          <img
+                            src={produit.image || "vegetable.png"}
+                            alt={produit.nom || produit.name}
+                            className="h-48 w-48 object-contain transition-transform group-hover:scale-105"
+                          />
+                          <button className="absolute bottom-2 right-2 p-1.5 rounded-full bg-white dark:bg-zinc-700 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-[#5a7052] dark:text-zinc-100 hover:text-[#3c5a3e] dark:hover:text-zinc-500">
+                            <Heart size={16} />
+                          </button>
                         </div>
-                        <h3 className="font-medium text-[#3c5a3e] dark:text-zinc-100">
-                          {produit.name}
-                        </h3>
-                        <p className="text-sm text-[#5a7052] dark:text-zinc-500">
-                          {produit.producteur}
-                        </p>
-                      </div>
-                      <div className="flex items-center justify-between mt-3">
-                        <span className="font-bold text-[#3c5a3e] dark:text-zinc-100">
-                          {/*{produit.price.toFixed(2)} €*/}
-                        </span>
-                        <Button
-                          size="sm"
-                          className="bg-[#8fb573] hover:bg-[#7a9c62] dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
-                          onClick={(e: any) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            alert("OK");
-                          }}
-                        >
-                          <ShoppingCart size={14} className="mr-1" />
-                          Ajouter
-                        </Button>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
+                        <div className="mb-2">
+                          <div className="flex items-center text-[#e4a14e] dark:text-amber-400 mb-1">
+                            {Array(5)
+                              .fill(0)
+                              .map((_, i) => (
+                                <span key={i}>
+                                  {i < Math.floor(produit.note || produit.rating || 0) ? (
+                                    <Star size={14} className="fill-current" />
+                                  ) : (produit.note || produit.rating || 0) % 1 > 0 &&
+                                    i === Math.floor(produit.note || produit.rating || 0) ? (
+                                    <StarHalf size={14} className="fill-current" />
+                                  ) : (
+                                    <Star
+                                      size={14}
+                                      className="text-gray-300 dark:text-zinc-600"
+                                    />
+                                  )}
+                                </span>
+                              ))}
+                            <span className="text-xs text-[#5a7052] dark:text-zinc-100 ml-1">
+                              ({produit.avis || produit.reviews || 0})
+                            </span>
+                          </div>
+                          <h3 className="font-medium text-[#3c5a3e] dark:text-zinc-100">
+                            {produit.nom || produit.name}
+                          </h3>
+                          <p className="text-sm text-[#5a7052] dark:text-zinc-500">
+                            {produit.producteur || produit.producer}
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-between mt-3">
+                          <span className="font-bold text-[#3c5a3e] dark:text-zinc-100">
+                            {produit.prix?.toFixed(2) || produit.price?.toFixed(2) || "-"} €
+                          </span>
+                          <Button
+                            size="sm"
+                            className="bg-[#8fb573] hover:bg-[#7a9c62] dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
+                            onClick={(e: any) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              alert("OK");
+                            }}
+                          >
+                            <ShoppingCart size={14} className="mr-1" />
+                            Ajouter
+                          </Button>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Tous les produits */}
@@ -551,76 +479,80 @@ export default function CategoryPage() {
                   </select>
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {produits.map((produit) => (
-                  <Link
-                    href={`/product/${produit.id}`}
-                    key={produit.id}
-                    className="bg-white dark:bg-zinc-900 rounded-xl p-4 border border-[#e8e1d4] dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow relative group"
-                  >
-                    {produit.bio && (
-                      <span className="absolute top-3 left-3 bg-[#8fb573] dark:bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-full flex items-center z-10">
-                        <Leaf size={10} className="mr-0.5" />
-                        Bio
-                      </span>
-                    )}
-                    <div className="relative mb-3 bg-[#f7f4eb] dark:bg-zinc-800 rounded-lg p-4 flex items-center justify-center h-48">
-                      <img
-                        src="vegetable.png"
-                        alt={produit.nom}
-                        className="h-48 w-48 object-contain transition-transform group-hover:scale-105"
-                      />
-                      <button className="absolute bottom-2 right-2 p-1.5 rounded-full bg-white dark:bg-zinc-700 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-[#5a7052] dark:text-zinc-100 hover:text-[#3c5a3e] dark:hover:text-zinc-500">
-                        <Heart size={16} />
-                      </button>
-                    </div>
-                    <div className="mb-2">
-                      <div className="flex items-center text-[#e4a14e] dark:text-amber-400 mb-1">
-                        {Array(5)
-                          .fill(0)
-                          .map((_, i) => (
-                            <span key={i}>
-                              {i < Math.floor(produit.note) ? (
-                                <Star size={14} className="fill-current" />
-                              ) : produit.note % 1 > 0 &&
-                                i === Math.floor(produit.note) ? (
-                                <StarHalf size={14} className="fill-current" />
-                              ) : (
-                                <Star
-                                  size={14}
-                                  className="text-gray-300 dark:text-zinc-600"
-                                />
-                              )}
-                            </span>
-                          ))}
-                        <span className="text-xs text-[#5a7052] dark:text-zinc-100 ml-1">
-                          ({produit.avis})
+              {loading ? (
+                <div className="text-center py-8">Chargement...</div>
+              ) : error ? (
+                <div className="text-center text-red-500 py-8">{error}</div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {products.map((produit) => (
+                    <Link
+                      href={`/product/${produit.id}`}
+                      key={produit.id}
+                      className="bg-white dark:bg-zinc-900 rounded-xl p-4 border border-[#e8e1d4] dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow relative group"
+                    >
+                      {produit.bio && (
+                        <span className="absolute top-3 left-3 bg-[#8fb573] dark:bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-full flex items-center z-10">
+                          <Leaf size={10} className="mr-0.5" />
+                          Bio
                         </span>
+                      )}
+                      <div className="relative mb-3 bg-[#f7f4eb] dark:bg-zinc-800 rounded-lg p-4 flex items-center justify-center h-48">
+                        <img
+                          src={produit.image || "vegetable.png"}
+                          alt={produit.nom || produit.name}
+                          className="h-48 w-48 object-contain transition-transform group-hover:scale-105"
+                        />
+                        <button className="absolute bottom-2 right-2 p-1.5 rounded-full bg-white dark:bg-zinc-700 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-[#5a7052] dark:text-zinc-100 hover:text-[#3c5a3e] dark:hover:text-zinc-500">
+                          <Heart size={16} />
+                        </button>
                       </div>
-                      <h3 className="font-medium text-[#3c5a3e] dark:text-zinc-100">
-                        {produit.nom}
-                      </h3>
-                      <p className="text-sm text-[#5a7052] dark:text-zinc-500">
-                        {produit.producteur}
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between mt-3">
-                      <span className="font-bold text-[#3c5a3e] dark:text-zinc-100">
-                        {produit.prix.toFixed(2)} €
-                      </span>
-                      <Button
-                        size="sm"
-                        className="bg-[#8fb573] hover:bg-[#7a9c62] dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
-                      >
-                        <ShoppingCart size={14} className="mr-1" />
-                        Ajouter
-                      </Button>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
+                      <div className="mb-2">
+                        <div className="flex items-center text-[#e4a14e] dark:text-amber-400 mb-1">
+                          {Array(5)
+                            .fill(0)
+                            .map((_, i) => (
+                              <span key={i}>
+                                {i < Math.floor(produit.note || produit.rating || 0) ? (
+                                  <Star size={14} className="fill-current" />
+                                ) : (produit.note || produit.rating || 0) % 1 > 0 &&
+                                  i === Math.floor(produit.note || produit.rating || 0) ? (
+                                  <StarHalf size={14} className="fill-current" />
+                                ) : (
+                                  <Star
+                                    size={14}
+                                    className="text-gray-300 dark:text-zinc-600"
+                                  />
+                                )}
+                              </span>
+                            ))}
+                        <span className="text-xs text-[#5a7052] dark:text-zinc-100 ml-1">
+                          ({produit.avis || produit.reviews || 0})
+                        </span>
+                        </div>
+                        <h3 className="font-medium text-[#3c5a3e] dark:text-zinc-100">
+                          {produit.nom || produit.name}
+                        </h3>
+                        <p className="text-sm text-[#5a7052] dark:text-zinc-500">
+                          {produit.producteur || produit.producer}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="font-bold text-[#3c5a3e] dark:text-zinc-100">
+                          {produit.prix?.toFixed(2) || produit.price?.toFixed(2) || "-"} €
+                        </span>
+                        <Button
+                          size="sm"
+                          className="bg-[#8fb573] hover:bg-[#7a9c62] dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
+                        >
+                          <ShoppingCart size={14} className="mr-1" />
+                          Ajouter
+                        </Button>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
               <div className="flex justify-center mt-8">
                 <div className="flex space-x-1">
                   <button className="w-8 h-8 flex items-center justify-center rounded bg-white dark:bg-zinc-800 border border-[#e8e1d4] dark:border-zinc-700 text-[#5a7052] dark:text-zinc-400 hover:bg-[#f7f4eb] dark:hover:bg-zinc-700 transition-colors">
