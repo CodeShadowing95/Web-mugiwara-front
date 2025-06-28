@@ -59,9 +59,20 @@ export interface Product {
     conservation: string;
     preparationAdvice: string;
     imageUrl?: string;
+    reviews: Review[];
     farm: Ferme;
     tags?: Tag[];
     medias?:[]
+}
+
+export interface Review {
+    id: number;
+    productId: number;
+    userId: number;
+    rating: number;
+    comment: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface Tag {

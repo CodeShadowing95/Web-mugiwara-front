@@ -1,8 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
@@ -30,6 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/app-components/ThemeToggle"
 import {Product, Tag} from "@/types"
+import { getProductReviews } from "@/lib/review"
 
 // Types
 type ProductImage = {
@@ -103,7 +102,13 @@ type RecipeProps = {
 }
 
 interface ProductDetailProps {
-  product2?: Product
+  product2?: Product | {
+    product: Product;
+    medias: any[];
+    reviews: any[];
+    averageRating: number;
+    reviewsCount: number;
+  }
 }
 
 export default function ProductDetail({ product2 }: ProductDetailProps) {
@@ -112,6 +117,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
   const [isZoomed, setIsZoomed] = useState(false)
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
   const [isLiked, setIsLiked] = useState(false)
+  const [reviews, setReviews] = useState<ProductReview[]>([])
 
   // Si aucun produit n'est fourni, afficher un message de chargement ou d'erreur
   if (!product2) {
@@ -125,41 +131,58 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
     )
   }
 
-  const prod = product2.product ?? product2;
+  // Déterminer si product2 est une structure API ou un Product direct
+  const isApiStructure = product2 && typeof product2 === 'object' && 'product' in product2;
+  const prod = isApiStructure ? (product2 as any).product : product2 as Product;
+  const apiData = isApiStructure ? product2 as any : null;
+
+  // Debug: Afficher les données reçues
+  console.log("ProductDetail - product2:", product2);
+  console.log("ProductDetail - prod:", prod);
+  console.log("ProductDetail - isApiStructure:", isApiStructure);
 
   // Données du produit (normalement récupérées depuis une API)
   const product: ProductProps = {
-    id: 1,
-    name: "Tomates anciennes bio",
-    description: "Assortiment de tomates anciennes cultivées en agriculture biologique",
-    longDescription:
-      "Nos tomates anciennes bio sont cultivées avec passion par nos producteurs locaux. Elles sont récoltées à maturité pour vous garantir une saveur exceptionnelle. Cet assortiment coloré comprend plusieurs variétés comme la Noire de Crimée, l'Ananas, la Cœur de Bœuf et la Green Zebra. Parfaites pour vos salades d'été, vos sauces maison ou simplement à déguster avec un filet d'huile d'olive et du basilic frais.",
-    price: 4.95,
-    oldPrice: 5.95,
-    unit: "500g",
-    origin: "Provence, France",
+    id: prod?.id || 1,
+    name: prod?.name || "Nom du produit non disponible",
+    description: prod?.description || "Description non disponible",
+    longDescription: prod?.longDescription || "Description détaillée non disponible",
+    price: prod?.price || 0,
+    oldPrice: undefined, // Pas de oldPrice dans le type Product
+    unit: prod?.unity?.symbol || "unité",
+    origin: prod?.origin || "Origine non spécifiée",
     producer: {
-      name: "Ferme des Quatre Saisons",
-      location: "Aix-en-Provence",
-      description:
-        "La Ferme des Quatre Saisons est une exploitation familiale qui pratique l'agriculture biologique depuis plus de 20 ans. Située au cœur de la Provence, elle bénéficie d'un climat idéal pour la culture de fruits et légumes savoureux.",
-      image: "/placeholder.svg?height=100&width=100",
-      distance: "35km",
+      name: prod?.farm?.name || "Producteur non spécifié",
+      location: prod?.farm?.city || "Localisation non spécifiée",
+      description: prod?.farm?.description || "Description du producteur non disponible",
+      image: prod?.farm?.profileImage || "/placeholder.svg?height=100&width=100",
+      distance: "Distance non spécifiée",
     },
-    images: [
-      { id: 1, src: "/sample.png", alt: "Tomates anciennes bio" },
-      { id: 2, src: "/vegetable.png", alt: "Tomates anciennes bio en gros plan" },
-      { id: 3, src: "/vegetable2.png", alt: "Tomates anciennes bio en salade" },
-      { id: 4, src: "/sample.png", alt: "Tomates anciennes bio sur plant" },
+    images: product2?.medias?.map((img: any, index: number) => ({
+      id: index + 1,
+      src: img.url || "/sample.png",
+      alt: prod?.name || "Image du produit"
+    })) || [
+      { id: 1, src: "/sample.png", alt: "Image du produit" },
+      { id: 2, src: "/vegetable.png", alt: "Image du produit en gros plan" },
+      { id: 3, src: "/vegetable2.png", alt: "Image du produit" },
+      { id: 4, src: "/sample.png", alt: "Image du produit" },
     ],
-    tags: ["Légumes", "Été", "Cuisine méditerranéenne", "Salade"],
-    isBio: true,
-    isLocal: true,
-    isSeasonal: true,
-    stock: 24,
-    rating: 4.8,
-    reviewCount: 127,
-    reviews: [
+    tags: prod?.tags?.map((tag: any) => tag.name) || ["Produit"],
+    isBio: prod?.tags?.some((tag: any) => tag.name.toLowerCase().includes('bio')) || false,
+    isLocal: prod?.tags?.some((tag: any) => tag.name.toLowerCase().includes('local')) || false,
+    isSeasonal: prod?.tags?.some((tag: any) => tag.name.toLowerCase().includes('saison')) || false,
+    stock: prod?.stock || 0,
+    rating: apiData?.averageRating || 4.8, // Utiliser la vraie note moyenne
+    reviewCount: apiData?.reviewsCount || 127, // Utiliser le vrai nombre d'avis
+    reviews: apiData?.reviews?.map((review: any) => ({
+      id: review.id,
+      author: `${review.user?.persona.firstName} ${review.user?.persona.lastName?.charAt(0)}.`,
+      rating: review.rating,
+      date: new Date(review.createdAt).toLocaleDateString('fr-FR'),
+      comment: review.comment,
+      avatar: "/placeholder.svg?height=50&width=50",
+    })) || [
       {
         id: 1,
         author: "Marie L.",
@@ -270,6 +293,9 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
     ],
   }
 
+  // Debug: Afficher les données traitées
+  console.log("ProductDetail - product traité:", product);
+
   const handleQuantityChange = (value: number) => {
     if (value >= 1 && value <= product.stock) {
       setQuantity(value)
@@ -310,6 +336,14 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
     )
   }
 
+  useEffect(() => {
+    if (prod?.id) {
+      getProductReviews(prod.id)
+        .then((data) => setReviews(data))
+        .catch(() => setReviews(product.reviews))
+    }
+  }, [prod?.id])
+
   return (
     <div className="min-h-screen bg-farm-beige-light dark:bg-gray-950 transition-colors duration-200">
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
@@ -324,27 +358,30 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
             <li>
               <span className="mx-2">/</span>
             </li>
-            <li>
-              <Link href="#" className="hover:text-farm-green-dark dark:hover:text-white">
-                {prod?.category?.map((cat: any) => (
-                  <li key={cat.id}>
-                    <Link href="#" className="hover:text-farm-green-dark dark:hover:text-white">
-                      {cat.name}
-                    </Link>
-                  </li>
-                ))}
-              </Link>
-            </li>
+            {prod?.category ? (
+              <li>
+                <Link href="#" className="hover:text-farm-green-dark dark:hover:text-white">
+                  {prod.category.name}
+                </Link>
+              </li>
+            ) : (
+              <li>
+                <span>Catégorie</span>
+              </li>
+            )}
             <li>
               <span className="mx-2">/</span>
             </li>
-            <li className="font-medium text-farm-green-dark dark:text-white">Nom_produit</li>
+            <li className="font-medium text-farm-green-dark dark:text-white">
+              {prod?.name || 'Nom_produit'}
+            </li>
           </ol>
         </nav>
 
         {/* Contenu principal */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Galerie d'images */}
+          {/* Galerie d'images - COMMENTÉE POUR LE MOMENT */}
+          {/*
           <div className="space-y-4">
             <div
               className={cn(
@@ -368,7 +405,6 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                 />
               </div>
 
-              {/* Badges */}
               <div className="absolute top-4 left-4 flex flex-col space-y-2 z-10">
                 {Array.isArray(prod.tags) && prod.tags.map((tag: Tag, index: number) => (
                     <Badge
@@ -379,23 +415,8 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                       {tag.name}
                     </Badge>
                 ))}
-                {/*{product.isBio && (
-                  <Badge className="bg-farm-green text-white px-3 py-1 flex items-center">
-                    <Leaf size={14} className="mr-1" />
-                    Bio
-                  </Badge>
-                )}
-                {product.isLocal && (
-                  <Badge className="bg-farm-orange text-white px-3 py-1 flex items-center">
-                    <MapPin size={14} className="mr-1" />
-                    Local
-                  </Badge>
-                )}
-                {product.isSeasonal && <Badge className="bg-farm-green-light text-white px-3 py-1">De saison</Badge>}
-                {product.oldPrice && <Badge className="bg-red-500 text-white px-3 py-1">Promo</Badge>}*/}
               </div>
 
-              {/* Navigation des images */}
               {product.images.length > 1 && (
                 <>
                   <button
@@ -420,7 +441,6 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
               )}
             </div>
 
-            {/* Miniatures */}
             {product.images.length > 1 && (
               <div className="flex space-x-2 overflow-x-auto pb-2">
                 {product.images.map((image, index) => (
@@ -446,6 +466,26 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
               </div>
             )}
           </div>
+          */}
+
+          {/* Placeholder pour la galerie d'images */}
+          <div className="space-y-4">
+            <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-gray-800 aspect-square flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-32 h-32 bg-farm-beige dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Image
+                    src="/sample.png"
+                    alt={prod?.name || "Image du produit"}
+                    width={128}
+                    height={128}
+                    className="rounded-full"
+                  />
+                </div>
+                <p className="text-farm-green dark:text-gray-300 font-medium">{prod?.name || "Nom du produit non disponible"}</p>
+                <p className="text-sm text-farm-green dark:text-gray-400 mt-2">Galerie d'images temporairement désactivée</p>
+              </div>
+            </div>
+          </div>
 
           {/* Informations produit */}
           <div className="space-y-6">
@@ -455,9 +495,9 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
 
               <div className="flex items-center space-x-4 mb-4">
                 <div className="flex items-center">
-                  {renderRatingStars(prod?.rating || 0)}
+                  {renderRatingStars(product.rating)}
                   <span className="ml-2 text-farm-green dark:text-gray-300">
-                    {(prod?.rating || 0).toFixed(1)} ({prod?.reviewCount || 0} avis)
+                    {product.rating.toFixed(1)} ({product.reviewCount} avis)
                   </span>
                 </div>
               </div>
@@ -467,9 +507,9 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                   {(prod?.price ?? 0).toFixed(2)} €
                 </span>
                 <span className="text-sm text-farm-green dark:text-gray-400">{prod?.unitPrice} / {prod?.unity?.symbol ?? ''}</span>
-                {prod?.oldPrice && (
+                {product.oldPrice && (
                   <span className="text-lg line-through text-gray-500 dark:text-gray-500">
-                    {prod.oldPrice.toFixed(2)} €
+                    {product.oldPrice.toFixed(2)} €
                   </span>
                 )}
               </div>
@@ -480,7 +520,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
               </div>
 
               <div className="flex flex-wrap gap-2 mb-6">
-                {Array.isArray(prod.tags) && prod.tags.map((tag: Tag, index: number) => (
+                {Array.isArray(prod?.tags) && prod?.tags.map((tag: Tag, index: number) => (
                   <Badge
                     key={index}
                     variant="outline"
@@ -717,21 +757,21 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
           <TabsContent value="description" className="pt-6">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-farm-beige-dark dark:border-gray-700">
               <h2 className="text-xl font-bold text-farm-green-dark dark:text-white mb-4">À propos de ce produit</h2>
-              <p className="text-farm-green dark:text-gray-300 mb-4">{prod?.longDescription}</p>
+              <p className="text-farm-green dark:text-gray-300 mb-4">{(prod as Product)?.longDescription}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                {prod?.conservation && (
+                {(prod as Product)?.conservation && (
                   <div className="bg-farm-beige-light dark:bg-gray-900 p-4 rounded-lg">
                     <h3 className="font-medium text-farm-green-dark dark:text-white mb-2">Conservation</h3>
                     <p className="text-sm text-farm-green dark:text-gray-400">
-                      {prod.conservation}
+                      {(prod as Product).conservation}
                     </p>
                   </div>
                 )}
-                {prod?.preparationAdvice && (
+                {(prod as Product)?.preparationAdvice && (
                   <div className="bg-farm-beige-light dark:bg-gray-900 p-4 rounded-lg">
                     <h3 className="font-medium text-farm-green-dark dark:text-white mb-2">Conseils d'utilisation</h3>
                     <p className="text-sm text-farm-green dark:text-gray-400">
-                      {prod.preparationAdvice}
+                      {(prod as Product).preparationAdvice}
                     </p>
                   </div>
                 )}
@@ -754,15 +794,15 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                 </div>
                 <div className="md:w-3/4">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-farm-green-dark dark:text-white">{prod.farm?.name}</h2>
+                    <h2 className="text-xl font-bold text-farm-green-dark dark:text-white">{product.producer.name}</h2>
                     <Badge className="bg-farm-orange text-white flex items-center">
-                      <MapPin size={12} className="mr-1" />À {prod.farm?.city}
+                      <MapPin size={12} className="mr-1" />À {product.producer.location}
                     </Badge>
                   </div>
-                  <p className="text-farm-green dark:text-gray-300 mb-4">{prod.farm?.description}</p>
+                  <p className="text-farm-green dark:text-gray-300 mb-4">{product.producer.description}</p>
                   <div className="flex items-center text-farm-green dark:text-gray-300 mb-6">
                     <MapPin size={16} className="mr-2 text-farm-green-light" />
-                    {prod.farm?.city}
+                    {product.producer.location}
                   </div>
                   <Button className="bg-farm-green-light hover:bg-farm-green text-white">
                     Voir tous les produits de ce producteur
@@ -828,7 +868,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
               </div>
 
               <div className="space-y-6">
-                {product.reviews.map((review) => (
+                {reviews.map((review) => (
                   <div
                     key={review.id}
                     className="border-b border-farm-beige-dark dark:border-gray-700 pb-6 last:border-0"
