@@ -1,8 +1,3 @@
-export interface Categorie {
-    categorie: string;
-    produits: string[];
-};
-
 export interface Ferme {
     name: string;
     description: string;
@@ -40,10 +35,33 @@ export interface Persona {
     gender: string;
 }
 
-export interface CategoryWithChildren {
+export interface Category {
     id: number;
     name: string;
     description?: string;
     parent?: any;
     children: Array<{ id: number; name: string; description?: string; parent?: any }>;
+}
+
+export interface Product {
+    id: number;
+    name: string;
+    description: string;
+    price: number;
+    unit: string;
+    featured: boolean;
+    stock: number;
+    category: Category;
+    imageUrl?: string;
+    farmId: number;
+    tags?: Tag[];
+    medias?:[]
+}
+
+export interface Tag {
+    id: number;
+    name: string;
+    bgColor: string;
+    textColor: string;
+    slug: string;
 }

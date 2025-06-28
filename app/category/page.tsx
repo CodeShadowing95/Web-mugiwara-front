@@ -20,8 +20,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { categories } from "@/constants";
-import { getProductsByCategory } from "@/lib/productCategory";
+import {getCategoryById, getCategoryParents, getProductsByCategory} from "@/lib/productCategory";
+import {Category, Product, Tag} from "@/types";
+import FeaturedProductCard from "@/app-components/Home/FeaturedProductCard";
 
 export default function CategoryPage() {
   const searchParams =
@@ -39,9 +40,9 @@ export default function CategoryPage() {
     season: searchParams.get("season"),
   };
 
-  const [family, setFamily] = useState("");
-  const [category, setCategory] = useState("");
-  const [products, setProducts] = useState([] as any[]);
+  const [parentsCategory, setParentsCategory] = useState<Category[] | []>([]);
+  const [category, setCategory] = useState<Category | null>(null);
+  const [products, setProducts] = useState<Product[] | []>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [filtersOpen, setFiltersOpen] = useState({
@@ -58,12 +59,30 @@ export default function CategoryPage() {
     }));
   };
 
-  // Nouvelle fonction pour charger dynamiquement les produits selon la catégorie
+  const fetchCategory = async () => {
+    setError("");
+    try {
+      const data = await getCategoryById(item);
+      setCategory(data);
+    } catch (err: any) {
+      setError("Erreur lors du chargement de la catégorie.");
+    }
+  };
+
+  const fetchCategoryParents = async () => {
+    setError("");
+    try {
+      const data = await getCategoryParents(item);
+      setParentsCategory(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      setError("Erreur lors du chargement des parents de la categorie.");
+    }
+  };
+
   const fetchProducts = async () => {
     setLoading(true);
     setError("");
     try {
-      // On suppose que l'item correspond à l'ID de la catégorie (à adapter si besoin)
       const data = await getProductsByCategory(item);
       setProducts(Array.isArray(data) ? data : []);
     } catch (err: any) {
@@ -75,19 +94,17 @@ export default function CategoryPage() {
   };
 
   useEffect(() => {
-    const fetchFamilyCategoryFromURL = () => {
-      const idItem = parseInt(item) - 1;
-      setFamily(categories[idItem]?.categorie);
-      setCategory(
-        query
-          .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ")
-      );
-    };
-    fetchProducts();
-    fetchFamilyCategoryFromURL();
+    void fetchProducts();
+    void fetchCategory();
+    void fetchCategoryParents();
   }, [item, query]);
+
+  const featuredProducts = products.filter(
+    (product) => product.featured
+  );
+  const listedProducts = products.filter(
+    (product) => !product.featured
+  );
 
   return (
     <div className="min-h-screen bg-[#f9f7f2] dark:bg-zinc-950">
@@ -97,9 +114,21 @@ export default function CategoryPage() {
           <Home size={14} className="mr-1" />
           Accueil
         </Link>
+        {parentsCategory && parentsCategory.length > 0 && parentsCategory.map((parent, idx) => (
+          <>
+            <ChevronRight size={14} key={`chevron-${parent.id}`}/>
+            <Link
+              key={parent.id}
+              href={`/category?item=${parent.id}`}
+              className="hover:underline"
+            >
+              {parent.name}
+            </Link>
+          </>
+        ))}
         <ChevronRight size={14} />
         <span className="font-medium">
-          {family} - {category}
+          {category?.name || "..."}
         </span>
       </div>
 
@@ -338,17 +367,14 @@ export default function CategoryPage() {
                   <Apple size={24} className="inline mr-1" />
                   <Carrot size={24} className="inline" />
                 </span>
-                {family}
+                {category?.name || "..."}
               </h1>
               <p className="text-[#5a7052] dark:text-zinc-500 mb-4">
-                Découvrez notre sélection de fruits et légumes frais, cultivés
-                avec passion par nos producteurs locaux. Tous nos produits sont
-                récoltés à maturité pour vous garantir une fraîcheur et une
-                saveur optimales.
+                {category?.description || "..."}
               </p>
               <div className="flex flex-wrap gap-2">
                 <span className="bg-[#5a7052] dark:bg-emerald-700 text-[#f7f4eb] dark:text-emerald-50 px-3 py-1 rounded-full text-sm font-bold flex items-center">
-                  {category}
+                  {category?.name}
                 </span>
                 <span className="bg-[#f7f4eb] dark:bg-zinc-800 text-[#5a7052] dark:text-zinc-100 px-3 py-1 rounded-full text-sm font-medium flex items-center">
                   <Leaf
@@ -364,43 +390,85 @@ export default function CategoryPage() {
             </div>
 
             {/* Produits mis en avant */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-[#3c5a3e] dark:text-zinc-100">
-                  Meilleures ventes
-                </h2>
-                <div className="flex space-x-2">
-                  <button className="p-1.5 rounded-full bg-white dark:bg-zinc-800 border border-[#e8e1d4] dark:border-zinc-700 text-[#5a7052] dark:text-zinc-100 hover:bg-[#f7f4eb] dark:hover:bg-zinc-700">
-                    <ChevronLeft size={18} />
-                  </button>
-                  <button className="p-1.5 rounded-full bg-white dark:bg-zinc-800 border border-[#e8e1d4] dark:border-zinc-700 text-[#5a7052] dark:text-zinc-100 hover:bg-[#f7f4eb] dark:hover:bg-zinc-700">
-                    <ChevronRight size={18} />
-                  </button>
+            {featuredProducts.length > 0 && (
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-[#3c5a3e] dark:text-zinc-100">
+                    Meilleures ventes
+                  </h2>
+                  <div className="flex space-x-2">
+                    <button className="p-1.5 rounded-full bg-white dark:bg-zinc-800 border border-[#e8e1d4] dark:border-zinc-700 text-[#5a7052] dark:text-zinc-100 hover:bg-[#f7f4eb] dark:hover:bg-zinc-700">
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button className="p-1.5 rounded-full bg-white dark:bg-zinc-800 border border-[#e8e1d4] dark:border-zinc-700 text-[#5a7052] dark:text-zinc-100 hover:bg-[#f7f4eb] dark:hover:bg-zinc-700">
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
                 </div>
+                {loading ? (
+                  <div className="text-center py-8">Chargement...</div>
+                ) : error ? (
+                  <div className="text-center text-red-500 py-8">{error}</div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {featuredProducts.map((produit) => (
+                      <FeaturedProductCard key={produit.id} produit={produit} />
+                    ))}
+                  </div>
+                )}
               </div>
-              {loading ? (
-                <div className="text-center py-8">Chargement...</div>
-              ) : error ? (
-                <div className="text-center text-red-500 py-8">{error}</div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {products.slice(0, 3).map((produit) => {
-                    return (
+            )}
+
+            {/* Tous les produits */}
+            {listedProducts.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-[#3c5a3e] dark:text-zinc-100">
+                    Tous nos produits
+                  </h2>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-[#5a7052] dark:text-zinc-300">
+                      Trier par:
+                    </span>
+                    <select className="text-sm border border-[#e8e1d4] dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 px-2 py-1 text-[#5a7052] dark:text-zinc-300">
+                      <option>Popularité</option>
+                      <option>Prix croissant</option>
+                      <option>Prix décroissant</option>
+                      <option>Nouveautés</option>
+                    </select>
+                  </div>
+                </div>
+                {loading ? (
+                  <div className="text-center py-8">Chargement...</div>
+                ) : error ? (
+                  <div className="text-center text-red-500 py-8">{error}</div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {listedProducts.map((produit) => (
                       <Link
                         href={`/product/${produit.id}`}
                         key={produit.id}
                         className="bg-white dark:bg-zinc-900 rounded-xl p-4 border border-[#e8e1d4] dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow relative group"
                       >
-                        {produit.bio && (
-                          <span className="absolute top-3 left-3 bg-[#8fb573] dark:bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-full flex items-center z-10">
-                            <Leaf size={10} className="mr-0.5" />
-                            Bio
-                          </span>
+                        {/* Affichage des tags */}
+                        {produit.tags && Array.isArray(produit.tags) && produit.tags.length > 0 && (
+                          <div className="absolute top-3 left-3 flex gap-2 z-10">
+                            {produit.tags.map((tag: Tag, idx: number) => (
+                              <span
+                                key={tag.id || tag.name + idx}
+                                style={{ backgroundColor: tag.bgColor, color: tag.textColor }}
+                                className="text-xs px-2 py-0.5 rounded-full flex items-center"
+                              >
+                                <Leaf size={10} className="mr-0.5" />
+                                {tag.name}
+                              </span>
+                            ))}
+                          </div>
                         )}
                         <div className="relative mb-3 bg-[#f7f4eb] dark:bg-zinc-800 rounded-lg p-4 flex items-center justify-center h-48">
                           <img
-                            src={produit.image || "vegetable.png"}
-                            alt={produit.nom || produit.name}
+                            src={produit.imageUrl || "vegetable.png"}
+                            alt={produit.name}
                             className="h-48 w-48 object-contain transition-transform group-hover:scale-105"
                           />
                           <button className="absolute bottom-2 right-2 p-1.5 rounded-full bg-white dark:bg-zinc-700 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-[#5a7052] dark:text-zinc-100 hover:text-[#3c5a3e] dark:hover:text-zinc-500">
@@ -413,11 +481,8 @@ export default function CategoryPage() {
                               .fill(0)
                               .map((_, i) => (
                                 <span key={i}>
-                                  {i < Math.floor(produit.note || produit.rating || 0) ? (
+                                  {i < 0 ? (
                                     <Star size={14} className="fill-current" />
-                                  ) : (produit.note || produit.rating || 0) % 1 > 0 &&
-                                    i === Math.floor(produit.note || produit.rating || 0) ? (
-                                    <StarHalf size={14} className="fill-current" />
                                   ) : (
                                     <Star
                                       size={14}
@@ -426,153 +491,54 @@ export default function CategoryPage() {
                                   )}
                                 </span>
                               ))}
-                            <span className="text-xs text-[#5a7052] dark:text-zinc-100 ml-1">
-                              ({produit.avis || produit.reviews || 0})
-                            </span>
+                          <span className="text-xs text-[#5a7052] dark:text-zinc-100 ml-1">
+                            (0)
+                          </span>
                           </div>
                           <h3 className="font-medium text-[#3c5a3e] dark:text-zinc-100">
-                            {produit.nom || produit.name}
+                            {produit.name}
                           </h3>
-                          <p className="text-sm text-[#5a7052] dark:text-zinc-500">
-                            {produit.producteur || produit.producer}
-                          </p>
                         </div>
                         <div className="flex items-center justify-between mt-3">
                           <span className="font-bold text-[#3c5a3e] dark:text-zinc-100">
-                            {produit.prix?.toFixed(2) || produit.price?.toFixed(2) || "-"} €
+                            {produit.price?.toFixed(2) || "-"} €
                           </span>
                           <Button
                             size="sm"
                             className="bg-[#8fb573] hover:bg-[#7a9c62] dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
-                            onClick={(e: any) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              alert("OK");
-                            }}
                           >
                             <ShoppingCart size={14} className="mr-1" />
                             Ajouter
                           </Button>
                         </div>
                       </Link>
-                    );
-                  })}
+                    ))}
+                  </div>
+                )}
+                <div className="flex justify-center mt-8">
+                  <div className="flex space-x-1">
+                    <button className="w-8 h-8 flex items-center justify-center rounded bg-white dark:bg-zinc-800 border border-[#e8e1d4] dark:border-zinc-700 text-[#5a7052] dark:text-zinc-400 hover:bg-[#f7f4eb] dark:hover:bg-zinc-700 transition-colors">
+                      <ChevronLeft size={16} />
+                    </button>
+                    <button className="w-8 h-8 flex items-center justify-center rounded bg-[#8fb573] dark:bg-emerald-600 text-white font-medium transition-colors">
+                      1
+                    </button>
+                    <button className="w-8 h-8 flex items-center justify-center rounded bg-white dark:bg-zinc-800 border border-[#e8e1d4] dark:border-zinc-700 text-[#5a7052] dark:text-zinc-400 hover:bg-[#f7f4eb] dark:hover:bg-zinc-700 transition-colors">
+                      2
+                    </button>
+                    <button className="w-8 h-8 flex items-center justify-center rounded bg-white dark:bg-zinc-800 border border-[#e8e1d4] dark:border-zinc-700 text-[#5a7052] dark:text-zinc-400 hover:bg-[#f7f4eb] dark:hover:bg-zinc-700 transition-colors">
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Tous les produits */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-[#3c5a3e] dark:text-zinc-100">
-                  Tous nos produits
-                </h2>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-[#5a7052] dark:text-zinc-300">
-                    Trier par:
-                  </span>
-                  <select className="text-sm border border-[#e8e1d4] dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 px-2 py-1 text-[#5a7052] dark:text-zinc-300">
-                    <option>Popularité</option>
-                    <option>Prix croissant</option>
-                    <option>Prix décroissant</option>
-                    <option>Nouveautés</option>
-                  </select>
-                </div>
+            {featuredProducts.length === 0 && listedProducts.length === 0 && (
+              <div className="text-center text-[#5a7052] dark:text-zinc-200 text-lg py-16">
+                Aucun produit disponible pour cette catégorie.
               </div>
-              {loading ? (
-                <div className="text-center py-8">Chargement...</div>
-              ) : error ? (
-                <div className="text-center text-red-500 py-8">{error}</div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {products.map((produit) => (
-                    <Link
-                      href={`/product/${produit.id}`}
-                      key={produit.id}
-                      className="bg-white dark:bg-zinc-900 rounded-xl p-4 border border-[#e8e1d4] dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow relative group"
-                    >
-                      {produit.bio && (
-                        <span className="absolute top-3 left-3 bg-[#8fb573] dark:bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-full flex items-center z-10">
-                          <Leaf size={10} className="mr-0.5" />
-                          Bio
-                        </span>
-                      )}
-                      <div className="relative mb-3 bg-[#f7f4eb] dark:bg-zinc-800 rounded-lg p-4 flex items-center justify-center h-48">
-                        <img
-                          src={produit.image || "vegetable.png"}
-                          alt={produit.nom || produit.name}
-                          className="h-48 w-48 object-contain transition-transform group-hover:scale-105"
-                        />
-                        <button className="absolute bottom-2 right-2 p-1.5 rounded-full bg-white dark:bg-zinc-700 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-[#5a7052] dark:text-zinc-100 hover:text-[#3c5a3e] dark:hover:text-zinc-500">
-                          <Heart size={16} />
-                        </button>
-                      </div>
-                      <div className="mb-2">
-                        <div className="flex items-center text-[#e4a14e] dark:text-amber-400 mb-1">
-                          {Array(5)
-                            .fill(0)
-                            .map((_, i) => (
-                              <span key={i}>
-                                {i < Math.floor(produit.note || produit.rating || 0) ? (
-                                  <Star size={14} className="fill-current" />
-                                ) : (produit.note || produit.rating || 0) % 1 > 0 &&
-                                  i === Math.floor(produit.note || produit.rating || 0) ? (
-                                  <StarHalf size={14} className="fill-current" />
-                                ) : (
-                                  <Star
-                                    size={14}
-                                    className="text-gray-300 dark:text-zinc-600"
-                                  />
-                                )}
-                              </span>
-                            ))}
-                        <span className="text-xs text-[#5a7052] dark:text-zinc-100 ml-1">
-                          ({produit.avis || produit.reviews || 0})
-                        </span>
-                        </div>
-                        <h3 className="font-medium text-[#3c5a3e] dark:text-zinc-100">
-                          {produit.nom || produit.name}
-                        </h3>
-                        <p className="text-sm text-[#5a7052] dark:text-zinc-500">
-                          {produit.producteur || produit.producer}
-                        </p>
-                      </div>
-                      <div className="flex items-center justify-between mt-3">
-                        <span className="font-bold text-[#3c5a3e] dark:text-zinc-100">
-                          {produit.prix?.toFixed(2) || produit.price?.toFixed(2) || "-"} €
-                        </span>
-                        <Button
-                          size="sm"
-                          className="bg-[#8fb573] hover:bg-[#7a9c62] dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
-                        >
-                          <ShoppingCart size={14} className="mr-1" />
-                          Ajouter
-                        </Button>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-              <div className="flex justify-center mt-8">
-                <div className="flex space-x-1">
-                  <button className="w-8 h-8 flex items-center justify-center rounded bg-white dark:bg-zinc-800 border border-[#e8e1d4] dark:border-zinc-700 text-[#5a7052] dark:text-zinc-400 hover:bg-[#f7f4eb] dark:hover:bg-zinc-700 transition-colors">
-                    <ChevronLeft size={16} />
-                  </button>
-                  <button className="w-8 h-8 flex items-center justify-center rounded bg-[#8fb573] dark:bg-emerald-600 text-white font-medium transition-colors">
-                    1
-                  </button>
-                  <button className="w-8 h-8 flex items-center justify-center rounded bg-white dark:bg-zinc-800 border border-[#e8e1d4] dark:border-zinc-700 text-[#5a7052] dark:text-zinc-400 hover:bg-[#f7f4eb] dark:hover:bg-zinc-700 transition-colors">
-                    2
-                  </button>
-                  <button className="w-8 h-8 flex items-center justify-center rounded bg-white dark:bg-zinc-800 border border-[#e8e1d4] dark:border-zinc-700 text-[#5a7052] dark:text-zinc-400 hover:bg-[#f7f4eb] dark:hover:bg-zinc-700 transition-colors">
-                    3
-                  </button>
-                  <button className="w-8 h-8 flex items-center justify-center rounded bg-white dark:bg-zinc-800 border border-[#e8e1d4] dark:border-zinc-700 text-[#5a7052] dark:text-zinc-400 hover:bg-[#f7f4eb] dark:hover:bg-zinc-700 transition-colors">
-                    <ChevronRight size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </main>

@@ -2,10 +2,10 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { CategoryWithChildren } from '@/types';
+import { Category } from '@/types';
 import { genRandKey } from '@/utils/utilities';
 
-const CategoryCard = ({ index, categorie }: { index: number, categorie: CategoryWithChildren }) => {
+const CategoryCard = ({ categorie }: { categorie: Category }) => {
     return (
         <div className="bg-white rounded-xl p-6 shadow-sm border border-[#e8e1d4]">
             <h2 className="text-xl font-bold text-[#3c5a3e] mb-4">{categorie.name}</h2>
@@ -19,7 +19,7 @@ const CategoryCard = ({ index, categorie }: { index: number, categorie: Category
                             .replace(/[^\w\s-]/g, '')
                             .replace(/\s+/g, '-');
                         return (
-                            <Link key={key} href={`/category?item=${index}&q=${normalizedItem}`} className="group">
+                            <Link key={key} href={`/category?item=${categorie.id}&q=${normalizedItem}`} className="group">
                                 <div className="aspect-square rounded-lg mb-2 overflow-hidden">
                                     <img
                                         src="vegetable2.png"
@@ -36,7 +36,7 @@ const CategoryCard = ({ index, categorie }: { index: number, categorie: Category
                 )}
             </div>
             <Link
-                href={`/category?item=${index}&q=${categorie.name.toLowerCase().normalize('NFD').replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')}`}
+                href={`/category?item=${categorie.id}&q=${categorie.name.toLowerCase().normalize('NFD').replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')}`}
                 className="inline-block mt-4 text-sm font-medium text-[#8fb573] hover:text-[#7a9c62] hover:underline"
             >
                 Voir plus
