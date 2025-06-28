@@ -408,9 +408,9 @@ export default function CategoryPage() {
                 ) : error ? (
                   <div className="text-center text-red-500 py-8">{error}</div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
                     {featuredProducts.map((produit) => (
-                      <FeaturedProductCard key={produit.id} produit={produit} />
+                      <FeaturedProductCard key={produit.id} product={produit} />
                     ))}
                   </div>
                 )}
