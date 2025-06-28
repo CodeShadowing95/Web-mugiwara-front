@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import CategoryCard from "./CategoryCard"
 import { genRandKey } from "@/utils/utilities"

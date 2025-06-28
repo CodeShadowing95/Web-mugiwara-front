@@ -4,10 +4,25 @@ export const getCategories = async () => {
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL
     const url = `${apiUrl}/api/public/v1/product-categories`;
-    const options = { method: 'GET' };
+    const options = { 
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        }
+    };
 
     try {
         const response = await fetch(url, options);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new TypeError("Response is not JSON");
+        }
+
         const data = await response.json();
         return data;
     } catch (error) {
@@ -19,9 +34,25 @@ export const getCategories = async () => {
 export const getProductsByCategory = async (categoryId: string) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const url = `${apiUrl}/api/public/v1/product-category/${categoryId}/products`;
-    const options = { method: 'GET' };
+    const options = { 
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        }
+    };
+
     try {
         const response = await fetch(url, options);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new TypeError("Response is not JSON");
+        }
+
         const data = await response.json();
         return data;
     } catch (error) {
@@ -33,16 +64,32 @@ export const getProductsByCategory = async (categoryId: string) => {
 export const getCategoryChildren = async (categoryId: string) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const url = `${apiUrl}/api/public/v1/product-category/${categoryId}/children`;
-    const options = { method: 'GET' };
+    const options = { 
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        }
+    };
+
     try {
         const response = await fetch(url, options);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new TypeError("Response is not JSON");
+        }
+
         const data = await response.json();
-        // Toujours retourner un tableau
+        // Always return an array
         if (!data) return [];
         if (Array.isArray(data)) return data;
         return [data];
     } catch (error) {
         console.error('Failed to fetch category children:', error);
-        return [];
+        throw error;
     }
 }

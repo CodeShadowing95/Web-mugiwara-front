@@ -141,7 +141,7 @@ const FermierLayout = ({ children }: { children: React.ReactNode }) => {
       )}
 
       {!isAuthPage && <Sidebar hasFarms={hasFarms} />}
-      <div className="flex-1 flex flex-col w-full lg:w-[calc(100%-16rem)]">
+      <div className={`flex-1 flex flex-col w-full ${isAuthPage ? '' : 'lg:w-[calc(100%-16rem)'} ]`}>
         <div className={`${!isAuthPage && 'ml-64'}`}>
           {!isAuthPage && hasFarms && <Navbar />}
           {children}

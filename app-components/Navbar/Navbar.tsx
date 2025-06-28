@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react'
 import { MapPin, Search, X } from 'lucide-react'
 import SearchbarNav from './SearchbarNav'
-import LangSelector from './LangSelector'
 import AccountDropdown from './AccountDropdown'
 import CustomCart from './CustomCart'
 import FarmNav from '../FarmNav'

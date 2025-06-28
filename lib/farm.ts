@@ -5,6 +5,17 @@ export const getFarms = async () => {
 
     try {
         const response = await fetch(url, options);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server response:', {
+                status: response.status,
+                statusText: response.statusText,
+                body: errorText
+            });
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
         return data;
     } catch (error) {

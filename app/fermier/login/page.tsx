@@ -30,6 +30,12 @@ export default function FermierLoginPage() {
         setSuccess("")
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL
+            console.log("API URL:", apiUrl)
+        
+            if (!apiUrl) {
+                throw new Error("API URL non définie")
+            }
+        
             const response = await fetch(`${apiUrl}/api/login_check`, {
                 method: "POST",
                 headers: {
@@ -40,7 +46,12 @@ export default function FermierLoginPage() {
                     password: password,
                 }),
             })
+        
             if (!response.ok) {
+                console.log("Status:", response.status)
+                const text = await response.text()
+                console.log("Response:", text)
+        
                 setIsLoading(false)
                 if (response.status === 401) {
                     setError("Identifiants invalides.")
@@ -49,21 +60,17 @@ export default function FermierLoginPage() {
                 }
                 return
             }
+        
             const res = await response.json()
-            if (res.token) {
-                localStorage.setItem("jwt_token", res.token)
-                await refreshUser(true);
-                setSuccess("Connexion réussie ! Redirection...")
-                setTimeout(() => {
-                    router.push("/fermier")
-                }, 1200)
-            } else {
-                setError("Erreur lors de la récupération du token.")
-            }
+            console.log("Login result:", res)
+            // etc.
         } catch (err) {
+            console.error("Erreur fetch:", err)
             setError("Erreur de connexion. Veuillez réessayer.")
+        } finally {
+            setIsLoading(false)
         }
-        setIsLoading(false)
+        
     }
 
     return (
@@ -125,12 +132,12 @@ export default function FermierLoginPage() {
                 style={{ backgroundColor: "var(--farm-beige-light)" }}
             >
                 <div className="w-full max-w-md animate-fade-in">
-                    <div className="mb-2 text-center flex justify-center items-center gap-2">
+                    {/* <div className="mb-2 text-center flex justify-center items-center gap-2">
                         <ArrowLeft className="w-4 h-4 text-gray-600" />
                         <Link href="/" className="text-sm text-gray-600 hover:underline">
                             Retour à l'accueil
                         </Link>
-                    </div>
+                    </div> */}
 
                     <Card className="border-0 shadow-2xl bg-white">
                         <CardHeader className="space-y-1 pb-8">
