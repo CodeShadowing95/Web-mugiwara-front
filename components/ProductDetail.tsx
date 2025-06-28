@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/app-components/ThemeToggle"
+import {Product, Tag} from "@/types"
 
 // Types
 type ProductImage = {
@@ -101,12 +102,30 @@ type RecipeProps = {
   authorImage?: string
 }
 
-export default function ProductDetail() {
+interface ProductDetailProps {
+  product2?: Product
+}
+
+export default function ProductDetail({ product2 }: ProductDetailProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [isZoomed, setIsZoomed] = useState(false)
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
   const [isLiked, setIsLiked] = useState(false)
+
+  // Si aucun produit n'est fourni, afficher un message de chargement ou d'erreur
+  if (!product2) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600 mx-auto"></div>
+          <p className="mt-4 text-lg">Chargement du produit...</p>
+        </div>
+      </div>
+    )
+  }
+
+  const prod = product2.product ?? product2;
 
   // Données du produit (normalement récupérées depuis une API)
   const product: ProductProps = {
@@ -307,7 +326,13 @@ export default function ProductDetail() {
             </li>
             <li>
               <Link href="#" className="hover:text-farm-green-dark dark:hover:text-white">
-                Catégorie_produit
+                {prod?.category?.map((cat: any) => (
+                  <li key={cat.id}>
+                    <Link href="#" className="hover:text-farm-green-dark dark:hover:text-white">
+                      {cat.name}
+                    </Link>
+                  </li>
+                ))}
               </Link>
             </li>
             <li>
@@ -345,7 +370,16 @@ export default function ProductDetail() {
 
               {/* Badges */}
               <div className="absolute top-4 left-4 flex flex-col space-y-2 z-10">
-                {product.isBio && (
+                {Array.isArray(prod.tags) && prod.tags.map((tag: Tag, index: number) => (
+                    <Badge
+                        key={index}
+                        variant="outline"
+                        className={`px-3 py-1 flex items-center ${tag.bgColor ? `bg-[${tag.bgColor}]` : ''} ${tag.textColor ? `text-[${tag.textColor}]` : ''}`}
+                    >
+                      {tag.name}
+                    </Badge>
+                ))}
+                {/*{product.isBio && (
                   <Badge className="bg-farm-green text-white px-3 py-1 flex items-center">
                     <Leaf size={14} className="mr-1" />
                     Bio
@@ -358,7 +392,7 @@ export default function ProductDetail() {
                   </Badge>
                 )}
                 {product.isSeasonal && <Badge className="bg-farm-green-light text-white px-3 py-1">De saison</Badge>}
-                {product.oldPrice && <Badge className="bg-red-500 text-white px-3 py-1">Promo</Badge>}
+                {product.oldPrice && <Badge className="bg-red-500 text-white px-3 py-1">Promo</Badge>}*/}
               </div>
 
               {/* Navigation des images */}
@@ -416,43 +450,43 @@ export default function ProductDetail() {
           {/* Informations produit */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-farm-green-dark dark:text-white mb-2">{product.name}</h1>
-              <p className="text-farm-green dark:text-gray-300 mb-4">{product.description}</p>
+              <h1 className="text-3xl font-bold text-farm-green-dark dark:text-white mb-2">{prod?.name ?? 'Nom du produit non disponible'}</h1>
+              <p className="text-farm-green dark:text-gray-300 mb-4">{prod?.description ?? 'Description non disponible'}</p>
 
               <div className="flex items-center space-x-4 mb-4">
                 <div className="flex items-center">
-                  {renderRatingStars(product.rating)}
+                  {renderRatingStars(prod?.rating || 0)}
                   <span className="ml-2 text-farm-green dark:text-gray-300">
-                    {product.rating.toFixed(1)} ({product.reviewCount} avis)
+                    {(prod?.rating || 0).toFixed(1)} ({prod?.reviewCount || 0} avis)
                   </span>
                 </div>
               </div>
 
               <div className="flex items-baseline space-x-3 mb-4">
                 <span className="text-3xl font-bold text-farm-green-dark dark:text-white">
-                  {product.price.toFixed(2)} €
+                  {(prod?.price ?? 0).toFixed(2)} €
                 </span>
-                <span className="text-sm text-farm-green dark:text-gray-400">/ {product.unit}</span>
-                {product.oldPrice && (
+                <span className="text-sm text-farm-green dark:text-gray-400">{prod?.unitPrice} / {prod?.unity?.symbol ?? ''}</span>
+                {prod?.oldPrice && (
                   <span className="text-lg line-through text-gray-500 dark:text-gray-500">
-                    {product.oldPrice.toFixed(2)} €
+                    {prod.oldPrice.toFixed(2)} €
                   </span>
                 )}
               </div>
 
               <div className="flex items-center space-x-2 text-farm-green dark:text-gray-300 mb-6">
                 <MapPin size={16} className="text-farm-green-light dark:text-farm-green-light" />
-                <span>Origine : {product.origin}</span>
+                <span>Origine : {prod?.origin}</span>
               </div>
 
               <div className="flex flex-wrap gap-2 mb-6">
-                {product.tags.map((tag, index) => (
+                {Array.isArray(prod.tags) && prod.tags.map((tag: Tag, index: number) => (
                   <Badge
                     key={index}
                     variant="outline"
                     className="bg-farm-beige dark:bg-gray-800 text-farm-green dark:text-gray-300 border-farm-beige-dark dark:border-gray-700"
                   >
-                    {tag}
+                    {tag.name}
                   </Badge>
                 ))}
               </div>
@@ -683,22 +717,24 @@ export default function ProductDetail() {
           <TabsContent value="description" className="pt-6">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-farm-beige-dark dark:border-gray-700">
               <h2 className="text-xl font-bold text-farm-green-dark dark:text-white mb-4">À propos de ce produit</h2>
-              <p className="text-farm-green dark:text-gray-300 mb-4">{product.longDescription}</p>
+              <p className="text-farm-green dark:text-gray-300 mb-4">{prod?.longDescription}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                <div className="bg-farm-beige-light dark:bg-gray-900 p-4 rounded-lg">
-                  <h3 className="font-medium text-farm-green-dark dark:text-white mb-2">Conservation</h3>
-                  <p className="text-sm text-farm-green dark:text-gray-400">
-                    Conservez vos tomates à température ambiante, jamais au réfrigérateur. Elles se garderont ainsi 4 à
-                    5 jours en préservant toutes leurs saveurs.
-                  </p>
-                </div>
-                <div className="bg-farm-beige-light dark:bg-gray-900 p-4 rounded-lg">
-                  <h3 className="font-medium text-farm-green-dark dark:text-white mb-2">Conseils d'utilisation</h3>
-                  <p className="text-sm text-farm-green dark:text-gray-400">
-                    Idéales en salade avec un filet d'huile d'olive et du basilic frais. Parfaites également pour
-                    réaliser des sauces, des tartes ou des gratins.
-                  </p>
-                </div>
+                {prod?.conservation && (
+                  <div className="bg-farm-beige-light dark:bg-gray-900 p-4 rounded-lg">
+                    <h3 className="font-medium text-farm-green-dark dark:text-white mb-2">Conservation</h3>
+                    <p className="text-sm text-farm-green dark:text-gray-400">
+                      {prod.conservation}
+                    </p>
+                  </div>
+                )}
+                {prod?.preparationAdvice && (
+                  <div className="bg-farm-beige-light dark:bg-gray-900 p-4 rounded-lg">
+                    <h3 className="font-medium text-farm-green-dark dark:text-white mb-2">Conseils d'utilisation</h3>
+                    <p className="text-sm text-farm-green dark:text-gray-400">
+                      {prod.preparationAdvice}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
@@ -718,15 +754,15 @@ export default function ProductDetail() {
                 </div>
                 <div className="md:w-3/4">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-farm-green-dark dark:text-white">{product.producer.name}</h2>
+                    <h2 className="text-xl font-bold text-farm-green-dark dark:text-white">{prod.farm?.name}</h2>
                     <Badge className="bg-farm-orange text-white flex items-center">
-                      <MapPin size={12} className="mr-1" />À {product.producer.distance}
+                      <MapPin size={12} className="mr-1" />À {prod.farm?.city}
                     </Badge>
                   </div>
-                  <p className="text-farm-green dark:text-gray-300 mb-4">{product.producer.description}</p>
+                  <p className="text-farm-green dark:text-gray-300 mb-4">{prod.farm?.description}</p>
                   <div className="flex items-center text-farm-green dark:text-gray-300 mb-6">
                     <MapPin size={16} className="mr-2 text-farm-green-light" />
-                    {product.producer.location}
+                    {prod.farm?.city}
                   </div>
                   <Button className="bg-farm-green-light hover:bg-farm-green text-white">
                     Voir tous les produits de ce producteur

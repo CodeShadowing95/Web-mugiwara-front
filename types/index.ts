@@ -47,13 +47,19 @@ export interface Product {
     id: number;
     name: string;
     description: string;
+    longDescription: string;
     price: number;
     unit: string;
+    unitPrice: number;
+    unity: Unity;
+    origin: string;
     featured: boolean;
     stock: number;
     category: Category;
+    conservation: string;
+    preparationAdvice: string;
     imageUrl?: string;
-    farmId: number;
+    farm: Ferme;
     tags?: Tag[];
     medias?:[]
 }
@@ -64,4 +70,10 @@ export interface Tag {
     bgColor: string;
     textColor: string;
     slug: string;
+}
+
+export interface Unity {
+    id: number,
+    name: string;
+    symbol: string;
 }
