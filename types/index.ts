@@ -40,7 +40,7 @@ export interface Category {
     name: string;
     description?: string;
     parent?: any;
-    children: Array<{ id: number; name: string; description?: string; parent?: any }>;
+    children: Category[];
 }
 
 export interface Product {

@@ -373,19 +373,17 @@ export default function CategoryPage() {
                 {category?.description || "..."}
               </p>
               <div className="flex flex-wrap gap-2">
-                <span className="bg-[#5a7052] dark:bg-emerald-700 text-[#f7f4eb] dark:text-emerald-50 px-3 py-1 rounded-full text-sm font-bold flex items-center">
-                  {category?.name}
-                </span>
-                <span className="bg-[#f7f4eb] dark:bg-zinc-800 text-[#5a7052] dark:text-zinc-100 px-3 py-1 rounded-full text-sm font-medium flex items-center">
-                  <Leaf
-                    size={14}
-                    className="mr-1 text-[#8fb573] dark:text-emerald-400"
-                  />
-                  Bio
-                </span>
-                <span className="bg-[#f7f4eb] dark:bg-zinc-800 text-[#5a7052] dark:text-zinc-100 px-3 py-1 rounded-full text-sm font-medium">
-                  Local
-                </span>
+                {category?.children?.map((child) => {
+                    return (
+                        <Link
+                        key={child.id}
+                        href={`/category?item=${child.id}`}
+                        className="bg-[#f7f4eb] dark:bg-zinc-800 text-[#5a7052] dark:text-zinc-100 px-3 py-1 rounded-full text-sm font-medium hover:bg-[#e8e1d4] dark:hover:bg-zinc-700 transition-colors"
+                        >
+                        {child.name}
+                        </Link>
+                    );
+                })}
               </div>
             </div>
 
