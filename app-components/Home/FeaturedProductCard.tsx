@@ -22,7 +22,15 @@ const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ product }) =>
       {/* Image produit */}
       <Link href={`/product/${product.id}`} className="relative w-32 h-32 md:w-40 md:h-40 flex-shrink-0 rounded-xl overflow-hidden shadow border border-farm-green-light dark:border-farm-green-dark group-hover:scale-105 transition-transform duration-300">
         <Image
-          src={"/placeholder.png"}
+          src={(() => {
+            if (Array.isArray(product.medias)) {
+              const img = product.medias.find((m: any) => m.mediaType?.slug === "image" && m.publicPath);
+              if (img && typeof img.publicPath === "string") {
+                return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/${img.publicPath.replace(/^public\//, "")}`;
+              }
+            }
+            return "/vegetable.png";
+          })()}
           alt={product.name}
           fill
           className="object-cover w-full h-full"
@@ -41,12 +49,11 @@ const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ product }) =>
         <h2 className="text-xl md:text-2xl font-bold text-farm-green-dark dark:text-white mb-1 line-clamp-2">
           {product.name}
         </h2>
-        {Array.isArray(product.category) && product.category.length > 0 && (
-          <div className="text-xs text-farm-green dark:text-gray-300 mb-1 font-medium">
-            {product.category.map((cat, i, arr) => (
-              <span key={cat.id}>
-                {cat.name}
-                {i < arr.length - 1 ? ', ' : ''}
+        {Array.isArray(product.categories) && product.categories.length > 0 && (
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+            {product.categories.map((cat, i, arr) => (
+              <span key={cat.id || i}>
+                {cat.name}{i < arr.length - 1 ? ', ' : ''}
               </span>
             ))}
           </div>
@@ -68,7 +75,7 @@ const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ product }) =>
             </div>
           )}*/}
         </div>
-        <Link href={`/product/${product.id}`} className="inline-block mt-4 px-5 py-2 rounded-lg bg-farm-orange text-white font-bold text-sm shadow hover:bg-farm-green-dark transition-colors">
+        <Link href={`/product/${product.id}`} className="inline-block mt-4 px-5 py-2 rounded-lg bg-farm-orange text-white font-bold text-sm shadow hover:bg-farm-green-dark transition-colors w-fit">
           Découvrir
         </Link>
       </div>

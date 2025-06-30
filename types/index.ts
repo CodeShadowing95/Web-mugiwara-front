@@ -25,11 +25,18 @@ export interface Farm {
     color?: string;
 }
 
+export interface User {
+    id: number;
+    uuid: number;
+    roles: string[];
+    persona: Persona;
+}
+
 export interface Persona {
     user_id: number;
     email: string;
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     address: string;
     zip_code: number;
     city: string;
@@ -55,23 +62,24 @@ export interface Product {
     unit: string;
     unitPrice: number;
     unity: Unity;
+    oldPrice: number;
     origin: string;
     featured: boolean;
     stock: number;
-    category: Category;
+    categories: Category[];
     conservation: string;
     preparationAdvice: string;
     imageUrl?: string;
     reviews: Review[];
     farm: Farm;
     tags?: Tag[];
-    medias?:[]
+    medias?: Media[];
 }
 
 export interface Review {
     id: number;
     productId: number;
-    userId: number;
+    user: User;
     rating: number;
     comment: string;
     createdAt: string;
@@ -90,4 +98,21 @@ export interface Unity {
     id: number,
     name: string;
     symbol: string;
+}
+
+export interface MediaType {
+    id: number;
+    name: string;
+    slug: string;
+}
+
+export interface Media {
+    id: number;
+    realName: string;
+    realPath: string;
+    publicPath: string;
+    mime: string;
+    status: string;
+    uploadedAt: string;
+    mediaType: MediaType;
 }
