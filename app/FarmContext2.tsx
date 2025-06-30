@@ -44,7 +44,7 @@ export function FarmProvider2({ children }: { children: ReactNode }) {
       const user = userInStorage ? JSON.parse(userInStorage) : null;
 
       if (!token) {
-        throw new Error('Veuillez vous connecter pour accéder à vos fermes');
+        return;
       }
 
       if (!user?.id) {
@@ -67,9 +67,9 @@ export function FarmProvider2({ children }: { children: ReactNode }) {
 
       const data = await res.json();
       const farmData = data || [];
-      
+
       setFarms(farmData);
-      
+
       // Conserver la ferme sélectionnée si elle existe toujours dans la liste
       if (selectedFarm) {
         const farmStillExists = farmData.find((farm: Farm) => farm.id === selectedFarm.id);
@@ -98,12 +98,12 @@ export function FarmProvider2({ children }: { children: ReactNode }) {
     const loadInitialData = async () => {
       const storedFarms = localStorage.getItem('farms');
       const storedSelectedFarm = localStorage.getItem('selectedFarm');
-      
+
       if (storedFarms) {
         try {
           const parsedFarms = JSON.parse(storedFarms);
           setFarms(parsedFarms);
-          
+
           if (storedSelectedFarm) {
             const parsedSelectedFarm = JSON.parse(storedSelectedFarm);
             setSelectedFarm(parsedSelectedFarm);

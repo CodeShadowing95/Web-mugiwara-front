@@ -41,7 +41,6 @@ export function FarmProvider({ children }: { children: ReactNode }) {
 
     const token = localStorage.getItem('jwt_token');
     if (!token) {
-      setError('Veuillez vous connecter pour accéder à vos fermes');
       return;
     }
 
@@ -72,15 +71,15 @@ export function FarmProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await res.json();
-      
+
       // Mise à jour du state en fonction des données reçues
       const farmData = data || [];
       setFarms(farmData);
-      
+
       if (farmData.length > 0) {
         const newFarm = farmData[0];
         setSelectedFarm(newFarm);
-        
+
         // Si c'est une nouvelle ferme, mettre à jour le cache
         if (isNewFarm) {
           localStorage.setItem('newFarmData', JSON.stringify(newFarm));
@@ -119,7 +118,7 @@ export function FarmProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('newFarmData');
       }
     }
-    
+
     // Rafraîchir les données depuis l'API
     refreshFarms();
   }, [refreshFarms]);

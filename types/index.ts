@@ -50,13 +50,14 @@ export interface Category {
     name: string;
     description?: string;
     parent?: any;
+    thumbnail: Media;
     children: Category[];
 }
 
 export interface Product {
     id: number;
     name: string;
-    description: string;
+    shortDescription: string;
     longDescription: string;
     price: number;
     unit: string;
