@@ -22,11 +22,18 @@ export interface Ferme {
     galleryImages: string[];
 }
 
+export interface User {
+    id: number;
+    uuid: number;
+    roles: string[];
+    persona: Persona;
+}
+
 export interface Persona {
     user_id: number;
     email: string;
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     address: string;
     zip_code: number;
     city: string;
@@ -52,6 +59,7 @@ export interface Product {
     unit: string;
     unitPrice: number;
     unity: Unity;
+    oldPrice: number;
     origin: string;
     featured: boolean;
     stock: number;
@@ -68,7 +76,7 @@ export interface Product {
 export interface Review {
     id: number;
     productId: number;
-    userId: number;
+    user: User;
     rating: number;
     comment: string;
     createdAt: string;

@@ -408,7 +408,7 @@ export default function CategoryPage() {
                 ) : error ? (
                   <div className="text-center text-red-500 py-8">{error}</div>
                 ) : (
-                  <div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {featuredProducts.map((produit) => (
                       <FeaturedProductCard key={produit.id} product={produit} />
                     ))}
@@ -465,7 +465,15 @@ export default function CategoryPage() {
                         )}
                         <div className="relative mb-3 bg-[#f7f4eb] dark:bg-zinc-800 rounded-lg p-4 flex items-center justify-center h-48">
                           <img
-                            src={produit.imageUrl || "vegetable.png"}
+                            src={(() => {
+                              if (Array.isArray(produit.medias)) {
+                                const img = produit.medias.find((m: any) => m.mediaType?.slug === "image" && m.publicPath);
+                                if (img && typeof img.publicPath === "string") {
+                                  return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/${img.publicPath.replace(/^public\//, "")}`;
+                                }
+                              }
+                              return "/vegetable.png";
+                            })()}
                             alt={produit.name}
                             className="h-48 w-48 object-contain transition-transform group-hover:scale-105"
                           />

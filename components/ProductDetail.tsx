@@ -27,79 +27,8 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/app-components/ThemeToggle"
-import {Product, Tag} from "@/types"
+import { Product, Review, Tag, User } from "@/types"
 import { getProductReviews } from "@/lib/review"
-
-// Types
-type ProductImage = {
-  id: number
-  src: string
-  alt: string
-}
-
-type ProductReview = {
-  id: number
-  author: string
-  rating: number
-  date: string
-  comment: string
-  avatar?: string
-}
-
-type NutritionFact = {
-  name: string
-  value: string
-  percent?: number
-}
-
-type ProductProps = {
-  id: number
-  name: string
-  description: string
-  longDescription: string
-  price: number
-  oldPrice?: number
-  unit: string
-  origin: string
-  producer: {
-    name: string
-    location: string
-    description: string
-    image: string
-    distance: string
-  }
-  images: ProductImage[]
-  tags: string[]
-  isBio: boolean
-  isLocal: boolean
-  isSeasonal: boolean
-  stock: number
-  rating: number
-  reviewCount: number
-  reviews: ProductReview[]
-  nutritionFacts: NutritionFact[]
-  relatedProducts: {
-    id: number
-    name: string
-    image: string
-    price: number
-    unit: string
-  }[]
-  recipes: RecipeProps[]
-}
-
-type RecipeProps = {
-  id: number
-  title: string
-  image: string
-  description: string
-  prepTime: string
-  cookTime: string
-  difficulty: "Facile" | "Moyen" | "Difficile"
-  servings: number
-  author: string
-  authorImage?: string
-}
 
 interface ProductDetailProps {
   product2?: Product | {
@@ -117,7 +46,8 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
   const [isZoomed, setIsZoomed] = useState(false)
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
   const [isLiked, setIsLiked] = useState(false)
-  const [reviews, setReviews] = useState<ProductReview[]>([])
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [showAllReviews, setShowAllReviews] = useState(false)
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -137,107 +67,123 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
   const prod = isApiStructure ? (product2 as any).product : product2 as Product;
   const apiData = isApiStructure ? product2 as any : null;
 
-  const product: ProductProps = {
+  console.log(prod.medias);
+
+  const images = Array.isArray(prod.medias) && prod.medias.some((media: any) => media.mediaType?.slug === "image")
+    ? prod.medias.filter((media: any) => media.mediaType?.slug === "image").map((img: any, index: number) => ({
+        id: img.id || index + 1,
+        src: img.publicPath
+          ? `${API_URL}/${img.publicPath.replace(/^public\//, "")}`
+          : "/sample.png",
+        alt: prod?.name || "Image du produit",
+      }))
+    : [
+        { id: 1, src: "/sample.png", alt: "Image du produit" },
+      ];
+
+  const recipes = [
+    {
+      id: 1,
+      title: "Salade de tomates anciennes et burrata",
+      image: "/placeholder.svg?height=300&width=400",
+      description:
+        "Une salade fraîche et colorée, parfaite pour l'été, qui met en valeur la saveur des tomates anciennes.",
+      prepTime: "15 min",
+      cookTime: "0 min",
+      difficulty: "Facile",
+      servings: 4,
+      author: "Chef Marie",
+      authorImage: "/placeholder.svg?height=50&width=50",
+    },
+    {
+      id: 2,
+      title: "Tarte rustique aux tomates anciennes",
+      image: "/placeholder.svg?height=300&width=400",
+      description:
+        "Une tarte savoureuse avec une pâte croustillante et des tomates juteuses, parfumée au basilic et à l'huile d'olive.",
+      prepTime: "20 min",
+      cookTime: "35 min",
+      difficulty: "Moyen",
+      servings: 6,
+      author: "Chef Thomas",
+      authorImage: "/placeholder.svg?height=50&width=50",
+    },
+    {
+      id: 3,
+      title: "Gazpacho de tomates anciennes",
+      image: "/placeholder.svg?height=300&width=400",
+      description:
+        "Une soupe froide rafraîchissante, idéale pour les journées chaudes d'été, qui concentre toutes les saveurs des tomates.",
+      prepTime: "15 min",
+      cookTime: "0 min",
+      difficulty: "Facile",
+      servings: 4,
+      author: "Chef Sophie",
+      authorImage: "/placeholder.svg?height=50&width=50",
+    },
+    {
+      id: 4,
+      title: "Pâtes fraîches sauce tomates anciennes",
+      image: "/placeholder.svg?height=300&width=400",
+      description:
+        "Des pâtes al dente nappées d'une sauce tomate maison aux herbes fraîches et à l'ail, un classique revisité.",
+      prepTime: "10 min",
+      cookTime: "25 min",
+      difficulty: "Moyen",
+      servings: 4,
+      author: "Chef Marco",
+      authorImage: "/placeholder.svg?height=50&width=50",
+    },
+  ];
+
+  const product: Product = {
     id: prod?.id || 1,
     name: prod?.name || "Nom du produit non disponible",
     description: prod?.description || "Description non disponible",
     longDescription: prod?.longDescription || "Description détaillée non disponible",
     price: prod?.price || 0,
-    oldPrice: undefined, // Pas de oldPrice dans le type Product
+    oldPrice: prod?.price || 0,
     unit: prod?.unity?.symbol || "unité",
+    unitPrice: prod?.unitPrice || 0,
+    unity: prod?.unity || { id: 0, name: "Unité", symbol: "u" },
     origin: prod?.origin || "Origine non spécifiée",
-    producer: {
+    featured: prod?.featured || false,
+    categories: prod?.categories || [],
+    conservation: prod?.conservation || "",
+    preparationAdvice: prod?.preparationAdvice || "",
+    farm: {
       name: prod?.farm?.name || "Producteur non spécifié",
-      location: prod?.farm?.city || "Localisation non spécifiée",
       description: prod?.farm?.description || "Description du producteur non disponible",
-      image: prod?.farm?.profileImage || "/placeholder.svg?height=100&width=100",
-      distance: "Distance non spécifiée",
+      farmType: prod?.farm?.farmType || "Type inconnu",
+      certifications: prod?.farm?.certifications || [],
+      address: prod?.farm?.address || "Adresse inconnue",
+      city: prod?.farm?.city || "Localisation non spécifiée",
+      zipCode: prod?.farm?.zipCode || "00000",
+      region: prod?.farm?.region || "Région inconnue",
+      coordinates: prod?.farm?.coordinates || { lat: "0", lng: "0" },
+      phone: prod?.farm?.phone || "",
+      email: prod?.farm?.email || "",
+      website: prod?.farm?.website || "",
+      farmSize: prod?.farm?.farmSize || "",
+      mainProducts: prod?.farm?.mainProducts || [],
+      seasonality: prod?.farm?.seasonality || "",
+      deliveryZones: prod?.farm?.deliveryZones || [],
+      deliveryMethods: prod?.farm?.deliveryMethods || [],
+      minimumOrder: prod?.farm?.minimumOrder || "",
+      profileImage: prod?.farm?.profileImage || "/placeholder.svg?height=100&width=100",
+      galleryImages: prod?.farm?.galleryImages || [],
     },
-    images:
-      Array.isArray(prod.medias) && prod.medias.some((media: any) => media.mediaType?.slug === "image")
-        ? prod.medias
-            .filter((media: any) => media.mediaType?.slug === "image")
-            .map((img: any, index: number) => ({
-              id: img.id || index + 1,
-              src: img.publicPath && img.realPath
-                ? `${API_URL}/${(img.publicPath + '/' + img.realPath).replace('/public', '')}`
-                : "/sample.png",
-              alt: prod?.name || "Image du produit",
-            }))
-        : [
-            { id: 1, src: "/sample.png", alt: "Image du produit" },
-          ],
     tags: prod?.tags?.map((tag: any) => tag.name) || ["Produit"],
-    isBio: prod?.tags?.some((tag: any) => tag.name.toLowerCase().includes('bio')) || false,
-    isLocal: prod?.tags?.some((tag: any) => tag.name.toLowerCase().includes('local')) || false,
-    isSeasonal: prod?.tags?.some((tag: any) => tag.name.toLowerCase().includes('saison')) || false,
     stock: prod?.stock || 0,
-    rating: apiData?.averageRating || 0,
-    reviewCount: apiData?.reviewsCount || 0,
     reviews: apiData?.reviews?.map((review: any) => ({
       id: review.id,
-      author: `${review.user?.persona.firstName} ${review.user?.persona.lastName?.charAt(0)}.`,
+      user: review.user ? review.user : undefined,
+      author: review.user ? `${review.user.persona.firstName} ${review.user.persona.lastName?.charAt(0)}` : "Utilisateur inconnu",
       rating: review.rating,
-      date: new Date(review.createdAt).toLocaleDateString('fr-FR'),
+      date: new Date(review.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }),
       comment: review.comment,
       avatar: "/placeholder.svg?height=50&width=50",
     })) || [],
-    nutritionFacts: Array.isArray(prod?.nutritionFacts) ? prod.nutritionFacts : [],
-    relatedProducts: Array.isArray(prod?.relatedProducts) ? prod.relatedProducts : [],
-    recipes: [
-      {
-        id: 1,
-        title: "Salade de tomates anciennes et burrata",
-        image: "/placeholder.svg?height=300&width=400",
-        description:
-          "Une salade fraîche et colorée, parfaite pour l'été, qui met en valeur la saveur des tomates anciennes.",
-        prepTime: "15 min",
-        cookTime: "0 min",
-        difficulty: "Facile",
-        servings: 4,
-        author: "Chef Marie",
-        authorImage: "/placeholder.svg?height=50&width=50",
-      },
-      {
-        id: 2,
-        title: "Tarte rustique aux tomates anciennes",
-        image: "/placeholder.svg?height=300&width=400",
-        description:
-          "Une tarte savoureuse avec une pâte croustillante et des tomates juteuses, parfumée au basilic et à l'huile d'olive.",
-        prepTime: "20 min",
-        cookTime: "35 min",
-        difficulty: "Moyen",
-        servings: 6,
-        author: "Chef Thomas",
-        authorImage: "/placeholder.svg?height=50&width=50",
-      },
-      {
-        id: 3,
-        title: "Gazpacho de tomates anciennes",
-        image: "/placeholder.svg?height=300&width=400",
-        description:
-          "Une soupe froide rafraîchissante, idéale pour les journées chaudes d'été, qui concentre toutes les saveurs des tomates.",
-        prepTime: "15 min",
-        cookTime: "0 min",
-        difficulty: "Facile",
-        servings: 4,
-        author: "Chef Sophie",
-        authorImage: "/placeholder.svg?height=50&width=50",
-      },
-      {
-        id: 4,
-        title: "Pâtes fraîches sauce tomates anciennes",
-        image: "/placeholder.svg?height=300&width=400",
-        description:
-          "Des pâtes al dente nappées d'une sauce tomate maison aux herbes fraîches et à l'ail, un classique revisité.",
-        prepTime: "10 min",
-        cookTime: "25 min",
-        difficulty: "Moyen",
-        servings: 4,
-        author: "Chef Marco",
-        authorImage: "/placeholder.svg?height=50&width=50",
-      },
-    ],
   }
 
   const handleQuantityChange = (value: number) => {
@@ -306,7 +252,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
               prod.categories.map((cat: any, idx: number) => (
                 <React.Fragment key={cat.id || idx}>
                   <li>
-                    <Link href="#" className="hover:text-farm-green-dark dark:hover:text-white">
+                    <Link href={`/category?item=${cat.id}${cat.slug ? `&q=${cat.slug}` : ''}`} className="hover:text-farm-green-dark dark:hover:text-white">
                       {cat.name}
                     </Link>
                   </li>
@@ -345,8 +291,8 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                 style={isZoomed ? { transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%` } : undefined}
               >
                 <Image
-                  src={product.images[currentImageIndex].src || "/placeholder.svg"}
-                  alt={product.images[currentImageIndex].alt}
+                  src={images[currentImageIndex].src || "/placeholder.svg"}
+                  alt={images[currentImageIndex].alt}
                   width={600}
                   height={600}
                   className="w-full h-full object-contain"
@@ -365,13 +311,13 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                 ))}
               </div>
 
-              {product.images.length > 1 && (
+              {images.length > 1 && (
                 <>
                   <button
                     className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 rounded-full p-2 shadow-md hover:bg-white dark:hover:bg-gray-700 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation()
-                      setCurrentImageIndex((prev) => (prev === 0 ? product.images.length - 1 : prev - 1))
+                      setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
                     }}
                   >
                     <ChevronLeft size={20} className="text-farm-green-dark dark:text-white" />
@@ -380,7 +326,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                     className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 rounded-full p-2 shadow-md hover:bg-white dark:hover:bg-gray-700 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation()
-                      setCurrentImageIndex((prev) => (prev === product.images.length - 1 ? 0 : prev + 1))
+                      setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
                     }}
                   >
                     <ChevronRight size={20} className="text-farm-green-dark dark:text-white" />
@@ -389,9 +335,9 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
               )}
             </div>
 
-            {product.images.length > 1 && (
+            {images.length > 1 && (
               <div className="flex space-x-2 overflow-x-auto pb-2">
-                {product.images.map((image, index) => (
+                {images.map((image: {id: number, src: string, alt: string}, index: number) => (
                   <button
                     key={image.id}
                     className={cn(
@@ -423,9 +369,9 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
 
               <div className="flex items-center space-x-4 mb-4">
                 <div className="flex items-center">
-                  {renderRatingStars(product.rating)}
+                  {renderRatingStars(apiData?.averageRating || 0)}
                   <span className="ml-2 text-farm-green dark:text-gray-300">
-                    {product.rating.toFixed(1)} ({product.reviewCount} avis)
+                    {apiData?.averageRating?.toFixed(1) || '0.0'} ({apiData?.reviewsCount || 0} avis)
                   </span>
                 </div>
               </div>
@@ -560,7 +506,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {product.recipes.map((recipe) => (
+              {recipes.map((recipe: any) => (
                 <motion.div
                   key={recipe.id}
                   whileHover={{ y: -8 }}
@@ -712,8 +658,8 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                 <div className="md:w-1/4 flex-shrink-0">
                   <div className="rounded-xl overflow-hidden bg-farm-beige-light dark:bg-gray-900 p-4 flex items-center justify-center">
                     <Image
-                      src={product.producer.image || "/placeholder.svg"}
-                      alt={product.producer.name}
+                      src={product.farm.profileImage || "/placeholder.svg"}
+                      alt={product.farm.name}
                       width={150}
                       height={150}
                       className="rounded-lg"
@@ -722,15 +668,15 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                 </div>
                 <div className="md:w-3/4">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-farm-green-dark dark:text-white">{product.producer.name}</h2>
+                    <h2 className="text-xl font-bold text-farm-green-dark dark:text-white">{product.farm.name}</h2>
                     <Badge className="bg-farm-orange text-white flex items-center">
-                      <MapPin size={12} className="mr-1" />À {product.producer.location}
+                      <MapPin size={12} className="mr-1" />À {product.farm.city}
                     </Badge>
                   </div>
-                  <p className="text-farm-green dark:text-gray-300 mb-4">{product.producer.description}</p>
+                  <p className="text-farm-green dark:text-gray-300 mb-4">{product.farm.description}</p>
                   <div className="flex items-center text-farm-green dark:text-gray-300 mb-6">
                     <MapPin size={16} className="mr-2 text-farm-green-light" />
-                    {product.producer.location}
+                    {product.farm.city}
                   </div>
                   <Button className="bg-farm-green-light hover:bg-farm-green text-white">
                     Voir tous les produits de ce producteur
@@ -750,29 +696,33 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
               </p>
 
               <div className="border-t border-farm-beige-dark dark:border-gray-700 pt-4">
-                {product.nutritionFacts.map((fact, index) => (
-                  <div
-                    key={index}
-                    className={cn(
-                      "flex items-center justify-between py-3",
-                      index !== product.nutritionFacts.length - 1 &&
-                        "border-b border-farm-beige-dark dark:border-gray-700",
-                    )}
-                  >
-                    <span className="font-medium text-farm-green-dark dark:text-white">{fact.name}</span>
-                    <div className="flex items-center">
-                      <span className="text-farm-green dark:text-gray-300 mr-4">{fact.value}</span>
-                      {fact.percent !== undefined && (
-                        <div className="w-24 bg-farm-beige dark:bg-gray-700 h-2 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-farm-green-light dark:bg-farm-green-light rounded-full"
-                            style={{ width: `${fact.percent}%` }}
-                          />
-                        </div>
+                {Array.isArray(prod.nutritionFacts) && prod.nutritionFacts.length > 0 ? (
+                  prod.nutritionFacts.map((fact: any, index: number) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        "flex items-center justify-between py-3",
+                        index !== prod.nutritionFacts.length - 1 &&
+                          "border-b border-farm-beige-dark dark:border-gray-700",
                       )}
+                    >
+                      <span className="font-medium text-farm-green-dark dark:text-white">{fact.name}</span>
+                      <div className="flex items-center">
+                        <span className="text-farm-green dark:text-gray-300 mr-4">{fact.value}</span>
+                        {fact.percent !== undefined && (
+                          <div className="w-24 bg-farm-beige dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-farm-green-light dark:bg-farm-green-light rounded-full"
+                              style={{ width: `${fact.percent}%` }}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <span className="text-farm-green dark:text-gray-400">Aucune information nutritionnelle disponible.</span>
+                )}
               </div>
 
               <div className="mt-6 flex items-start space-x-3 p-4 bg-farm-beige-light dark:bg-gray-900 rounded-lg">
@@ -789,53 +739,58 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-farm-green-dark dark:text-white">Avis clients</h2>
                 <div className="flex items-center space-x-2">
-                  <div className="flex">{renderRatingStars(product.rating)}</div>
-                  <span className="font-medium text-farm-green-dark dark:text-white">{product.rating.toFixed(1)}</span>
-                  <span className="text-farm-green dark:text-gray-400">({product.reviewCount})</span>
+                  <div className="flex">{renderRatingStars(apiData?.averageRating || 0)}</div>
+                  <span className="font-medium text-farm-green-dark dark:text-white">{apiData?.averageRating?.toFixed(1) || '0.0'}</span>
+                  <span className="text-farm-green dark:text-gray-400">({apiData?.reviewsCount || 0})</span>
                 </div>
               </div>
 
               <div className="space-y-6">
-                {reviews.map((review) => (
-                  <div
-                    key={review.id}
-                    className="border-b border-farm-beige-dark dark:border-gray-700 pb-6 last:border-0"
-                  >
-                    <div className="flex items-start">
-                      <div className="mr-4">
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-farm-beige dark:bg-gray-700">
-                          {review.avatar ? (
-                            <Image
-                              src={review.avatar || "/placeholder.svg"}
-                              alt={review.author}
-                              width={40}
-                              height={40}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-farm-green-light text-white font-medium">
-                              {review.author.charAt(0)}
-                            </div>
-                          )}
+                {(showAllReviews ? reviews : reviews.slice(0, 3)).map((review) => {
+                  const user = review.user;
+                  return (
+                    <div
+                      key={review.id}
+                      className="border-b border-farm-beige-dark dark:border-gray-700 pb-6 last:border-0"
+                    >
+                      <div className="flex items-start">
+                        <div className="mr-4">
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-farm-beige dark:bg-gray-700">
+                            {user ? (
+                              <Image
+                                src={"/placeholder.svg"}
+                                alt={`${user.persona.firstName} ${user.persona.lastName?.charAt(0)}`}
+                                width={40}
+                                height={40}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-farm-green-light text-white font-medium">
+                                Utilisateur inconnu
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-medium text-farm-green-dark dark:text-white">{review.author}</h3>
-                          <span className="text-sm text-farm-green dark:text-gray-400">{review.date}</span>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="font-medium text-farm-green-dark dark:text-white">{user ? `${user.persona.firstName} ${user.persona.lastName?.charAt(0)}.` : "Utilisateur inconnu"}</h3>
+                            <span className="text-sm text-farm-green dark:text-gray-400">{new Date(review.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
+                          </div>
+                          <div className="flex mb-2">{renderRatingStars(review.rating)}</div>
+                          <p className="text-farm-green dark:text-gray-300">{review.comment}</p>
                         </div>
-                        <div className="flex mb-2">{renderRatingStars(review.rating)}</div>
-                        <p className="text-farm-green dark:text-gray-300">{review.comment}</p>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="mt-6">
-                <Button className="w-full bg-farm-beige hover:bg-farm-beige-dark text-farm-green-dark py-3">
-                  Voir tous les avis
-                </Button>
+                {reviews.length > 3 && (
+                  <Button className="w-full bg-farm-beige hover:bg-farm-beige-dark text-farm-green-dark py-3" onClick={() => setShowAllReviews(!showAllReviews)}>
+                    {showAllReviews ? "Voir moins d'avis" : "Voir tous les avis"}
+                  </Button>
+                )}
               </div>
             </div>
           </TabsContent>
@@ -848,7 +803,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
           </h2>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {product.relatedProducts.map((item) => (
+            {/* {product.relatedProducts.map((item) => (
               <motion.div
                 whileHover={{ y: -5 }}
                 transition={{ duration: 0.2 }}
@@ -879,7 +834,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                   </Button>
                 </div>
               </motion.div>
-            ))}
+            ))} */}
           </div>
         </section>
       </main>

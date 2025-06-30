@@ -22,7 +22,15 @@ const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ product }) =>
       {/* Image produit */}
       <Link href={`/product/${product.id}`} className="relative w-32 h-32 md:w-40 md:h-40 flex-shrink-0 rounded-xl overflow-hidden shadow border border-farm-green-light dark:border-farm-green-dark group-hover:scale-105 transition-transform duration-300">
         <Image
-          src={"/placeholder.png"}
+          src={(() => {
+            if (Array.isArray(product.medias)) {
+              const img = product.medias.find((m: any) => m.mediaType?.slug === "image" && m.publicPath);
+              if (img && typeof img.publicPath === "string") {
+                return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/${img.publicPath.replace(/^public\//, "")}`;
+              }
+            }
+            return "/vegetable.png";
+          })()}
           alt={product.name}
           fill
           className="object-cover w-full h-full"
@@ -67,7 +75,7 @@ const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ product }) =>
             </div>
           )}*/}
         </div>
-        <Link href={`/product/${product.id}`} className="inline-block mt-4 px-5 py-2 rounded-lg bg-farm-orange text-white font-bold text-sm shadow hover:bg-farm-green-dark transition-colors">
+        <Link href={`/product/${product.id}`} className="inline-block mt-4 px-5 py-2 rounded-lg bg-farm-orange text-white font-bold text-sm shadow hover:bg-farm-green-dark transition-colors w-fit">
           Découvrir
         </Link>
       </div>
