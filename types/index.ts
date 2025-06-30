@@ -55,14 +55,14 @@ export interface Product {
     origin: string;
     featured: boolean;
     stock: number;
-    category: Category;
+    categories: Category[];
     conservation: string;
     preparationAdvice: string;
     imageUrl?: string;
     reviews: Review[];
     farm: Ferme;
     tags?: Tag[];
-    medias?:[]
+    medias?: Media[];
 }
 
 export interface Review {
@@ -87,4 +87,21 @@ export interface Unity {
     id: number,
     name: string;
     symbol: string;
+}
+
+export interface MediaType {
+    id: number;
+    name: string;
+    slug: string;
+}
+
+export interface Media {
+    id: number;
+    realName: string;
+    realPath: string;
+    publicPath: string;
+    mime: string;
+    status: string;
+    uploadedAt: string;
+    mediaType: MediaType;
 }

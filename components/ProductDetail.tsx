@@ -119,6 +119,8 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
   const [isLiked, setIsLiked] = useState(false)
   const [reviews, setReviews] = useState<ProductReview[]>([])
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
   // Si aucun produit n'est fourni, afficher un message de chargement ou d'erreur
   if (!product2) {
     return (
@@ -131,17 +133,10 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
     )
   }
 
-  // Déterminer si product2 est une structure API ou un Product direct
   const isApiStructure = product2 && typeof product2 === 'object' && 'product' in product2;
   const prod = isApiStructure ? (product2 as any).product : product2 as Product;
   const apiData = isApiStructure ? product2 as any : null;
 
-  // Debug: Afficher les données reçues
-  console.log("ProductDetail - product2:", product2);
-  console.log("ProductDetail - prod:", prod);
-  console.log("ProductDetail - isApiStructure:", isApiStructure);
-
-  // Données du produit (normalement récupérées depuis une API)
   const product: ProductProps = {
     id: prod?.id || 1,
     name: prod?.name || "Nom du produit non disponible",
@@ -158,23 +153,27 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
       image: prod?.farm?.profileImage || "/placeholder.svg?height=100&width=100",
       distance: "Distance non spécifiée",
     },
-    images: product2?.medias?.map((img: any, index: number) => ({
-      id: index + 1,
-      src: img.url || "/sample.png",
-      alt: prod?.name || "Image du produit"
-    })) || [
-      { id: 1, src: "/sample.png", alt: "Image du produit" },
-      { id: 2, src: "/vegetable.png", alt: "Image du produit en gros plan" },
-      { id: 3, src: "/vegetable2.png", alt: "Image du produit" },
-      { id: 4, src: "/sample.png", alt: "Image du produit" },
-    ],
+    images:
+      Array.isArray(prod.medias) && prod.medias.some((media: any) => media.mediaType?.slug === "image")
+        ? prod.medias
+            .filter((media: any) => media.mediaType?.slug === "image")
+            .map((img: any, index: number) => ({
+              id: img.id || index + 1,
+              src: img.publicPath && img.realPath
+                ? `${API_URL}/${(img.publicPath + '/' + img.realPath).replace('/public', '')}`
+                : "/sample.png",
+              alt: prod?.name || "Image du produit",
+            }))
+        : [
+            { id: 1, src: "/sample.png", alt: "Image du produit" },
+          ],
     tags: prod?.tags?.map((tag: any) => tag.name) || ["Produit"],
     isBio: prod?.tags?.some((tag: any) => tag.name.toLowerCase().includes('bio')) || false,
     isLocal: prod?.tags?.some((tag: any) => tag.name.toLowerCase().includes('local')) || false,
     isSeasonal: prod?.tags?.some((tag: any) => tag.name.toLowerCase().includes('saison')) || false,
     stock: prod?.stock || 0,
-    rating: apiData?.averageRating || 4.8, // Utiliser la vraie note moyenne
-    reviewCount: apiData?.reviewsCount || 127, // Utiliser le vrai nombre d'avis
+    rating: apiData?.averageRating || 0,
+    reviewCount: apiData?.reviewsCount || 0,
     reviews: apiData?.reviews?.map((review: any) => ({
       id: review.id,
       author: `${review.user?.persona.firstName} ${review.user?.persona.lastName?.charAt(0)}.`,
@@ -182,61 +181,9 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
       date: new Date(review.createdAt).toLocaleDateString('fr-FR'),
       comment: review.comment,
       avatar: "/placeholder.svg?height=50&width=50",
-    })) || [
-      {
-        id: 1,
-        author: "Marie L.",
-        rating: 5,
-        date: "15/07/2023",
-        comment:
-          "Ces tomates sont absolument délicieuses ! Elles ont un goût authentique qu'on ne trouve pas dans les supermarchés. Je les recommande vivement.",
-        avatar: "/placeholder.svg?height=50&width=50",
-      },
-      {
-        id: 2,
-        author: "Thomas D.",
-        rating: 4,
-        date: "02/07/2023",
-        comment:
-          "Très bonnes tomates, juteuses et parfumées. Le seul petit bémol est qu'elles ne se conservent pas très longtemps, mais c'est normal pour des produits frais et bio.",
-        avatar: "/placeholder.svg?height=50&width=50",
-      },
-      {
-        id: 3,
-        author: "Sophie M.",
-        rating: 5,
-        date: "28/06/2023",
-        comment:
-          "Un délice ! Ces tomates ont un goût incroyable, on sent vraiment la différence avec celles du supermarché. Je ne peux plus m'en passer pour mes salades estivales.",
-        avatar: "/placeholder.svg?height=50&width=50",
-      },
-    ],
-    nutritionFacts: [
-      { name: "Calories", value: "18 kcal", percent: 1 },
-      { name: "Protéines", value: "0.9g", percent: 2 },
-      { name: "Glucides", value: "3.9g", percent: 1 },
-      { name: "Lipides", value: "0.2g", percent: 0 },
-      { name: "Fibres", value: "1.2g", percent: 5 },
-      { name: "Vitamine C", value: "14mg", percent: 17 },
-    ],
-    relatedProducts: [
-      { id: 2, name: "Basilic frais bio", image: "/placeholder.svg?height=200&width=200", price: 1.95, unit: "botte" },
-      { id: 3, name: "Mozzarella di Bufala", image: "/placeholder.svg?height=200&width=200", price: 3.5, unit: "125g" },
-      {
-        id: 4,
-        name: "Huile d'olive extra vierge",
-        image: "/placeholder.svg?height=200&width=200",
-        price: 9.95,
-        unit: "50cl",
-      },
-      {
-        id: 5,
-        name: "Poivrons multicolores bio",
-        image: "/placeholder.svg?height=200&width=200",
-        price: 4.5,
-        unit: "400g",
-      },
-    ],
+    })) || [],
+    nutritionFacts: Array.isArray(prod?.nutritionFacts) ? prod.nutritionFacts : [],
+    relatedProducts: Array.isArray(prod?.relatedProducts) ? prod.relatedProducts : [],
     recipes: [
       {
         id: 1,
@@ -292,9 +239,6 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
       },
     ],
   }
-
-  // Debug: Afficher les données traitées
-  console.log("ProductDetail - product traité:", product);
 
   const handleQuantityChange = (value: number) => {
     if (value >= 1 && value <= product.stock) {
@@ -358,12 +302,17 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
             <li>
               <span className="mx-2">/</span>
             </li>
-            {prod?.category ? (
-              <li>
-                <Link href="#" className="hover:text-farm-green-dark dark:hover:text-white">
-                  {prod.category.name}
-                </Link>
-              </li>
+            {Array.isArray(prod?.categories) && prod.categories.length > 0 ? (
+              prod.categories.map((cat: any, idx: number) => (
+                <React.Fragment key={cat.id || idx}>
+                  <li>
+                    <Link href="#" className="hover:text-farm-green-dark dark:hover:text-white">
+                      {cat.name}
+                    </Link>
+                  </li>
+                  {idx < prod.categories.length - 1 && <li><span className="mx-2">/</span></li>}
+                </React.Fragment>
+              ))
             ) : (
               <li>
                 <span>Catégorie</span>
@@ -380,8 +329,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
 
         {/* Contenu principal */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Galerie d'images - COMMENTÉE POUR LE MOMENT */}
-          {/*
+          {/* Galerie d'images */}
           <div className="space-y-4">
             <div
               className={cn(
@@ -465,26 +413,6 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                 ))}
               </div>
             )}
-          </div>
-          */}
-
-          {/* Placeholder pour la galerie d'images */}
-          <div className="space-y-4">
-            <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-gray-800 aspect-square flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-32 h-32 bg-farm-beige dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Image
-                    src="/sample.png"
-                    alt={prod?.name || "Image du produit"}
-                    width={128}
-                    height={128}
-                    className="rounded-full"
-                  />
-                </div>
-                <p className="text-farm-green dark:text-gray-300 font-medium">{prod?.name || "Nom du produit non disponible"}</p>
-                <p className="text-sm text-farm-green dark:text-gray-400 mt-2">Galerie d'images temporairement désactivée</p>
-              </div>
-            </div>
           </div>
 
           {/* Informations produit */}

@@ -110,7 +110,7 @@ export default function LoginPage() {
               <div
                 className="flex items-center justify-center grow-animation"
               >
-                <img src={"./logo/coco-logo.png"} alt="Marché Fermier Logo" className="w-60" />
+                <img src={"/logo/coco-logo.png"} alt="Marché Fermier Logo" className="w-60" />
               </div>
               <h1 className="text-4xl mt-10 font-bold mb-4" style={{ color: "var(--farm-green-dark)" }}>
                 Connexion

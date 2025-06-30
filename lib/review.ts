@@ -2,7 +2,7 @@
 
 export const getProductReviews = async (productId: number) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    const url = `${apiUrl}/api/reviews/product/${productId}`;
+    const url = `${apiUrl}/api/public/v1/product/${productId}/reviews`;
     const options = { method: 'GET' };
 
     try {

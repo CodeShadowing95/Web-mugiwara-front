@@ -41,12 +41,11 @@ const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ product }) =>
         <h2 className="text-xl md:text-2xl font-bold text-farm-green-dark dark:text-white mb-1 line-clamp-2">
           {product.name}
         </h2>
-        {Array.isArray(product.category) && product.category.length > 0 && (
-          <div className="text-xs text-farm-green dark:text-gray-300 mb-1 font-medium">
-            {product.category.map((cat, i, arr) => (
-              <span key={cat.id}>
-                {cat.name}
-                {i < arr.length - 1 ? ', ' : ''}
+        {Array.isArray(product.categories) && product.categories.length > 0 && (
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+            {product.categories.map((cat, i, arr) => (
+              <span key={cat.id || i}>
+                {cat.name}{i < arr.length - 1 ? ', ' : ''}
               </span>
             ))}
           </div>
