@@ -45,11 +45,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useUser } from '@/app/UserContext';
 
 export default function FermierProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [activeTab, setActiveTab] = useState("personal")
   const [hasFarms, setHasFarms] = useState(false)
+  const { currentUser } = useUser();
+
+  const userInitials = currentUser?.persona.firstName.charAt(0) + currentUser?.persona.lastName.charAt(0).toUpperCase();
 
   // Données du profil
   const [profileData, setProfileData] = useState({
@@ -161,7 +165,7 @@ export default function FermierProfilePage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
-        const data = localStorage.getItem("newFarmData")
+        const data = localStorage.getItem("farms")
         if (data) {
           const farms = JSON.parse(data)
           if (Object.keys(farms).length > 0) {
@@ -179,7 +183,7 @@ export default function FermierProfilePage() {
 
   return (
     <div className="min-h-screen bg-farm-beige-light">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* En-tête du profil */}
         <div className="mb-8">
           <Card className="border-0 shadow-lg bg-gradient-to-r from-[var(--farm-green)] to-[var(--farm-green-dark)] text-white p-0">
@@ -188,10 +192,9 @@ export default function FermierProfilePage() {
                 {/* Avatar */}
                 <div className="relative">
                   <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
-                    <AvatarImage src={profileData.avatar || "/placeholder.svg"} alt={profileData.firstName} />
-                    <AvatarFallback className="bg-farm-orange text-white text-2xl font-bold">
-                      {profileData.firstName[0]}
-                      {profileData.lastName[0]}
+                    <AvatarImage src={profileData.avatar || "/cook.jpg"} alt={profileData.firstName} />
+                    <AvatarFallback className="bg-farm-orange text-white text-4xl font-bold">
+                      {userInitials}
                     </AvatarFallback>
                   </Avatar>
                   <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
@@ -202,7 +205,7 @@ export default function FermierProfilePage() {
                 {/* Informations principales */}
                 <div className="flex-1">
                   <h1 className="text-3xl font-bold mb-2">
-                    {profileData.firstName} {profileData.lastName}
+                    {currentUser?.persona.firstName} {currentUser?.persona.lastName}
                   </h1>
 
                   {!hasFarms ? (
@@ -301,7 +304,7 @@ export default function FermierProfilePage() {
                     </div>
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
-                      Membre depuis {stats.joinDate}
+                      Membre depuis {new Date().getFullYear()}
                     </div>
                     <div className={`flex items-center ${!hasFarms && 'hidden'}`}>
                       <Star className="w-4 h-4 mr-1" />
@@ -434,7 +437,7 @@ export default function FermierProfilePage() {
                     </Label>
                     <Input
                       id="firstName"
-                      value={profileData.firstName}
+                      value={currentUser?.persona.firstName}
                       onChange={(e) => handleInputChange("firstName", e.target.value)}
                       disabled={!isEditing}
                       className="mt-2 h-12"
@@ -446,7 +449,7 @@ export default function FermierProfilePage() {
                     </Label>
                     <Input
                       id="lastName"
-                      value={profileData.lastName}
+                      value={currentUser?.persona.lastName}
                       onChange={(e) => handleInputChange("lastName", e.target.value)}
                       disabled={!isEditing}
                       className="mt-2 h-12"
@@ -463,7 +466,7 @@ export default function FermierProfilePage() {
                     <Input
                       id="email"
                       type="email"
-                      value={profileData.email}
+                      value={currentUser?.persona.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
                       disabled={!isEditing}
                       className="pl-10 h-12"
@@ -480,7 +483,7 @@ export default function FermierProfilePage() {
                     <Input
                       id="phone"
                       type="tel"
-                      value={profileData.phone}
+                      value={currentUser?.persona.phoneNumber}
                       onChange={(e) => handleInputChange("phone", e.target.value)}
                       disabled={!isEditing}
                       className="pl-10 h-12"

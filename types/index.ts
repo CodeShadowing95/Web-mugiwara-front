@@ -1,4 +1,5 @@
-export interface Ferme {
+export interface Farm {
+    id: number;
     name: string;
     description: string;
     farmType: string;
@@ -20,6 +21,8 @@ export interface Ferme {
     minimumOrder: string;
     profileImage: string;
     galleryImages: string[];
+
+    color?: string;
 }
 
 export interface Persona {
@@ -60,7 +63,7 @@ export interface Product {
     preparationAdvice: string;
     imageUrl?: string;
     reviews: Review[];
-    farm: Ferme;
+    farm: Farm;
     tags?: Tag[];
     medias?:[]
 }

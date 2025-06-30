@@ -30,7 +30,7 @@ const Toast = ({
 
         toast.custom((t) => (
             <div className={`relative flex items-center gap-4 p-3 ${className} rounded-xl shadow-lg min-w-[300px] border border-gray-100 dark:border-zinc-800 overflow-hidden`}>
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-emerald-900/30">
                     {icon}
                 </div>
                 <div className="flex-1 font-lato">

@@ -5,8 +5,7 @@ import { genRandKey } from "@/utils/utilities"
 import BannerCarousel from "./BannerCarousel"
 import { getCategories, getCategoryChildren } from "@/lib/productCategory"
 import { getFarms} from "@/lib/farm";
-import {Category} from "@/types";
-import {Ferme} from "@/types";
+import {Category, Farm} from "@/types";
 
 export default async function  FarmHomepage() {
   const productCategories = await getCategories();
@@ -72,7 +71,7 @@ export default async function  FarmHomepage() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-[#3c5a3e] mb-6">Nos producteurs à l'honneur</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {farms.slice(0, 4).map((farm: Ferme) => (
+            {farms.slice(0, 4).map((farm: Farm) => (
               <div
                 key={genRandKey()}
                 className="bg-white rounded-xl overflow-hidden shadow-sm border border-[#e8e1d4] hover:shadow-md transition-shadow group"

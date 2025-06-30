@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
 import { UserProvider } from "@/app/UserContext";
+import { FarmProvider2 } from "@/app/FarmContext2";
 
 export default function RootLayout({
   children,
@@ -36,16 +37,18 @@ export default function RootLayout({
       <body className="max-w-screen min-h-screen bg-[#f9f7f2] dark:bg-zinc-950 overflow-x-hidden"
         cz-shortcut-listen="true">
           <UserProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="light"
-              enableSystem
-              disableTransitionOnChange
-            >
-              {pagesWithoutNavbar && <Navbar />}
-              <Toaster richColors closeButton toastOptions={{ duration: 5000 }} position="top-right" />
-              {children}
-            </ThemeProvider>
+              <FarmProvider2>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="light"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  {pagesWithoutNavbar && <Navbar />}
+                  <Toaster richColors closeButton toastOptions={{ duration: 5000 }} position="top-right" />
+                  {children}
+                </ThemeProvider>
+              </FarmProvider2>
           </UserProvider>
       </body>
     </html>

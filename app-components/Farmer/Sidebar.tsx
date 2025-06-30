@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { BarChart3, ChevronDown, Home, Leaf, LogOut, Package, Settings, ShoppingBasket, Tractor, Truck, Users, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useRouter } from 'next/navigation';
+import { useUser } from '@/app/UserContext';
+
 
 interface SidebarProps {
     hasFarms: boolean
@@ -12,9 +14,12 @@ interface SidebarProps {
 
 const Sidebar = ({ hasFarms } : SidebarProps) => {
     const router = useRouter()
+    const { currentUser } = useUser()
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [selectedMenu, setSelectedMenu] = useState(typeof window !== "undefined" ? localStorage.getItem("selectedMenu") || "dashboard" : "dashboard")
     const [hasRedirected, setHasRedirected] = useState(false) // ← pour éviter double redirection
+
+    const userInitials = currentUser?.persona.firstName.charAt(0) + currentUser?.persona.lastName.charAt(0).toUpperCase();
 
     const handleSelectedMenu = (menu: string) => {
         setSelectedMenu(menu)
@@ -24,6 +29,8 @@ const Sidebar = ({ hasFarms } : SidebarProps) => {
     // Chargement initial
     useEffect(() => {
       const menu = localStorage.getItem('selectedMenu') || 'dashboard'
+      console.log("Actual user: ", currentUser);
+      
       setSelectedMenu(menu)
     }, [])
 
@@ -196,11 +203,11 @@ const Sidebar = ({ hasFarms } : SidebarProps) => {
                         <div className="flex items-center">
                             <Avatar className="h-10 w-10 mr-3">
                                 <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Ferme des Oliviers" />
-                                <AvatarFallback className="bg-farm-orange text-white font-bold">--</AvatarFallback>
+                                <AvatarFallback className="bg-farm-orange text-white font-bold">{userInitials}</AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-white truncate">Aucune ferme</p>
-                                <p className="text-xs text-white/60 truncate">Pierre Durand</p>
+                                <p className="text-xs text-white/60 truncate">{currentUser?.persona.firstName} {currentUser?.persona.lastName}</p>
                             </div>
                             <ChevronDown className="w-4 h-4 ml-2 text-white/60" />
                         </div>

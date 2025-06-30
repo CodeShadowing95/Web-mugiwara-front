@@ -26,11 +26,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useFarm2 } from "@/app/FarmContext2"
 
 export default function AddFarmPage() {
     const [currentStep, setCurrentStep] = useState(1)
     const [isLoading, setIsLoading] = useState(false)
     const [uploadedImages, setUploadedImages] = useState<string[]>([])
+    const [error, setError] = useState<string | null>(null)
+    const { refreshNewFarm, setFarms, setSelectedFarm } = useFarm2()
 
     // États du formulaire
     const [formData, setFormData] = useState({
@@ -43,7 +46,7 @@ export default function AddFarmPage() {
         // Localisation
         address: "",
         city: "",
-        postalCode: "",
+        zipCode: "",
         region: "",
         coordinates: { lat: "", lng: "" },
 
@@ -168,12 +171,96 @@ export default function AddFarmPage() {
     const handleSubmit = async () => {
         setIsLoading(true)
 
-        localStorage.setItem("newFarmData", JSON.stringify(formData))
-        // Simulation de l'envoi des données
-        setTimeout(() => {
-            setIsLoading(false)
+        console.log("Formulaire soumis :", formData);
+
+        // Envoi des données au serveur
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const token = localStorage.getItem("jwt_token");
+        console.log("API URL:", apiUrl);
+        console.log("Token:", token);
+        
+        try {
+            const response = await fetch(`${apiUrl}/api/v1/create-farm`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(formData),
+            })
+
+            if (!response.ok) {
+                console.log("Status:", response.status)
+                const text = await response.text()
+                console.log("Response:", text)
+        
+                setIsLoading(false)
+                if (response.status === 401) {
+                    setError("Identifiants invalides.")
+                } else {
+                    setError("Erreur interne du serveur.")
+                }
+                return
+            }
+
+            const data = await response.json()
+            console.log("Réponse de l'API :", data)
+            // Récupération des fermes existantes du localStorage
+            const existingFarmsStr = localStorage.getItem('farms')
+            const existingFarms = existingFarmsStr ? JSON.parse(existingFarmsStr) : []
+            
+            // Ajout de la nouvelle ferme
+            const updatedFarms = [...existingFarms, data]
+            
+            // Mise à jour du localStorage et du contexte
+            localStorage.setItem('farms', JSON.stringify(updatedFarms))
+            setFarms(updatedFarms)
+            setSelectedFarm(data)
+            refreshNewFarm()
+            // Réinitialisation du formulaire
+            setFormData({
+                name: "",
+                description: "",
+                farmType: "",
+                // certifications: [],
+
+                address: "",
+                city: "",
+                zipCode: "",
+                region: "",
+                coordinates: { lat: "", lng: "" },
+
+                phone: "",
+                email: "",
+                website: "",
+
+                farmSize: "",
+                // productionMethods: [],
+                mainProducts: [],
+                seasonality: "",
+
+                deliveryZones: [],
+                deliveryMethods: [],
+                minimumOrder: "",
+
+                profileImage: "",
+                galleryImages: uploadedImages,
+            })
+
+            // Redirection vers la page de fermier
             window.location.href = "/fermier"
-        }, 2000)
+        } catch (error) {
+            console.error("Erreur lors de l'envoi des données :", error)
+            setIsLoading(false)
+            setError("Une erreur s'est produite lors de l'envoi des données. Veuillez réessayer plus tard.")
+            return
+        }
+
+        // Simulation de l'envoi des données
+        // setTimeout(() => {
+        //     setIsLoading(false)
+        //     window.location.href = "/fermier"
+        // }, 2000)
     }
 
     const nextStep = () => {
@@ -193,7 +280,7 @@ export default function AddFarmPage() {
             case 1:
                 return formData.name && formData.farmType && formData.description
             case 2:
-                return formData.address && formData.city && formData.postalCode
+                return formData.address && formData.city && formData.zipCode
             case 3:
                 return formData.phone && formData.email
             case 4:
@@ -357,14 +444,14 @@ export default function AddFarmPage() {
                                         />
                                     </div>
                                     <div>
-                                        <Label htmlFor="postalCode" className="text-base font-medium text-farm-green-dark">
+                                        <Label htmlFor="zipCode" className="text-base font-medium text-farm-green-dark">
                                             Code postal *
                                         </Label>
                                         <Input
-                                            id="postalCode"
+                                            id="zipCode"
                                             placeholder="13100"
-                                            value={formData.postalCode}
-                                            onChange={(e) => handleInputChange("postalCode", e.target.value)}
+                                            value={formData.zipCode}
+                                            onChange={(e) => handleInputChange("zipCode", e.target.value)}
                                             className="mt-2 h-12"
                                         />
                                     </div>

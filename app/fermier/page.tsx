@@ -9,7 +9,7 @@ export default function FermierDashboard() {
   const [hasFarms, setHasFarms] = useState(false)
 
   useEffect(() => {
-    const farms = typeof window !== "undefined" && JSON.parse(localStorage.getItem("newFarmData") || "{}")
+    const farms = typeof window !== "undefined" && JSON.parse(localStorage.getItem("farms") || "{}")
     if (Object.keys(farms).length > 0) {
       setHasFarms(true)
     }
