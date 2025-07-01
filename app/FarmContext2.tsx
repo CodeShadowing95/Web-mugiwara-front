@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Farm } from '@/types';
+import { toast } from "sonner";
 
 type FarmContext2Type = {
   selectedFarm: Farm | null;
@@ -20,7 +21,8 @@ const FarmContext2 = createContext<FarmContext2Type | undefined>(undefined);
 export function useFarm2() {
   const context = useContext(FarmContext2);
   if (!context) {
-    throw new Error('useFarm2 doit être utilisé dans FarmProvider2');
+    toast.error('useFarm2 doit être utilisé dans FarmProvider2');
+    return null;
   }
   return context;
 }
@@ -48,7 +50,8 @@ export function FarmProvider2({ children }: { children: ReactNode }) {
       }
 
       if (!user?.id) {
-        throw new Error('Informations utilisateur non disponibles');
+        toast.error('Informations utilisateur non disponibles');
+        return;
       }
 
       const res = await fetch(`${apiUrl}/api/public/v1/farms/farmer/${user.id}`, {
@@ -60,9 +63,8 @@ export function FarmProvider2({ children }: { children: ReactNode }) {
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => null);
-        throw new Error(
-          errorData?.message || 'Erreur lors de la récupération des fermes'
-        );
+        toast.error(errorData?.message || 'Erreur lors de la récupération des fermes');
+        return;
       }
 
       const data = await res.json();

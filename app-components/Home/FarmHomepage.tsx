@@ -71,34 +71,40 @@ export default async function  FarmHomepage() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-[#3c5a3e] mb-6">Nos producteurs à l'honneur</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {farms.slice(0, 4).map((farm: Farm) => (
-              <div
-                key={genRandKey()}
-                className="bg-white rounded-xl overflow-hidden shadow-sm border border-[#e8e1d4] hover:shadow-md transition-shadow group"
-              >
-                <div className="aspect-video relative overflow-hidden">
-                  <img
-                    src="farm.jpg"
-                    alt={`${farm.name}`}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                    <div>
-                      <h3 className="font-medium text-white">{farm.name}</h3>
-                      <p className="text-sm text-white/80">{farm.zipCode}, {farm.city}</p>
+            {farms.slice(0, 4).map((farm: Farm) => {
+              const normalizedFarm = farm.name.toLowerCase()
+                .normalize('NFD')
+                .replace(/[^\w\s-]/g, '')
+                .replace(/\s+/g, '-');
+              return (
+                <div
+                  key={genRandKey()}
+                  className="bg-white rounded-xl overflow-hidden shadow-sm border border-[#e8e1d4] hover:shadow-md transition-shadow group"
+                >
+                  <div className="aspect-video relative overflow-hidden">
+                    <img
+                      src="farm.jpg"
+                      alt={`${farm.name}`}
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                      <div>
+                        <h3 className="font-medium text-white">{farm.name}</h3>
+                        <p className="text-sm text-white/80">{farm.zipCode}, {farm.city}</p>
+                      </div>
                     </div>
                   </div>
+                  <div className="p-4">
+                    <p className="text-sm text-[#6b6b6b] mb-3">
+                      {farm.description}
+                    </p>
+                    <Link href={`/farm/${farm.id}?q=${normalizedFarm}`} className="text-sm font-medium text-[#8fb573] hover:text-[#7a9c62] hover:underline">
+                      Découvrir les produits
+                    </Link>
+                  </div>
                 </div>
-                <div className="p-4">
-                  <p className="text-sm text-[#6b6b6b] mb-3">
-                    {farm.description}
-                  </p>
-                  <Link href="#" className="text-sm font-medium text-[#8fb573] hover:text-[#7a9c62] hover:underline">
-                    Découvrir les produits
-                  </Link>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

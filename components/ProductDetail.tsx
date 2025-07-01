@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils"
 import { Product, Review, Tag } from "@/types"
 import { getProductReviews } from "@/lib/review"
 import { getProductsByCategory } from "@/lib/productCategory"
+import Breadcrumb, { BreadcrumbItem } from "@/app-components/Breadcrumb"
+import ProductGallery from "@/app-components/molecules/ProductGallery"
 
 interface ProductDetailProps {
   product2?: Product | {
@@ -210,128 +212,35 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
     <div className="min-h-screen bg-farm-beige-light dark:bg-gray-950 transition-colors duration-200">
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         {/* Fil d'Ariane */}
-        <nav className="text-sm text-farm-green mb-6 dark:text-gray-400">
-          <ol className="flex flex-wrap items-center space-x-2">
-            <li>
-              <Link href="#" className="hover:text-farm-green-dark dark:hover:text-white">
-                Accueil
-              </Link>
-            </li>
-            <li>
-              <span className="mx-2">/</span>
-            </li>
-            {Array.isArray(prod?.categories) && prod.categories.length > 0 ? (
-              prod.categories.map((cat: any, idx: number) => (
-                <React.Fragment key={cat.id || idx}>
-                  <li>
-                    <Link href={`/category?item=${cat.id}${cat.slug ? `&q=${cat.slug}` : ''}`} className="hover:text-farm-green-dark dark:hover:text-white">
-                      {cat.name}
-                    </Link>
-                  </li>
-                  {idx < prod.categories.length - 1 && <li><span className="mx-2">/</span></li>}
-                </React.Fragment>
-              ))
-            ) : (
-              <li>
-                <span>Catégorie</span>
-              </li>
-            )}
-            <li>
-              <span className="mx-2">/</span>
-            </li>
-            <li className="font-medium text-farm-green-dark dark:text-white">
-              {prod?.name || 'Nom_produit'}
-            </li>
-          </ol>
-        </nav>
+        <Breadcrumb
+          items={[
+            { label: "Accueil", href: "#" },
+            ...(
+              Array.isArray(prod?.categories) && prod.categories.length > 0
+                ? prod.categories.map((cat: any) => ({
+                    label: cat.name,
+                    href: `/category?item=${cat.id}${cat.slug ? `&q=${cat.slug}` : ''}`
+                  }))
+                : [{ label: "Catégorie" }]
+            ),
+            { label: prod?.name || 'Nom_produit' }
+          ]}
+        />
 
         {/* Contenu principal */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Galerie d'images */}
-          <div className="space-y-4">
-            <div
-              className={cn(
-                "relative rounded-2xl overflow-hidden bg-white dark:bg-gray-800 aspect-square",
-                isZoomed ? "cursor-zoom-out" : "cursor-zoom-in",
-              )}
-              onClick={() => setIsZoomed(!isZoomed)}
-              onMouseMove={handleMouseMove}
-              onMouseLeave={() => setIsZoomed(false)}
-            >
-              <div
-                className={cn("w-full h-full transition-transform duration-200", isZoomed ? "scale-150" : "scale-100")}
-                style={isZoomed ? { transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%` } : undefined}
-              >
-                <Image
-                  src={images[currentImageIndex].src || "/placeholder.svg"}
-                  alt={images[currentImageIndex].alt}
-                  width={600}
-                  height={600}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-
-              <div className="absolute top-4 left-4 flex flex-col space-y-2 z-10">
-                {Array.isArray(prod.tags) && prod.tags.map((tag: Tag, index: number) => (
-                    <Badge
-                        key={index}
-                        variant="outline"
-                        className={`px-3 py-1 flex items-center ${tag.bgColor ? `bg-[${tag.bgColor}]` : ''} ${tag.textColor ? `text-[${tag.textColor}]` : ''}`}
-                    >
-                      {tag.name}
-                    </Badge>
-                ))}
-              </div>
-
-              {images.length > 1 && (
-                <>
-                  <button
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 rounded-full p-2 shadow-md hover:bg-white dark:hover:bg-gray-700 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
-                    }}
-                  >
-                    <ChevronLeft size={20} className="text-farm-green-dark dark:text-white" />
-                  </button>
-                  <button
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 rounded-full p-2 shadow-md hover:bg-white dark:hover:bg-gray-700 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
-                    }}
-                  >
-                    <ChevronRight size={20} className="text-farm-green-dark dark:text-white" />
-                  </button>
-                </>
-              )}
-            </div>
-
-            {images.length > 1 && (
-              <div className="flex space-x-2 overflow-x-auto pb-2">
-                {images.map((image: {id: number, src: string, alt: string}, index: number) => (
-                  <button
-                    key={image.id}
-                    className={cn(
-                      "relative rounded-lg overflow-hidden border-2 flex-shrink-0 w-20 h-20 transition-all",
-                      index === currentImageIndex
-                        ? "border-farm-green-dark dark:border-farm-green-light"
-                        : "border-transparent hover:border-farm-green/50 dark:hover:border-farm-green-light/50",
-                    )}
-                    onClick={() => handleImageChange(index)}
-                  >
-                    <Image
-                      src={image.src || "/placeholder.svg"}
-                      alt={image.alt}
-                      width={80}
-                      height={80}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <ProductGallery
+            images={images}
+            tags={Array.isArray(prod.tags) ? prod.tags : []}
+            currentImageIndex={currentImageIndex}
+            onImageChange={handleImageChange}
+            isZoomed={isZoomed}
+            zoomPosition={zoomPosition}
+            onZoom={() => setIsZoomed(!isZoomed)}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => setIsZoomed(false)}
+          />
 
           {/* Informations produit */}
           <div className="space-y-6">
@@ -800,53 +709,6 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
             </div>
           </TabsContent>
         </Tabs>
-
-        {/* Produits associés */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-farm-green-dark dark:text-white mb-6">
-            Autres produits de la même catégorie
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {relatedProducts.length === 0 ? (
-              <div className="col-span-full text-farm-green dark:text-gray-300 text-center">Aucun produit associé trouvé.</div>
-            ) : (
-              relatedProducts.map((item) => (
-                <Link key={item.id} href={`/product/${item.id}`} className="block h-full">
-                  <motion.div
-                    whileHover={{ y: -5 }}
-                    transition={{ duration: 0.2 }}
-                    className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-farm-beige-dark dark:border-gray-700 hover:shadow-md transition-shadow h-full"
-                  >
-                    <div className="aspect-square rounded-lg bg-farm-beige-light dark:bg-gray-900 mb-3 flex items-center justify-center p-2">
-                      <Image
-                        src={item.medias && item.medias.length > 0 && item.medias[0].publicPath ? `${API_URL}/${item.medias[0].publicPath.replace(/^public\//, "")}` : "/vegetable2.png"}
-                        alt={item.name}
-                        width={150}
-                        height={150}
-                        className="object-contain max-h-32"
-                      />
-                    </div>
-                    <h3 className="font-medium text-farm-green-dark dark:text-white mb-1 line-clamp-2">{item.name}</h3>
-                    <div className="flex items-center justify-between mt-2">
-                      <div>
-                        <span className="font-bold text-farm-green-dark dark:text-white">{item.price?.toFixed(2) ?? "-"} €</span>
-                        <span className="text-xs text-farm-green dark:text-gray-400 ml-1">/ {item.unity?.symbol ?? "u"}</span>
-                      </div>
-                      <Button
-                        size="sm"
-                        className="bg-farm-green hover:bg-farm-green-dark text-white h-8 w-8 p-0 rounded-full"
-                        tabIndex={-1}
-                        type="button"
-                      >
-                        <Plus size={16} />
-                      </Button>
-                    </div>
-                  </motion.div>
-                </Link>
-              ))
-            )}
-          </div>
-        </section>
       </main>
     </div>
   )

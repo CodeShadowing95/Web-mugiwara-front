@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
 import { UserProvider } from "@/app/UserContext";
 import { FarmProvider2 } from "@/app/FarmContext2";
+import { LocationProvider } from "./LocationContext";
 
 export default function RootLayout({
   children,
@@ -38,16 +39,18 @@ export default function RootLayout({
         cz-shortcut-listen="true">
           <UserProvider>
               <FarmProvider2>
-                <ThemeProvider
-                  attribute="class"
-                  defaultTheme="light"
-                  enableSystem
-                  disableTransitionOnChange
-                >
-                  {pagesWithoutNavbar && <Navbar />}
-                  <Toaster richColors closeButton toastOptions={{ duration: 5000 }} position="top-right" />
-                  {children}
-                </ThemeProvider>
+                <LocationProvider>
+                  <ThemeProvider
+                    attribute="class"
+                    defaultTheme="light"
+                    enableSystem
+                    disableTransitionOnChange
+                  >
+                    {pagesWithoutNavbar && <Navbar />}
+                    <Toaster richColors closeButton toastOptions={{ duration: 5000 }} position="top-right" />
+                    {children}
+                  </ThemeProvider>
+                </LocationProvider>
               </FarmProvider2>
           </UserProvider>
       </body>

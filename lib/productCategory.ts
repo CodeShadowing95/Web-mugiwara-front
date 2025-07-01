@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+
 export const getCategories = async () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL
     const url = `${apiUrl}/api/public/v1/product-categories`;
@@ -12,19 +14,22 @@ export const getCategories = async () => {
         const response = await fetch(url, options);
         
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            toast.error(`Erreur serveur: ${response.status}. Veuillez rafraichir la page`);
+            return null;
         }
         
         const contentType = response.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
-            throw new TypeError("Response is not JSON");
+            toast.error("La réponse du serveur n'est pas au format JSON");
+            return null;
         }
 
         const data = await response.json();
         return data;
     } catch (error) {
         console.error('Failed to fetch categories:', error);
-        throw error;
+        toast.error('Impossible de récupérer les catégories.');
+        return null;
     }
 }
 
@@ -38,7 +43,8 @@ export const getCategoryById = async (categoryId: string) => {
         return data;
     } catch (error) {
         console.error('Failed to fetch category by ID:', error);
-        throw error;
+        toast.error('Impossible de récupérer la catégorie.');
+        return null;
     }
 }
 
@@ -56,19 +62,22 @@ export const getProductsByCategory = async (categoryId: string) => {
         const response = await fetch(url, options);
         
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            toast.error(`Erreur serveur: ${response.status}. Veuillez rafraichir la page`);
+            return null;
         }
 
         const contentType = response.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
-            throw new TypeError("Response is not JSON");
+            toast.error("La réponse du serveur n'est pas au format JSON");
+            return null;
         }
 
         const data = await response.json();
         return data;
     } catch (error) {
         console.error('Failed to fetch products by category:', error);
-        throw error;
+        toast.error('Impossible de récupérer les produits de la catégorie.');
+        return null;
     }
 }
 
@@ -86,12 +95,14 @@ export const getCategoryChildren = async (categoryId: string) => {
         const response = await fetch(url, options);
         
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            toast.error(`Erreur serveur: ${response.status}. Veuillez rafraichir la page`);
+            return null;
         }
 
         const contentType = response.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
-            throw new TypeError("Response is not JSON");
+            toast.error("La réponse du serveur n'est pas au format JSON");
+            return null;
         }
 
         const data = await response.json();
@@ -100,7 +111,8 @@ export const getCategoryChildren = async (categoryId: string) => {
         return [data];
     } catch (error) {
         console.error('Failed to fetch category children:', error);
-        throw error;
+        toast.error('Impossible de récupérer les sous-catégories.');
+        return [];
     }
 }
 
@@ -116,6 +128,7 @@ export const getCategoryParents = async (categoryId: string) => {
         return [data];
     } catch (error) {
         console.error('Failed to fetch category parents:', error);
+        toast.error('Impossible de récupérer les catégories parentes.');
         return [];
     }
 }

@@ -15,8 +15,8 @@ export default function FarmNav() {
     }, []);
 
     const navItems = [
-        { name: "Carte des fermes", href: "#" },
-        { name: "Nos producteurs", href: "#" },
+        { name: "Carte des fermes", href: "/farms/map" },
+        { name: "Nos producteurs", href: "/farms" },
         // { name: "Fruits & Légumes", href: "#" },
         // { name: "Produits laitiers", href: "#" },
         // { name: "Viandes", href: "#" },
