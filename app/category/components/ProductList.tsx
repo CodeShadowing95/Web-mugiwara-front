@@ -6,6 +6,9 @@ import { Product, Tag } from "@/types";
 import React, { useState } from "react";
 import { useLocation } from "@/app/LocationContext";
 import { haversineDistance } from "@/utils/utilities";
+import { useCart } from "@/context/CartContext";
+import Toast from "@/app-components/Toast";
+import { useRouter } from "next/navigation";
 
 interface ProductListProps {
   products: Product[];
@@ -21,6 +24,10 @@ const ProductList: React.FC<ProductListProps> = ({ products, loading, error, tit
   const totalPages = Math.ceil((products?.length || 0) / PRODUCTS_PER_PAGE);
 
   const { lat: userLat, lng: userLng } = useLocation();
+  const { addToCart, loading: cartLoading } = useCart();
+  const [toastData, setToastData] = useState<any>(null);
+  const [addingId, setAddingId] = useState<number | null>(null);
+  const router = useRouter();
 
   type ProductWithDistance = Product & { distance: number | null };
   const sortedProducts: ProductWithDistance[] = userLat !== null && userLng !== null && products
@@ -48,6 +55,38 @@ const ProductList: React.FC<ProductListProps> = ({ products, loading, error, tit
   const handlePrev = () => setPage((p) => Math.max(1, p - 1));
   const handleNext = () => setPage((p) => Math.min(totalPages, p + 1));
   const handlePage = (p: number) => setPage(p);
+
+  const handleAddToCart = async (product: Product, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setAddingId(product.id);
+    // DEBUG: log du token
+    if (typeof window !== "undefined") {
+      console.log("TOKEN:", localStorage.getItem("token"));
+    }
+    try {
+      await addToCart(product.id, 1);
+      setToastData({
+        title: "Ajouté au panier !",
+        description: `${product.name} a été ajouté à votre panier.`,
+        className: "bg-green-50 dark:bg-emerald-900/30",
+        icon: <ShoppingCart className="text-green-600 dark:text-emerald-400" />,
+      });
+    } catch (e: any) {
+      setToastData({
+        title: "Erreur",
+        description: e.message || "Impossible d'ajouter au panier.",
+        className: "bg-red-50 dark:bg-red-900/30",
+        icon: <ShoppingCart className="text-red-600 dark:text-red-400" />,
+      });
+      if (e.message === "Non authentifié") {
+        setTimeout(() => {
+          router.push("/login");
+        }, 1200);
+      }
+    } finally {
+      setAddingId(null);
+    }
+  };
 
   React.useEffect(() => {
     setPage(1); // reset page if products change
@@ -143,9 +182,11 @@ const ProductList: React.FC<ProductListProps> = ({ products, loading, error, tit
                 <Button
                   size="sm"
                   className="bg-[#8fb573] hover:bg-[#7a9c62] dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
+                  onClick={(e) => handleAddToCart(produit, e)}
+                  disabled={addingId === produit.id || produit.stock === 0}
                 >
                   <ShoppingCart size={14} className="mr-1" />
-                  Ajouter
+                  {addingId === produit.id ? "Ajout..." : "Ajouter"}
                 </Button>
               </div>
             </Link>
@@ -184,6 +225,9 @@ const ProductList: React.FC<ProductListProps> = ({ products, loading, error, tit
             </button>
           </div>
         </div>
+      )}
+      {toastData && (
+        <Toast {...toastData} />
       )}
     </div>
   );
