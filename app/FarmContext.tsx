@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Farm } from '@/types';
+import { toast } from "sonner";
 
 type FarmContextType = {
   selectedFarm: Farm | null;
@@ -20,7 +21,8 @@ const FarmContext = createContext<FarmContextType | undefined>(undefined);
 export function useFarm() {
   const context = useContext(FarmContext);
   if (!context) {
-    throw new Error('useFarm doit être utilisé dans FarmProvider');
+    toast.error('useFarm doit être utilisé dans FarmProvider');
+    return null;
   }
   return context;
 }
@@ -41,7 +43,6 @@ export function FarmProvider({ children }: { children: ReactNode }) {
 
     const token = localStorage.getItem('jwt_token');
     if (!token) {
-      setError('Veuillez vous connecter pour accéder à vos fermes');
       return;
     }
 
@@ -54,7 +55,8 @@ export function FarmProvider({ children }: { children: ReactNode }) {
       const user = userInStorage ? JSON.parse(userInStorage) : null;
 
       if (!user?.id) {
-        throw new Error('Informations utilisateur non disponibles');
+        toast.error('Informations utilisateur non disponibles');
+        return;
       }
 
       const res = await fetch(`${apiUrl}/api/public/v1/farms/farmer/${user.id}`, {
@@ -66,21 +68,20 @@ export function FarmProvider({ children }: { children: ReactNode }) {
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => null);
-        throw new Error(
-          errorData?.message || 'Erreur lors de la récupération des fermes'
-        );
+        toast.error(errorData?.message || 'Erreur lors de la récupération des fermes');
+        return;
       }
 
       const data = await res.json();
-      
+
       // Mise à jour du state en fonction des données reçues
       const farmData = data || [];
       setFarms(farmData);
-      
+
       if (farmData.length > 0) {
         const newFarm = farmData[0];
         setSelectedFarm(newFarm);
-        
+
         // Si c'est une nouvelle ferme, mettre à jour le cache
         if (isNewFarm) {
           localStorage.setItem('newFarmData', JSON.stringify(newFarm));
@@ -119,7 +120,7 @@ export function FarmProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('newFarmData');
       }
     }
-    
+
     // Rafraîchir les données depuis l'API
     refreshFarms();
   }, [refreshFarms]);

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { toast } from "sonner";
 
 interface UserContextType {
   currentUser: any;
@@ -11,7 +12,8 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {
-    throw new Error("useUser doit être utilisé dans UserProvider");
+    toast.error("useUser doit être utilisé dans UserProvider");
+    return null;
   }
   return context;
 };

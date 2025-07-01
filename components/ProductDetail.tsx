@@ -19,16 +19,20 @@ import {
   MapPin,
   Info,
   ShoppingCart,
-  ArrowLeft,
   ChevronRightIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
-import { ThemeToggle } from "@/app-components/ThemeToggle"
-import { Product, Review, Tag, User } from "@/types"
+import { Product, Review, Tag } from "@/types"
 import { getProductReviews } from "@/lib/review"
+import { getProductsByCategory } from "@/lib/productCategory"
+import Breadcrumb, { BreadcrumbItem } from "@/app-components/Breadcrumb"
+import ProductGallery from "@/app-components/molecules/ProductGallery"
+import { useCart } from "@/context/CartContext"
+import Toast from "@/app-components/Toast"
+import { useRouter } from "next/navigation"
 
 interface ProductDetailProps {
   product2?: Product | {
@@ -48,6 +52,10 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
   const [isLiked, setIsLiked] = useState(false)
   const [reviews, setReviews] = useState<Review[]>([])
   const [showAllReviews, setShowAllReviews] = useState(false)
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([])
+  const { addToCart, loading: cartLoading } = useCart()
+  const [toastData, setToastData] = useState<any>(null)
+  const router = useRouter()
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -66,8 +74,6 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
   const isApiStructure = product2 && typeof product2 === 'object' && 'product' in product2;
   const prod = isApiStructure ? (product2 as any).product : product2 as Product;
   const apiData = isApiStructure ? product2 as any : null;
-
-  console.log(prod.medias);
 
   const images = Array.isArray(prod.medias) && prod.medias.some((media: any) => media.mediaType?.slug === "image")
     ? prod.medias.filter((media: any) => media.mediaType?.slug === "image").map((img: any, index: number) => ({
@@ -136,58 +142,8 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
     },
   ];
 
-  const product: Product = {
-    id: prod?.id || 1,
-    name: prod?.name || "Nom du produit non disponible",
-    description: prod?.description || "Description non disponible",
-    longDescription: prod?.longDescription || "Description détaillée non disponible",
-    price: prod?.price || 0,
-    oldPrice: prod?.price || 0,
-    unit: prod?.unity?.symbol || "unité",
-    unitPrice: prod?.unitPrice || 0,
-    unity: prod?.unity || { id: 0, name: "Unité", symbol: "u" },
-    origin: prod?.origin || "Origine non spécifiée",
-    featured: prod?.featured || false,
-    categories: prod?.categories || [],
-    conservation: prod?.conservation || "",
-    preparationAdvice: prod?.preparationAdvice || "",
-    farm: {
-      name: prod?.farm?.name || "Producteur non spécifié",
-      description: prod?.farm?.description || "Description du producteur non disponible",
-      farmType: prod?.farm?.farmType || "Type inconnu",
-      certifications: prod?.farm?.certifications || [],
-      address: prod?.farm?.address || "Adresse inconnue",
-      city: prod?.farm?.city || "Localisation non spécifiée",
-      zipCode: prod?.farm?.zipCode || "00000",
-      region: prod?.farm?.region || "Région inconnue",
-      coordinates: prod?.farm?.coordinates || { lat: "0", lng: "0" },
-      phone: prod?.farm?.phone || "",
-      email: prod?.farm?.email || "",
-      website: prod?.farm?.website || "",
-      farmSize: prod?.farm?.farmSize || "",
-      mainProducts: prod?.farm?.mainProducts || [],
-      seasonality: prod?.farm?.seasonality || "",
-      deliveryZones: prod?.farm?.deliveryZones || [],
-      deliveryMethods: prod?.farm?.deliveryMethods || [],
-      minimumOrder: prod?.farm?.minimumOrder || "",
-      profileImage: prod?.farm?.profileImage || "/placeholder.svg?height=100&width=100",
-      galleryImages: prod?.farm?.galleryImages || [],
-    },
-    tags: prod?.tags?.map((tag: any) => tag.name) || ["Produit"],
-    stock: prod?.stock || 0,
-    reviews: apiData?.reviews?.map((review: any) => ({
-      id: review.id,
-      user: review.user ? review.user : undefined,
-      author: review.user ? `${review.user.persona.firstName} ${review.user.persona.lastName?.charAt(0)}` : "Utilisateur inconnu",
-      rating: review.rating,
-      date: new Date(review.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }),
-      comment: review.comment,
-      avatar: "/placeholder.svg?height=50&width=50",
-    })) || [],
-  }
-
   const handleQuantityChange = (value: number) => {
-    if (value >= 1 && value <= product.stock) {
+    if (value >= 1 && value <= prod.stock) {
       setQuantity(value)
     }
   }
@@ -230,142 +186,97 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
     if (prod?.id) {
       getProductReviews(prod.id)
         .then((data) => setReviews(data))
-        .catch(() => setReviews(product.reviews))
+        .catch(() => setReviews(prod.reviews))
     }
   }, [prod?.id])
+
+  useEffect(() => {
+    // Récupération des produits associés
+    const fetchRelated = async () => {
+      if (prod?.categories && prod.categories.length > 0) {
+        try {
+          const categoryId = prod.categories[0].id;
+          const data = await getProductsByCategory(categoryId);
+          if (Array.isArray(data)) {
+            // Exclure le produit courant et limiter à 4
+            const filtered = data.filter((p: any) => p.id !== prod.id).slice(0, 4);
+            setRelatedProducts(filtered);
+          } else {
+            setRelatedProducts([]);
+          }
+        } catch {
+          setRelatedProducts([]);
+        }
+      } else {
+        setRelatedProducts([]);
+      }
+    };
+    fetchRelated();
+  }, [prod?.id, prod?.categories]);
+
+  const handleAddToCart = async () => {
+    try {
+      await addToCart(prod.id, quantity);
+      setToastData({
+        title: "Ajouté au panier !",
+        description: `${prod.name} x${quantity} a été ajouté à votre panier.`,
+        className: "bg-green-50 dark:bg-emerald-900/30",
+        icon: <ShoppingCart className="text-green-600 dark:text-emerald-400" />,
+      });
+    } catch (e: any) {
+      setToastData({
+        title: "Erreur",
+        description: e.message || "Impossible d'ajouter au panier.",
+        className: "bg-red-50 dark:bg-red-900/30",
+        icon: <ShoppingCart className="text-red-600 dark:text-red-400" />,
+      });
+      if (e.message === "Non authentifié") {
+        setTimeout(() => {
+          router.push("/login");
+        }, 1200);
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-farm-beige-light dark:bg-gray-950 transition-colors duration-200">
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         {/* Fil d'Ariane */}
-        <nav className="text-sm text-farm-green mb-6 dark:text-gray-400">
-          <ol className="flex flex-wrap items-center space-x-2">
-            <li>
-              <Link href="#" className="hover:text-farm-green-dark dark:hover:text-white">
-                Accueil
-              </Link>
-            </li>
-            <li>
-              <span className="mx-2">/</span>
-            </li>
-            {Array.isArray(prod?.categories) && prod.categories.length > 0 ? (
-              prod.categories.map((cat: any, idx: number) => (
-                <React.Fragment key={cat.id || idx}>
-                  <li>
-                    <Link href={`/category?item=${cat.id}${cat.slug ? `&q=${cat.slug}` : ''}`} className="hover:text-farm-green-dark dark:hover:text-white">
-                      {cat.name}
-                    </Link>
-                  </li>
-                  {idx < prod.categories.length - 1 && <li><span className="mx-2">/</span></li>}
-                </React.Fragment>
-              ))
-            ) : (
-              <li>
-                <span>Catégorie</span>
-              </li>
-            )}
-            <li>
-              <span className="mx-2">/</span>
-            </li>
-            <li className="font-medium text-farm-green-dark dark:text-white">
-              {prod?.name || 'Nom_produit'}
-            </li>
-          </ol>
-        </nav>
+        <Breadcrumb
+          items={[
+            { label: "Accueil", href: "#" },
+            ...(
+              Array.isArray(prod?.categories) && prod.categories.length > 0
+                ? prod.categories.map((cat: any) => ({
+                    label: cat.name,
+                    href: `/category?item=${cat.id}${cat.slug ? `&q=${cat.slug}` : ''}`
+                  }))
+                : [{ label: "Catégorie" }]
+            ),
+            { label: prod?.name || 'Nom_produit' }
+          ]}
+        />
 
         {/* Contenu principal */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Galerie d'images */}
-          <div className="space-y-4">
-            <div
-              className={cn(
-                "relative rounded-2xl overflow-hidden bg-white dark:bg-gray-800 aspect-square",
-                isZoomed ? "cursor-zoom-out" : "cursor-zoom-in",
-              )}
-              onClick={() => setIsZoomed(!isZoomed)}
-              onMouseMove={handleMouseMove}
-              onMouseLeave={() => setIsZoomed(false)}
-            >
-              <div
-                className={cn("w-full h-full transition-transform duration-200", isZoomed ? "scale-150" : "scale-100")}
-                style={isZoomed ? { transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%` } : undefined}
-              >
-                <Image
-                  src={images[currentImageIndex].src || "/placeholder.svg"}
-                  alt={images[currentImageIndex].alt}
-                  width={600}
-                  height={600}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-
-              <div className="absolute top-4 left-4 flex flex-col space-y-2 z-10">
-                {Array.isArray(prod.tags) && prod.tags.map((tag: Tag, index: number) => (
-                    <Badge
-                        key={index}
-                        variant="outline"
-                        className={`px-3 py-1 flex items-center ${tag.bgColor ? `bg-[${tag.bgColor}]` : ''} ${tag.textColor ? `text-[${tag.textColor}]` : ''}`}
-                    >
-                      {tag.name}
-                    </Badge>
-                ))}
-              </div>
-
-              {images.length > 1 && (
-                <>
-                  <button
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 rounded-full p-2 shadow-md hover:bg-white dark:hover:bg-gray-700 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
-                    }}
-                  >
-                    <ChevronLeft size={20} className="text-farm-green-dark dark:text-white" />
-                  </button>
-                  <button
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 rounded-full p-2 shadow-md hover:bg-white dark:hover:bg-gray-700 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
-                    }}
-                  >
-                    <ChevronRight size={20} className="text-farm-green-dark dark:text-white" />
-                  </button>
-                </>
-              )}
-            </div>
-
-            {images.length > 1 && (
-              <div className="flex space-x-2 overflow-x-auto pb-2">
-                {images.map((image: {id: number, src: string, alt: string}, index: number) => (
-                  <button
-                    key={image.id}
-                    className={cn(
-                      "relative rounded-lg overflow-hidden border-2 flex-shrink-0 w-20 h-20 transition-all",
-                      index === currentImageIndex
-                        ? "border-farm-green-dark dark:border-farm-green-light"
-                        : "border-transparent hover:border-farm-green/50 dark:hover:border-farm-green-light/50",
-                    )}
-                    onClick={() => handleImageChange(index)}
-                  >
-                    <Image
-                      src={image.src || "/placeholder.svg"}
-                      alt={image.alt}
-                      width={80}
-                      height={80}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <ProductGallery
+            images={images}
+            tags={Array.isArray(prod.tags) ? prod.tags : []}
+            currentImageIndex={currentImageIndex}
+            onImageChange={handleImageChange}
+            isZoomed={isZoomed}
+            zoomPosition={zoomPosition}
+            onZoom={() => setIsZoomed(!isZoomed)}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => setIsZoomed(false)}
+          />
 
           {/* Informations produit */}
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl font-bold text-farm-green-dark dark:text-white mb-2">{prod?.name ?? 'Nom du produit non disponible'}</h1>
-              <p className="text-farm-green dark:text-gray-300 mb-4">{prod?.description ?? 'Description non disponible'}</p>
+              <p className="text-farm-green dark:text-gray-300 mb-4">{prod?.shortDescription ?? 'Description non disponible'}</p>
 
               <div className="flex items-center space-x-4 mb-4">
                 <div className="flex items-center">
@@ -381,9 +292,9 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                   {(prod?.price ?? 0).toFixed(2)} €
                 </span>
                 <span className="text-sm text-farm-green dark:text-gray-400">{prod?.unitPrice} / {prod?.unity?.symbol ?? ''}</span>
-                {product.oldPrice && (
+                {prod.oldPrice && prod.oldPrice > prod.price && (
                   <span className="text-lg line-through text-gray-500 dark:text-gray-500">
-                    {product.oldPrice.toFixed(2)} €
+                    {prod.oldPrice.toFixed(2)} €
                   </span>
                 )}
               </div>
@@ -420,24 +331,28 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                   <button
                     className="p-2 bg-farm-beige dark:bg-gray-800 text-farm-green-dark dark:text-white hover:bg-farm-beige-dark dark:hover:bg-gray-700"
                     onClick={() => handleQuantityChange(quantity + 1)}
-                    disabled={quantity >= product.stock}
+                    disabled={quantity >= prod.stock}
                   >
                     <Plus size={16} />
                   </button>
                 </div>
                 <div className="text-farm-green dark:text-gray-300">
                   <span className="text-sm">
-                    {product.stock > 10
+                    {prod.stock > 10
                       ? "En stock"
-                      : product.stock > 0
-                        ? `Plus que ${product.stock} en stock`
+                      : prod.stock > 0
+                        ? `Plus que ${prod.stock} en stock`
                         : "Rupture de stock"}
                   </span>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button className="flex-1 bg-farm-green hover:bg-farm-green-dark text-white py-6 rounded-xl text-base">
+                <Button
+                  className="flex-1 bg-farm-green hover:bg-farm-green-dark text-white py-6 rounded-xl text-base"
+                  onClick={handleAddToCart}
+                  disabled={cartLoading || quantity > prod.stock || prod.stock === 0}
+                >
                   <ShoppingCart className="mr-2 h-5 w-5" />
                   Ajouter au panier
                 </Button>
@@ -505,97 +420,114 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
               <Button className="bg-farm-orange hover:bg-farm-orange-dark text-white">Toutes les recettes</Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {recipes.map((recipe: any) => (
-                <motion.div
-                  key={recipe.id}
-                  whileHover={{ y: -8 }}
-                  transition={{ duration: 0.2 }}
-                  className="bg-farm-beige-light dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group"
-                >
-                  <div className="relative h-48 overflow-hidden">
-                    <Image
-                      // src={recipe.image || "/placeholder.svg"}
-                      src="/sample.png"
-                      alt={recipe.title}
-                      width={400}
-                      height={300}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute top-2 right-2">
-                      <Badge
-                        className={cn(
-                          "px-2 py-1",
-                          recipe.difficulty === "Facile"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            : recipe.difficulty === "Moyen"
-                              ? "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
-                              : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-                        )}
-                      >
-                        {recipe.difficulty}
-                      </Badge>
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                      <div className="relative">
-                        <h3 className="font-medium text-white text-lg leading-tight">{recipe.title}</h3>
+            <div className="relative min-h-[350px]">
+              {/* Grille de recettes en arrière-plan, opacité réduite et interactions désactivées */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 opacity-20 pointer-events-none select-none">
+                {recipes.map((recipe: any) => (
+                  <motion.div
+                    key={recipe.id}
+                    whileHover={{ y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="bg-farm-beige-light dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group"
+                  >
+                    <div className="relative h-48 overflow-hidden">
+                      <Image
+                        // src={recipe.image || "/placeholder.svg"}
+                        src="/sample.png"
+                        alt={recipe.title}
+                        width={400}
+                        height={300}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute top-2 right-2">
+                        <Badge
+                          className={cn(
+                            "px-2 py-1",
+                            recipe.difficulty === "Facile"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                              : recipe.difficulty === "Moyen"
+                                ? "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
+                                : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+                          )}
+                        >
+                          {recipe.difficulty}
+                        </Badge>
+                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+                        <div className="relative">
+                          <h3 className="font-medium text-white text-lg leading-tight">{recipe.title}</h3>
+                        </div>
                       </div>
                     </div>
+
+                    <div className="p-4">
+                      <p className="text-farm-green dark:text-gray-300 text-sm line-clamp-2 mb-4">{recipe.description}</p>
+
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex flex-col items-center">
+                            <span className="text-xs text-farm-green-light dark:text-farm-green-light font-medium">
+                              Préparation
+                            </span>
+                            <span className="text-farm-green-dark dark:text-white font-medium">{recipe.prepTime}</span>
+                          </div>
+                          <div className="flex flex-col items-center">
+                            <span className="text-xs text-farm-green-light dark:text-farm-green-light font-medium">
+                              Cuisson
+                            </span>
+                            <span className="text-farm-green-dark dark:text-white font-medium">{recipe.cookTime}</span>
+                          </div>
+                          <div className="flex flex-col items-center">
+                            <span className="text-xs text-farm-green-light dark:text-farm-green-light font-medium">
+                              Personnes
+                            </span>
+                            <span className="text-farm-green-dark dark:text-white font-medium">{recipe.servings}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-6 h-6 rounded-full overflow-hidden">
+                            <Image
+                              // src={recipe.authorImage || "/cook.jpg"}
+                              src="/cook.jpg"
+                              alt={recipe.author}
+                              width={24}
+                              height={24}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <span className="text-xs text-farm-green dark:text-gray-400">{recipe.author}</span>
+                        </div>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-farm-green-dark text-xs dark:text-white hover:text-farm-green-light dark:hover:text-farm-green-light p-0"
+                        >
+                          Consulter
+                          <ChevronRightIcon className="ml-1 h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Overlay "prochainement disponible" centré */}
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <div className="flex flex-col items-center justify-center bg-farm-beige-light dark:bg-gray-900 rounded-2xl p-8 border border-farm-beige-dark dark:border-gray-700 shadow-xl max-w-md w-full">
+                  <div className="mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-farm-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                   </div>
-
-                  <div className="p-4">
-                    <p className="text-farm-green dark:text-gray-300 text-sm line-clamp-2 mb-4">{recipe.description}</p>
-
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex flex-col items-center">
-                          <span className="text-xs text-farm-green-light dark:text-farm-green-light font-medium">
-                            Préparation
-                          </span>
-                          <span className="text-farm-green-dark dark:text-white font-medium">{recipe.prepTime}</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                          <span className="text-xs text-farm-green-light dark:text-farm-green-light font-medium">
-                            Cuisson
-                          </span>
-                          <span className="text-farm-green-dark dark:text-white font-medium">{recipe.cookTime}</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                          <span className="text-xs text-farm-green-light dark:text-farm-green-light font-medium">
-                            Personnes
-                          </span>
-                          <span className="text-farm-green-dark dark:text-white font-medium">{recipe.servings}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-6 h-6 rounded-full overflow-hidden">
-                          <Image
-                            // src={recipe.authorImage || "/cook.jpg"}
-                            src="/cook.jpg"
-                            alt={recipe.author}
-                            width={24}
-                            height={24}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <span className="text-xs text-farm-green dark:text-gray-400">{recipe.author}</span>
-                      </div>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-farm-green-dark text-xs dark:text-white hover:text-farm-green-light dark:hover:text-farm-green-light p-0"
-                      >
-                        Consulter
-                        <ChevronRightIcon className="ml-1 h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                  <span className="inline-block mb-2 px-3 py-1 rounded-full bg-farm-orange text-white font-semibold text-sm">Prochainement disponible</span>
+                  <h3 className="text-lg font-bold text-farm-green-dark dark:text-white mb-2 text-center">La section recettes arrive bientôt !</h3>
+                  <p className="text-farm-green dark:text-gray-300 text-center">Nous travaillons à vous proposer des idées de recettes savoureuses pour sublimer nos produits. Restez connectés !</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -625,7 +557,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
               value="reviews"
               className="flex-1 py-3 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-farm-green-dark dark:data-[state=active]:border-farm-green-light data-[state=active]:text-farm-green-dark dark:data-[state=active]:text-white"
             >
-              Avis ({product.reviews.length})
+              Avis ({prod.reviews.length})
             </TabsTrigger>
           </TabsList>
           <TabsContent value="description" className="pt-6">
@@ -658,8 +590,8 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                 <div className="md:w-1/4 flex-shrink-0">
                   <div className="rounded-xl overflow-hidden bg-farm-beige-light dark:bg-gray-900 p-4 flex items-center justify-center">
                     <Image
-                      src={product.farm.profileImage || "/placeholder.svg"}
-                      alt={product.farm.name}
+                      src={"/placeholder.svg"}
+                      alt={prod.farm.name}
                       width={150}
                       height={150}
                       className="rounded-lg"
@@ -668,15 +600,15 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                 </div>
                 <div className="md:w-3/4">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-farm-green-dark dark:text-white">{product.farm.name}</h2>
+                    <h2 className="text-xl font-bold text-farm-green-dark dark:text-white">{prod.farm.name}</h2>
                     <Badge className="bg-farm-orange text-white flex items-center">
-                      <MapPin size={12} className="mr-1" />À {product.farm.city}
+                      <MapPin size={12} className="mr-1" />À {prod.farm.city}
                     </Badge>
                   </div>
-                  <p className="text-farm-green dark:text-gray-300 mb-4">{product.farm.description}</p>
+                  <p className="text-farm-green dark:text-gray-300 mb-4">{prod.farm.description}</p>
                   <div className="flex items-center text-farm-green dark:text-gray-300 mb-6">
                     <MapPin size={16} className="mr-2 text-farm-green-light" />
-                    {product.farm.city}
+                    {prod.farm.city}
                   </div>
                   <Button className="bg-farm-green-light hover:bg-farm-green text-white">
                     Voir tous les produits de ce producteur
@@ -686,51 +618,67 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
             </div>
           </TabsContent>
           <TabsContent value="nutrition" className="pt-6">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-farm-beige-dark dark:border-gray-700">
-              <h2 className="text-xl font-bold text-farm-green-dark dark:text-white mb-4">
-                Informations nutritionnelles
-              </h2>
-              <p className="text-farm-green dark:text-gray-300 mb-6">
-                Valeurs nutritionnelles pour 100g de produit. Les pourcentages sont basés sur un régime alimentaire de
-                2000 calories par jour.
-              </p>
-
-              <div className="border-t border-farm-beige-dark dark:border-gray-700 pt-4">
-                {Array.isArray(prod.nutritionFacts) && prod.nutritionFacts.length > 0 ? (
-                  prod.nutritionFacts.map((fact: any, index: number) => (
-                    <div
-                      key={index}
-                      className={cn(
-                        "flex items-center justify-between py-3",
-                        index !== prod.nutritionFacts.length - 1 &&
-                          "border-b border-farm-beige-dark dark:border-gray-700",
-                      )}
-                    >
-                      <span className="font-medium text-farm-green-dark dark:text-white">{fact.name}</span>
-                      <div className="flex items-center">
-                        <span className="text-farm-green dark:text-gray-300 mr-4">{fact.value}</span>
-                        {fact.percent !== undefined && (
-                          <div className="w-24 bg-farm-beige dark:bg-gray-700 h-2 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-farm-green-light dark:bg-farm-green-light rounded-full"
-                              style={{ width: `${fact.percent}%` }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <span className="text-farm-green dark:text-gray-400">Aucune information nutritionnelle disponible.</span>
-                )}
-              </div>
-
-              <div className="mt-6 flex items-start space-x-3 p-4 bg-farm-beige-light dark:bg-gray-900 rounded-lg">
-                <Info size={20} className="text-farm-green-light flex-shrink-0 mt-1" />
-                <p className="text-sm text-farm-green dark:text-gray-400">
-                  Les tomates sont riches en lycopène, un puissant antioxydant, ainsi qu'en vitamines A, C et K. Elles
-                  sont également une bonne source de potassium et de folate.
+            <div className="relative">
+              {/* Maquette nutrition en arrière-plan, opacité réduite et interactions désactivées */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-farm-beige-dark dark:border-gray-700 opacity-20 pointer-events-none select-none">
+                <h2 className="text-xl font-bold text-farm-green-dark dark:text-white mb-4">
+                  Informations nutritionnelles
+                </h2>
+                <p className="text-farm-green dark:text-gray-300 mb-6">
+                  Valeurs nutritionnelles pour 100g de produit. Les pourcentages sont basés sur un régime alimentaire de
+                  2000 calories par jour.
                 </p>
+
+                <div className="border-t border-farm-beige-dark dark:border-gray-700 pt-4">
+                  {Array.isArray(prod.nutritionFacts) && prod.nutritionFacts.length > 0 ? (
+                    prod.nutritionFacts.map((fact: any, index: number) => (
+                      <div
+                        key={index}
+                        className={cn(
+                          "flex items-center justify-between py-3",
+                          index !== prod.nutritionFacts.length - 1 &&
+                            "border-b border-farm-beige-dark dark:border-gray-700",
+                        )}
+                      >
+                        <span className="font-medium text-farm-green-dark dark:text-white">{fact.name}</span>
+                        <div className="flex items-center">
+                          <span className="text-farm-green dark:text-gray-300 mr-4">{fact.value}</span>
+                          {fact.percent !== undefined && (
+                            <div className="w-24 bg-farm-beige dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-farm-green-light dark:bg-farm-green-light rounded-full"
+                                style={{ width: `${fact.percent}%` }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-farm-green dark:text-gray-400">Aucune information nutritionnelle disponible.</span>
+                  )}
+                </div>
+
+                <div className="mt-6 flex items-start space-x-3 p-4 bg-farm-beige-light dark:bg-gray-900 rounded-lg">
+                  <Info size={20} className="text-farm-green-light flex-shrink-0 mt-1" />
+                  <p className="text-sm text-farm-green dark:text-gray-400">
+                    Les tomates sont riches en lycopène, un puissant antioxydant, ainsi qu'en vitamines A, C et K. Elles
+                    sont également une bonne source de potassium et de folate.
+                  </p>
+                </div>
+              </div>
+              {/* Overlay "prochainement disponible" centré */}
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <div className="flex flex-col items-center justify-center bg-farm-beige-light dark:bg-gray-900 rounded-2xl p-8 border border-farm-beige-dark dark:border-gray-700 shadow-xl max-w-md w-full">
+                  <div className="mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-farm-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <span className="inline-block mb-2 px-3 py-1 rounded-full bg-farm-orange text-white font-semibold text-sm">Prochainement disponible</span>
+                  <h3 className="text-lg font-bold text-farm-green-dark dark:text-white mb-2 text-center">La section nutrition arrive bientôt !</h3>
+                  <p className="text-farm-green dark:text-gray-300 text-center">Nous travaillons à vous proposer des informations nutritionnelles détaillées pour chaque produit. Restez connectés !</p>
+                </div>
               </div>
             </div>
           </TabsContent>
@@ -795,49 +743,10 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
             </div>
           </TabsContent>
         </Tabs>
-
-        {/* Produits associés */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-farm-green-dark dark:text-white mb-6">
-            Produits fréquemment achetés ensemble
-          </h2>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {/* {product.relatedProducts.map((item) => (
-              <motion.div
-                whileHover={{ y: -5 }}
-                transition={{ duration: 0.2 }}
-                key={item.id}
-                className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-farm-beige-dark dark:border-gray-700 hover:shadow-md transition-shadow"
-              >
-                <div className="aspect-square rounded-lg bg-farm-beige-light dark:bg-gray-900 mb-3 flex items-center justify-center p-2">
-                  <Image
-                    // src={item.image || "/placeholder.svg"}
-                    src="/vegetable2.png"
-                    alt={item.name}
-                    width={150}
-                    height={150}
-                    className="object-contain max-h-32"
-                  />
-                </div>
-                <h3 className="font-medium text-farm-green-dark dark:text-white mb-1 line-clamp-2">{item.name}</h3>
-                <div className="flex items-center justify-between mt-2">
-                  <div>
-                    <span className="font-bold text-farm-green-dark dark:text-white">{item.price.toFixed(2)} €</span>
-                    <span className="text-xs text-farm-green dark:text-gray-400 ml-1">/ {item.unit}</span>
-                  </div>
-                  <Button
-                    size="sm"
-                    className="bg-farm-green hover:bg-farm-green-dark text-white h-8 w-8 p-0 rounded-full"
-                  >
-                    <Plus size={16} />
-                  </Button>
-                </div>
-              </motion.div>
-            ))} */}
-          </div>
-        </section>
       </main>
+      {toastData && (
+        <Toast {...toastData} />
+      )}
     </div>
   )
 }

@@ -1,5 +1,7 @@
 // review.ts
 
+import { toast } from "sonner";
+
 export const getProductReviews = async (productId: number) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const url = `${apiUrl}/api/public/v1/product/${productId}/reviews`;
@@ -14,12 +16,14 @@ export const getProductReviews = async (productId: number) => {
                 statusText: response.statusText,
                 body: errorText
             });
-            throw new Error(`HTTP error! status: ${response.status}`);
+            toast.error(`Erreur serveur: ${response.status}. Veuillez rafraichir la page`);
+            return null;
         }
         const data = await response.json();
         return data;
     } catch (error) {
         console.error('Failed to fetch product reviews:', error);
-        throw error;
+        toast.error('Impossible de récupérer les avis du produit.');
+        return null;
     }
 }

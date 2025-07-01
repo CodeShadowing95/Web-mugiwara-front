@@ -358,7 +358,7 @@ export default function AddFarmPage() {
 
                 {/* Formulaire */}
                 <Card className="border-0 shadow-lg">
-                    <CardContent className="p-8">
+                    <CardContent className="p-8 overflow-hidden">
                         {/* Étape 1: Informations générales */}
                         {currentStep === 1 && (
                             <div className="space-y-6">
@@ -736,12 +736,15 @@ export default function AddFarmPage() {
                                         <h3 className="font-medium text-farm-green-dark mb-4">Images ajoutées ({uploadedImages.length})</h3>
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                             {uploadedImages.map((image, index) => (
-                                                <div key={index} className="relative group">
-                                                    <img
-                                                        src={image || "/placeholder.svg"}
-                                                        alt={`Image ${index + 1}`}
-                                                        className="w-full h-32 object-cover rounded-lg"
-                                                    />
+                                                <div key={index} className="relative group overflow-hidden max-w-full" style={{maxWidth: '100%'}}>
+                                                    <div style={{width: '100%', aspectRatio: '4/3', overflow: 'hidden', borderRadius: '0.5rem'}}>
+                                                        <img
+                                                            src={image || "/placeholder.svg"}
+                                                            alt={`Image ${index + 1}`}
+                                                            className="w-full h-full object-cover rounded-lg"
+                                                            style={{ display: 'block', maxWidth: '100%', maxHeight: '100%' }}
+                                                        />
+                                                    </div>
                                                     <button
                                                         onClick={() => removeImage(index)}
                                                         className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"

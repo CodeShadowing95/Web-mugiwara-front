@@ -41,7 +41,8 @@ export const login = async (username: string, password: string) => {
 
 export const getMe = async () => {
   const token = getToken();
-  const res = await fetch('http://localhost:8080/api/current-user', {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+  const res = await fetch(`${API_URL}/api/current-user`, {
     headers: {
       'Authorization': `Bearer ${token}`,
     },

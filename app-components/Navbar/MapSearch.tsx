@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useLocation } from "@/app/LocationContext";
 
 interface MapSearchProps {
   onSelect: (city: string, lat: number, lon: number) => void;
@@ -30,6 +31,7 @@ const MapSearch: React.FC<MapSearchProps> = ({ onSelect }) => {
   const [search, setSearch] = useState('');
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [mapCenter, setMapCenter] = useState([DEFAULT_POSITION.lat, DEFAULT_POSITION.lon]);
+  const { setLocation } = useLocation();
 
   const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -48,6 +50,7 @@ const MapSearch: React.FC<MapSearchProps> = ({ onSelect }) => {
     setSearch(suggestion.display_name);
     const city = suggestion.address?.city || suggestion.address?.town || suggestion.address?.village || '';
     onSelect(city, parseFloat(suggestion.lat), parseFloat(suggestion.lon));
+    setLocation(city, parseFloat(suggestion.lat), parseFloat(suggestion.lon));
   };
 
   return (
