@@ -96,6 +96,12 @@ export function FarmProvider2({ children }: { children: ReactNode }) {
   // Charger les données initiales
   useEffect(() => {
     const loadInitialData = async () => {
+      const token = localStorage.getItem('jwt_token');
+      if (!token) {
+        setError('Veuillez vous connecter pour accéder à vos fermes');
+        return;
+      }
+
       const storedFarms = localStorage.getItem('farms');
       const storedSelectedFarm = localStorage.getItem('selectedFarm');
       

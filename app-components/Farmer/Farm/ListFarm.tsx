@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
     ArrowLeft,
@@ -41,6 +41,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useUser } from "@/app/UserContext"
+import { Farm } from "@/types"
 
 export default function ListFarm() {
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
@@ -49,6 +51,9 @@ export default function ListFarm() {
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
     const [filterStatus, setFilterStatus] = useState("all")
     const [filterType, setFilterType] = useState("all")
+
+    const [userFarms, setUserFarms] = useState<Farm[]>([])
+    const { currentUser, refreshUser } = useUser()
 
     // Données des fermes
     const [farms, setFarms] = useState([
@@ -154,6 +159,46 @@ export default function ListFarm() {
         },
     ])
 
+    const fetchFarms = async () => {
+        try {
+            const token = localStorage.getItem('jwt_token')
+            if (!token) {
+                throw new Error('Token d\'authentification non trouvé')
+            }
+
+            const options = {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            const response = await fetch(`${apiUrl}/api/public/v1/farms/farmer/${currentUser?.id}`, options)
+            if (!response.ok) {
+                throw new Error('Erreur lors de la récupération des données de l\'utilisateur')
+            }
+
+            const data = await response.json()
+            setUserFarms(data)
+        } catch (error) {
+            console.error('Erreur lors de la récupération des données de l\'utilisateur :', error)
+        }
+    }
+
+    const getActiveFarms = () => {
+        return farms.filter((farm) => farm.status === "on")
+    }
+
+    useEffect(() => {
+        try {
+            fetchFarms()
+        } catch (error) {
+            console.error('Impossible d\'accéder à la requête :', error)
+        }
+    }, [])
+
     // Filtrage et tri des fermes
     const getFilteredAndSortedFarms = () => {
         let filtered = farms
@@ -242,6 +287,8 @@ export default function ListFarm() {
 
     const filteredFarms = getFilteredAndSortedFarms()
 
+
+
     return (
         <div className="min-h-screen bg-[var(--farm-beige-light)]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -268,7 +315,7 @@ export default function ListFarm() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600">Total fermes</p>
-                                    <p className="text-2xl font-bold text-farm-green-dark">{farms.length}</p>
+                                    <p className="text-2xl font-bold text-farm-green-dark">{userFarms.length}</p>
                                 </div>
                                 <div className="w-12 h-12 bg-[var(--farm-green)]/10 rounded-full flex items-center justify-center">
                                     <Leaf className="w-6 h-6 text-farm-green" />
@@ -282,7 +329,7 @@ export default function ListFarm() {
                                 <div>
                                     <p className="text-sm text-gray-600">Fermes actives</p>
                                     <p className="text-2xl font-bold text-farm-green-dark">
-                                        {farms.filter((f) => f.status === "active").length}
+                                        {userFarms.filter((f) => f.status === "on").length}
                                     </p>
                                 </div>
                                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -297,7 +344,8 @@ export default function ListFarm() {
                                 <div>
                                     <p className="text-sm text-gray-600">Total produits</p>
                                     <p className="text-2xl font-bold text-farm-green-dark">
-                                        {farms.reduce((sum, farm) => sum + farm.products, 0)}
+                                        {/* {farms.reduce((sum, farm) => sum + farm.products, 0)} */}
+                                        0
                                     </p>
                                 </div>
                                 <div className="w-12 h-12 bg-[var(--farm-orange)]/10 rounded-full flex items-center justify-center">
@@ -312,7 +360,8 @@ export default function ListFarm() {
                                 <div>
                                     <p className="text-sm text-gray-600">Total clients</p>
                                     <p className="text-2xl font-bold text-farm-green-dark">
-                                        {farms.reduce((sum, farm) => sum + farm.customers, 0)}
+                                        {/* {farms.reduce((sum, farm) => sum + farm.customers, 0)} */}
+                                        0
                                     </p>
                                 </div>
                                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">

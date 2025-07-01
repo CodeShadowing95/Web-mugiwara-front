@@ -37,16 +37,25 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         const res = await fetch(`${apiUrl}/api/current-user`, {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
           },
         });
-        if (res.ok) {
-          const user = await res.json();
-          setCurrentUser(user);
-          localStorage.setItem("user", JSON.stringify(user));
-        } else {
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => null);
+          console.error('Erreur lors de la récupération du profil:', {
+            status: res.status,
+            statusText: res.statusText,
+            error: errorData
+          });
           setCurrentUser(null);
           localStorage.removeItem("user");
+          localStorage.removeItem("jwt_token");
+          throw new Error(errorData?.message || `Erreur HTTP: ${res.status}`);
         }
+        
+        const user = await res.json();
+        setCurrentUser(user);
+        localStorage.setItem("user", JSON.stringify(user));
       } catch (e) {
         setCurrentUser(null);
         localStorage.removeItem("user");

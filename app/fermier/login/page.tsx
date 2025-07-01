@@ -21,6 +21,7 @@ export default function FermierLoginPage() {
     const [loadingConnect, setLoadingConnect] = useState(false)
     const [error, setError] = useState("")
     const [success, setSuccess] = useState("")
+    const [textMessage, setTextMessage] = useState("Connexion...")
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -68,28 +69,73 @@ export default function FermierLoginPage() {
 
             setSuccess("Connexion réussie!")
 
-            setIsLoading(true)
+            // setIsLoading(true)
+            setTextMessage("Données utilisateur en cours...")
 
-            // const userToken = res.token;
-            // try {
-            //     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-            //     const res = await fetch(`${apiUrl}/api/current-user`, {
-            //         headers: {
-            //             Authorization: `Bearer ${userToken}`,
-            //         },
-            //     });
-            //     if (res.ok) {
-            //         const user = await res.json();
-            //         localStorage.setItem("user", JSON.stringify(user));
-            //     } else {
-            //         localStorage.removeItem("user");
-            //     }
-            // } catch (e) {
-            //     localStorage.removeItem("user");
-            // }
+            const userToken = res.token;
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                const res = await fetch(`${apiUrl}/api/current-user`, {
+                    headers: {
+                        Authorization: `Bearer ${userToken}`,
+                    },
+                });
+                if (res.ok) {
+                    const user = await res.json();
+                    localStorage.setItem("user", JSON.stringify(user));
+                } else {
+                    localStorage.removeItem("user");
+                }
+            } catch (e) {
+                localStorage.removeItem("user");
+            }
 
+            setTextMessage("Vérification du rôle...")
+            // On défini le role fermier
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                const res = await fetch(`${apiUrl}/api/become-farmer`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${userToken}`,
+                    },
+                });
+                if (res.ok) {
+                    console.log("Role fermier défini avec succès!");
+                } else {
+                    console.log("Erreur lors de la définition du role fermier.");
+                }
+            } catch (e) {
+                console.log("Erreur lors de la définition du role fermier.");
+            }
+
+            setTextMessage("Checking de fermes...")
+            // Récupération de fermes
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                const user = typeof window !== undefined && JSON.parse(localStorage.getItem("user") || "{}");
+                const res = await fetch(`${apiUrl}/api/public/v1/farms/farmer/${user.id}`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${userToken}`,
+                        "Content-Type": "application/json"
+                    },
+                });
+                if (res.ok) {
+                    console.log("Fermes récupérées avec succès!");
+                    const data = await res.json();
+                    const farmData = data || [];
+                    localStorage.setItem("farms", JSON.stringify(farmData));
+                } else {
+                    console.log("Erreur lors de la récupération des fermes.");
+                }
+            } catch (e) {
+                console.log("Erreur lors de la récupération des fermes.");
+            }
+
+            setTextMessage("Redirection...")
             // Vous pouvez rediriger l'utilisateur ici
-            // window.location.href = "/fermier"
+            window.location.href = "/fermier"
             // etc.
         } catch (err) {
             console.error("Erreur fetch:", err)
@@ -102,7 +148,7 @@ export default function FermierLoginPage() {
 
     return (
         <>
-            {isLoading && <Loader />}
+            {/* {isLoading && <Loader />} */}
             <div className="min-h-screen flex flex-col md:flex-row">
                 {/* Top/Left side - Hero Section */}
                 <div
@@ -169,7 +215,7 @@ export default function FermierLoginPage() {
                         </div> */}
 
                         <Card className="border-0 shadow-2xl bg-white">
-                            <CardHeader className="space-y-1 pb-8">
+                            <CardHeader className="space-y-1 pb-4">
                                 <div className="flex items-center justify-center mb-6 md:hidden">
                                     <div
                                         className="w-16 h-16 rounded-full flex items-center justify-center"
@@ -272,12 +318,12 @@ export default function FermierLoginPage() {
                                         style={{
                                             backgroundColor: "var(--farm-green-dark)",
                                         }}
-                                        disabled={loadingConnect}
+                                        disabled={loadingConnect || textMessage === ""}
                                     >
                                         {loadingConnect ? (
                                             <div className="flex items-center space-x-2">
                                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                                <span>Connexion...</span>
+                                                <span>{textMessage}</span>
                                             </div>
                                         ) : (
                                             "Accéder à mon espace"

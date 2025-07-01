@@ -96,7 +96,7 @@ const Navbar = () => {
                                 className="flex items-center space-x-2 hover:bg-farm-green/5 p-3 rounded-lg border border-transparent hover:border-farm-green/20 transition-all duration-200"
                             >
                                 <Avatar className="h-10 w-10">
-                                    <AvatarImage src={"/farm.jpg"} alt={activeFarm.name} />
+                                    <AvatarImage src={activeFarm.avatar} alt={activeFarm.avatar} />
                                     {/* <AvatarFallback className={`${activeFarm.color} text-white font-semibold`}>
                                         {activeFarm.name.split(' ').map(word => word[0]).join('')}
                                     </AvatarFallback> */}

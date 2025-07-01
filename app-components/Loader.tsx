@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { FarmLoader } from "@/components/ui/farm-loader"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -82,7 +81,6 @@ const initialSteps: LoadingStep[] = [
 ]
 
 export default function LoadingSimulationPage() {
-    const router = useRouter()
     const [steps, setSteps] = useState<LoadingStep[]>(initialSteps)
     const [currentStepIndex, setCurrentStepIndex] = useState(-1)
     const [isLoading, setIsLoading] = useState(false)
@@ -92,7 +90,14 @@ export default function LoadingSimulationPage() {
 
     const fetchStepData = async (step: LoadingStep) => {
         try {
-            const token = localStorage.getItem('jwt_token')
+            let token;
+            if(typeof window !== 'undefined') {
+                token = localStorage.getItem('jwt_token')
+            }
+
+            console.log("Token: ", token);
+            
+
             if (!token) {
                 throw new Error('Token d\'authentification non trouvé')
             }
@@ -107,6 +112,7 @@ export default function LoadingSimulationPage() {
 
             let response;
             const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            
             switch (step.id) {
                 case 'profile':
                     response = await fetch(`${apiUrl}/api/current-user`, options)
@@ -124,8 +130,10 @@ export default function LoadingSimulationPage() {
                         method: "POST",
                         headers: {
                             Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json'
                         },
                     });
+                    break;
                 case 'products':
                     // response = await fetch('/api/v1/products', options)
                     // Simuler une bonne response de produits vides
@@ -182,6 +190,7 @@ export default function LoadingSimulationPage() {
             }
 
             if (!response.ok) {
+                console.log(response);
                 throw new Error(`Erreur HTTP: ${response.status}`)
             }
 
@@ -192,67 +201,89 @@ export default function LoadingSimulationPage() {
         }
     }
 
-    const startSimulation = useCallback(async () => {
+    const startSimulation = async () => {
         if (isLoading) return;
 
         setIsLoading(true)
         setProgress(0)
 
-        for (let i = 0; i < steps.length; i++) {
-            const step = steps[i]
+        const stepsLength = steps.length
 
-            setCurrentStepIndex(i)
-            setLoadingMessage(step.description)
+        
 
-            // Marquer l'étape comme "loading"
-            setSteps((prev) =>
-                prev.map((s, index) =>
-                    index === i ? { ...s, status: "loading" } : s
-                )
-            )
+        // for (let i = 0; i < steps.length; i++) {
+        //     const step = steps[i]
 
-            try {
-                const data = await fetchStepData(step)
+        //     setCurrentStepIndex(i)
+        //     setLoadingMessage(step.description)
+        //     setProgress((i / steps.length) * 100)
 
-                // Stocker dans localStorage selon le type d'étape
-                switch (step.id) {
-                    case 'profile':
-                        localStorage.setItem('user', JSON.stringify(data))
-                        break
-                    case 'farms':
-                        localStorage.setItem('farms', JSON.stringify(data))
-                        break
-                    case 'role':
-                        // Optionnel : localStorage.setItem('role', JSON.stringify(data))
-                        break
-                    default:
-                        break
-                }
+        //     // Marquer l'étape comme "loading"
+        //     setSteps((prev) =>
+        //         prev.map((s, index) =>
+        //             index === i ? { ...s, status: "loading" } : s
+        //         )
+        //     )
 
-                // Marquer comme succès
-                setSteps((prev) =>
-                    prev.map((s, index) =>
-                        index === i ? { ...s, status: "success", data } : s
-                    )
-                )
-            } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
-                setSteps((prev) =>
-                    prev.map((s, index) =>
-                        index === i ? { ...s, status: "error", error: errorMessage } : s
-                    )
-                )
-                setIsLoading(false)
-                setLoadingMessage(`Erreur lors du chargement de ${step.label}: ${errorMessage}`)
-                return
-            }
-        }
+        //     try {
+        //         const data = await fetchStepData(step)
+
+        //         if (!data) {
+        //             throw new Error('Données de réponse manquantes')
+        //         }
+
+        //         if (data.error) {
+        //             throw new Error(data.error)
+        //         }
+
+        //         // Stocker dans localStorage selon le type d'étape
+        //         switch (step.id) {
+        //             case 'profile':
+        //                 localStorage.setItem('user', JSON.stringify(data))
+        //                 break
+        //             case 'farms':
+        //                 localStorage.setItem('farms', JSON.stringify(data))
+        //                 break
+        //             case 'role':
+        //                 // Mise à jour du profil utilisateur après être devenu fermier
+        //                 if (!data.message || data.message !== 'Déjà fermier') {
+        //                     const updatedUser = JSON.parse(localStorage.getItem('user') || '{}')
+        //                     updatedUser.roles = [...(updatedUser.roles || []), 'ROLE_FARMER']
+        //                     localStorage.setItem('user', JSON.stringify(updatedUser))
+        //                 }
+        //                 break
+        //             default:
+        //                 break
+        //         }
+
+        //         // Marquer comme succès
+        //         setSteps((prev) =>
+        //             prev.map((s, index) =>
+        //                 index === i ? { ...s, status: "success", data } : s
+        //             )
+        //         )
+
+        //         // Pause courte entre chaque étape pour l'animation
+        //         await new Promise(resolve => setTimeout(resolve, 500))
+
+        //     } catch (error) {
+        //         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
+        //         setSteps((prev) =>
+        //             prev.map((s, index) =>
+        //                 index === i ? { ...s, status: "error", error: errorMessage } : s
+        //             )
+        //         )
+        //         setIsLoading(false)
+        //         setLoadingMessage(`Erreur lors du chargement de ${step.label}: ${errorMessage}`)
+        //         return
+        //     }
+        // }
 
         setProgress(100)
         setLoadingMessage("Chargement terminé avec succès !")
         setIsLoading(false)
         setCurrentStepIndex(-1)
-    }, [isLoading, router])
+    }
 
     useEffect(() => {
         const allSuccess = steps.every(step => step.status === "success")
@@ -268,7 +299,7 @@ export default function LoadingSimulationPage() {
             hasStartedRef.current = true
             startSimulation()
         }
-    }, [startSimulation])
+    }, [])
 
     const getStatusIcon = (status: string) => {
         switch (status) {

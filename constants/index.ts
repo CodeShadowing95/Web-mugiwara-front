@@ -102,3 +102,26 @@ export const productsCart = [
         organic: true,
     },
 ]
+
+export const diceBearAvatars = [
+  "Mackenzie",
+  "Adrian",
+  "Jade",
+  "Brian",
+  "Caleb",
+  "Avery",
+  "Wyatt",
+  "Sophia",
+  "Jocelyn",
+  "Jessica",
+  "Amaya",
+  "Aiden",
+  "Christopher",
+  "Leah",
+  "Robert",
+  "Aidan",
+  "Sadie",
+  "Ryan",
+  "Maria",
+  "Jude"
+]

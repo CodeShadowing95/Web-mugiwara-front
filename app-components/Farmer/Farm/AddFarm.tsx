@@ -27,6 +27,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useFarm2 } from "@/app/FarmContext2"
+import { diceBearAvatars } from "@/constants"
 
 export default function AddFarmPage() {
     const [currentStep, setCurrentStep] = useState(1)
@@ -38,9 +39,10 @@ export default function AddFarmPage() {
     // États du formulaire
     const [formData, setFormData] = useState({
         // Informations générales
+        avatar: "",
         name: "",
         description: "",
-        farmType: "",
+        farmTypes: [] as string[],
         // certifications: [] as string[],
 
         // Localisation
@@ -81,16 +83,24 @@ export default function AddFarmPage() {
     ]
 
     const farmTypes = [
-        "Agriculture biologique",
-        "Agriculture conventionnelle",
-        "Agriculture raisonnée",
-        "Permaculture",
-        "Agriculture urbaine",
-        "Élevage",
-        "Maraîchage",
-        "Arboriculture",
-        "Viticulture",
-        "Apiculture",
+        { id: 1, name: "Maraîchage" },                 // légumes
+        { id: 2, name: "Arboriculture" },              // fruits
+        { id: 3, name: "Élevage bovin" },
+        { id: 4, name: "Élevage ovin/caprin" },
+        { id: 5, name: "Élevage porcin" },
+        { id: 6, name: "Aviculture" },                 // poules, canards...
+        { id: 7, name: "Apiculture" },                 // abeilles/miel
+        { id: 8, name: "Céréaliculture" },
+        { id: 9, name: "Viticulture" },
+        { id: 10, name: "Horticulture" },              // fleurs, ornement
+        { id: 11, name: "Polyculture-élevage" },       // mixte
+        { id: 12, name: "Agroforesterie" },
+        { id: 13, name: "Permaculture" },
+        { id: 14, name: "Aquaculture" },
+        { id: 15, name: "Transformation artisanale" }, // confitures, yaourts...
+        { id: 16, name: "Agriculture biologique" },
+        { id: 17, name: "Agriculture urbaine" },
+        { id: 18, name: "Ferme pédagogique" },
     ]
 
     const certifications = [
@@ -143,10 +153,10 @@ export default function AddFarmPage() {
         const files = event.target.files
         if (files) {
             const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"]
-            
+
             const newImages = Array.from(files)
                 .filter(file => {
-                    const extension = "."+file.name.split(".").pop()?.toLowerCase()
+                    const extension = "." + file.name.split(".").pop()?.toLowerCase()
                     return allowedExtensions.includes(extension)
                 })
                 .map(file => {
@@ -171,6 +181,10 @@ export default function AddFarmPage() {
     const handleSubmit = async () => {
         setIsLoading(true)
 
+        // Définir l'avatar
+        const avatarName = diceBearAvatars[Math.floor(Math.random() * diceBearAvatars.length)]
+        formData.avatar = `https://api.dicebear.com/9.x/shapes/svg?seed=${avatarName}`
+        
         console.log("Formulaire soumis :", formData);
 
         // Envoi des données au serveur
@@ -178,7 +192,7 @@ export default function AddFarmPage() {
         const token = localStorage.getItem("jwt_token");
         console.log("API URL:", apiUrl);
         console.log("Token:", token);
-        
+
         try {
             const response = await fetch(`${apiUrl}/api/v1/create-farm`, {
                 method: "POST",
@@ -193,7 +207,7 @@ export default function AddFarmPage() {
                 console.log("Status:", response.status)
                 const text = await response.text()
                 console.log("Response:", text)
-        
+
                 setIsLoading(false)
                 if (response.status === 401) {
                     setError("Identifiants invalides.")
@@ -208,10 +222,10 @@ export default function AddFarmPage() {
             // Récupération des fermes existantes du localStorage
             const existingFarmsStr = localStorage.getItem('farms')
             const existingFarms = existingFarmsStr ? JSON.parse(existingFarmsStr) : []
-            
+
             // Ajout de la nouvelle ferme
             const updatedFarms = [...existingFarms, data]
-            
+
             // Mise à jour du localStorage et du contexte
             localStorage.setItem('farms', JSON.stringify(updatedFarms))
             setFarms(updatedFarms)
@@ -219,9 +233,10 @@ export default function AddFarmPage() {
             refreshNewFarm()
             // Réinitialisation du formulaire
             setFormData({
+                avatar: "",
                 name: "",
                 description: "",
-                farmType: "",
+                farmTypes: [],
                 // certifications: [],
 
                 address: "",
@@ -278,7 +293,7 @@ export default function AddFarmPage() {
     const isStepValid = (step: number) => {
         switch (step) {
             case 1:
-                return formData.name && formData.farmType && formData.description
+                return formData.name && formData.farmTypes.length > 0 && formData.description
             case 2:
                 return formData.address && formData.city && formData.zipCode
             case 3:
@@ -317,10 +332,10 @@ export default function AddFarmPage() {
                             <div key={step.id} className="flex items-center">
                                 <div
                                     className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-200 ${currentStep === step.id
-                                            ? "bg-farm-green border-farm-green text-white"
-                                            : currentStep > step.id
-                                                ? "bg-green-500 border-green-500 text-white"
-                                                : "bg-white border-gray-300 text-gray-400"
+                                        ? "bg-farm-green border-farm-green text-white"
+                                        : currentStep > step.id
+                                            ? "bg-green-500 border-green-500 text-white"
+                                            : "bg-white border-gray-300 text-gray-400"
                                         }`}
                                 >
                                     {currentStep > step.id ? <Check className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
@@ -361,21 +376,23 @@ export default function AddFarmPage() {
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="farmType" className="text-base font-medium text-farm-green-dark">
-                                        Type d'agriculture *
+                                    <Label className="text-base font-medium text-farm-green-dark">
+                                        Types d'agriculture *
                                     </Label>
-                                    <Select value={formData.farmType} onValueChange={(value) => handleInputChange("farmType", value)}>
-                                        <SelectTrigger className="mt-2 h-12">
-                                            <SelectValue placeholder="Sélectionnez le type d'agriculture" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {farmTypes.map((type) => (
-                                                <SelectItem key={type} value={type}>
-                                                    {type}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <div className="mt-2 grid grid-cols-2 gap-3">
+                                        {farmTypes.map((type) => (
+                                            <div
+                                                key={type.id}
+                                                onClick={() => handleArrayToggle("farmTypes", type.name)}
+                                                className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 ${formData.farmTypes.includes(type.name)
+                                                    ? "bg-farm-green/10 border-farm-green text-farm-green-dark"
+                                                    : "bg-white border-gray-200 hover:border-farm-green/50"
+                                                    }`}
+                                            >
+                                                <span className="text-sm font-medium">{type.name}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 {/* <div>
@@ -634,8 +651,8 @@ export default function AddFarmPage() {
                                                 key={method}
                                                 onClick={() => handleArrayToggle("deliveryMethods", method)}
                                                 className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 ${formData.deliveryMethods.includes(method)
-                                                        ? "bg-farm-green/10 border-farm-green text-farm-green-dark"
-                                                        : "bg-white border-gray-200 hover:border-farm-green/50"
+                                                    ? "bg-farm-green/10 border-farm-green text-farm-green-dark"
+                                                    : "bg-white border-gray-200 hover:border-farm-green/50"
                                                     }`}
                                             >
                                                 <span className="text-sm font-medium">{method}</span>

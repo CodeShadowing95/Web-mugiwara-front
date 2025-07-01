@@ -1,5 +1,6 @@
 export interface Farm {
     id: number;
+    avatar: string;
     name: string;
     description: string;
     farmType: string;
@@ -21,8 +22,20 @@ export interface Farm {
     minimumOrder: string;
     profileImage: string;
     galleryImages: string[];
+    createdAt: string;
+    updatedAt: string;
 
     color?: string;
+    status?: string;
+    distance?: number;
+    rating?: number;
+    reviews?: Review[];
+    products?: Product[];
+    customers?: User[];
+    tags?: Tag[];
+    type?: string;
+    totalSales?: string;
+    monthlyOrders?: number;
 }
 
 export interface User {
