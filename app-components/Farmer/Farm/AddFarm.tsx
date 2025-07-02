@@ -34,7 +34,13 @@ export default function AddFarmPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [uploadedImages, setUploadedImages] = useState<string[]>([])
     const [error, setError] = useState<string | null>(null)
-    const { refreshNewFarm, setFarms, setSelectedFarm } = useFarm2()
+    const farm2Context = useFarm2()
+    
+    if (!farm2Context) {
+        return <div>Erreur : Contexte Farm2 non disponible</div>
+    }
+    
+    const { refreshNewFarm, setFarms, setSelectedFarm } = farm2Context
 
     // États du formulaire
     const [formData, setFormData] = useState({
@@ -184,7 +190,7 @@ export default function AddFarmPage() {
         // Définir l'avatar
         const avatarName = diceBearAvatars[Math.floor(Math.random() * diceBearAvatars.length)]
         formData.avatar = `https://api.dicebear.com/9.x/shapes/svg?seed=${avatarName}`
-        
+
         console.log("Formulaire soumis :", formData);
 
         // Envoi des données au serveur

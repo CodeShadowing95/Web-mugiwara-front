@@ -51,7 +51,13 @@ export default function FermierProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [activeTab, setActiveTab] = useState("personal")
   const [hasFarms, setHasFarms] = useState(false)
-  const { currentUser } = useUser();
+  const userContext = useUser()
+  
+  if (!userContext) {
+      return <div>Erreur : Contexte utilisateur non disponible</div>
+  }
+
+  const { currentUser } = userContext;
 
   const userInitials = currentUser?.persona.firstName.charAt(0) + currentUser?.persona.lastName.charAt(0).toUpperCase();
 

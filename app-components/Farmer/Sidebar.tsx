@@ -14,7 +14,13 @@ interface SidebarProps {
 
 const Sidebar = ({ hasFarms } : SidebarProps) => {
     const router = useRouter()
-    const { currentUser } = useUser()
+    const userContext = useUser()
+    
+    if (!userContext) {
+        return <div>Erreur : Contexte utilisateur non disponible</div>
+    }
+    
+    const { currentUser } = userContext
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [selectedMenu, setSelectedMenu] = useState(typeof window !== "undefined" ? localStorage.getItem("selectedMenu") || "dashboard" : "dashboard")
     const [hasRedirected, setHasRedirected] = useState(false) // ← pour éviter double redirection

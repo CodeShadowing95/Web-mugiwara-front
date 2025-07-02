@@ -15,7 +15,14 @@ import { getAvatarInitials } from '@/utils/utilities';
 const Navbar = () => {
     const router = useRouter();
     const [sidebarOpen, setSidebarOpen] = useState(false)
-    const { farms, selectedFarm, setSelectedFarm } = useFarm2();
+    
+    const farm2Context = useFarm2()
+    
+    if (!farm2Context) {
+        return <div>Erreur : Contexte Farm2 non disponible</div>
+    }
+
+    const { farms, selectedFarm, setSelectedFarm } = farm2Context;
     const [activeFarm, setActiveFarm] = useState<Farm>(selectedFarm as Farm)
 
     // Données des fermes de l'utilisateur

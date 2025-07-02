@@ -15,10 +15,21 @@ const FermierLayout = ({ children }: { children: React.ReactNode }) => {
   const [hasFarms, setHasFarms] = useState(false);
   const [showBecomeFarmerModal, setShowBecomeFarmerModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string|null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const [color, setColor] = useState<string>("success");
-  const { refreshUser } = useUser();
-  const { farms } = useFarm2();
+  const userContext = useUser()
+  const farm2Context = useFarm2()
+
+  if (!userContext) {
+    return <div>Erreur : Contexte utilisateur non disponible</div>
+  }
+
+  if (!farm2Context) {
+    return <div>Erreur : Contexte Farm2 non disponible</div>
+  }
+  
+  const { refreshUser } = userContext;
+  const { farms } = farm2Context;
 
   useEffect(() => {
     if (farms && farms.length > 0) {

@@ -53,7 +53,12 @@ export default function ListFarm() {
     const [filterType, setFilterType] = useState("all")
 
     const [userFarms, setUserFarms] = useState<Farm[]>([])
-    const { currentUser, refreshUser } = useUser()
+    const userContext = useUser()
+
+    if (!userContext) {
+        return <div>Erreur : Contexte utilisateur non disponible</div>
+    }
+    const { currentUser, refreshUser } = userContext
 
     // Données des fermes
     const [farms, setFarms] = useState([
