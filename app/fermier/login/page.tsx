@@ -4,34 +4,255 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Eye, EyeOff, Mail, Lock, Tractor, Wheat, Shovel, SunIcon, ArrowLeft } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, Tractor, Wheat, Shovel, SunIcon, ArrowLeft, User, UserCog, Database, Apple, ShoppingCart, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Loader from "@/app-components/Loader"
+import { LoadingModal } from "@/components/ui/loading-modal"
+import { useUser } from "@/app/UserContext"
+import { useFarm2 } from "@/app/FarmContext2"
+
+interface LoadingStep {
+    id: string
+    label: string
+    description: string
+    icon: React.ComponentType<{ className?: string }>
+    variant: "tractor" | "leaf" | "apple" | "carrot" | "wheat"
+    status: "pending" | "loading" | "success" | "error"
+    data?: any
+    error?: string
+}
+
+const initialSteps: LoadingStep[] = [
+    {
+        id: "profile",
+        label: "Profil utilisateur",
+        description: "Chargement des données utilisateur",
+        icon: User,
+        variant: "leaf",
+        status: "pending",
+    },
+    {
+        id: "role",
+        label: "Rôle Fermier",
+        description: "Initialisation du compte fermier",
+        icon: UserCog,
+        variant: "leaf",
+        status: "pending",
+    },
+    {
+        id: "farms",
+        label: "Données des fermes",
+        description: "Checking des informations des fermes",
+        icon: Database,
+        variant: "tractor",
+        status: "pending",
+    },
+    {
+        id: "products",
+        label: "Catalogue produits",
+        description: "Synchronisation du catalogue",
+        icon: Apple,
+        variant: "apple",
+        status: "pending",
+    },
+    {
+        id: "orders",
+        label: "Commandes récentes",
+        description: "Checking d'éventuelles commandes",
+        icon: ShoppingCart,
+        variant: "carrot",
+        status: "pending",
+    },
+    {
+        id: "analytics",
+        label: "Données analytiques",
+        description: "Calcul des statistiques de vente",
+        icon: BarChart3,
+        variant: "wheat",
+        status: "pending",
+    },
+]
 
 export default function FermierLoginPage() {
+    const userContext = useUser()
+    const FarmContext2 = useFarm2()
+
+    if (!userContext) {
+        return <div>Erreur : Contexte utilisateur non disponible</div>
+    }
+    if (!FarmContext2) {
+        return <div>Erreur : Contexte fermier non disponible</div>
+    }
+
+    const { setCurrentUser } = userContext
+    const { setFarms } = FarmContext2
 
     const [showPassword, setShowPassword] = useState(false)
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const [isLoading, setIsLoading] = useState(false)
     const [loadingConnect, setLoadingConnect] = useState(false)
     const [error, setError] = useState("")
     const [success, setSuccess] = useState("")
-    const [textMessage, setTextMessage] = useState("Connexion...")
+
+    // Modal de chargement
+    // const [isLoading, setIsLoading] = useState(false)
+    const [showLoadingModal, setShowLoadingModal] = useState(false)
+    const [steps, setSteps] = useState<LoadingStep[]>(initialSteps)
+    const [currentStepIndex, setCurrentStepIndex] = useState(-1)
+
+    const [blockProcess, setBlockProcess] = useState(false);
+
+    const fetchStepData = async (step: LoadingStep) => {
+        try {
+            let token
+
+            if (typeof window !== "undefined") {
+                token = localStorage.getItem("jwt_token")
+            }
+
+            if (!token) {
+                throw new Error("Token d'authentification non trouvé")
+            }
+
+            const options = {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            }
+
+            let response
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL
+
+            switch (step.id) {
+                case "profile":
+                    try {
+                        response = await fetch(`${apiUrl}/api/current-user`, options)
+                    } catch (error) {
+                        setBlockProcess(true);
+                        console.error("Erreur lors du chargement des données utilisateur:", error)
+                        throw new Error("Erreur lors du chargement des données utilisateur")
+                    }
+                    break
+
+                case "farms":
+                    const user = JSON.parse(localStorage.getItem("user") || "{}")
+                    if (!user || !user.id) {
+                        throw new Error("ID utilisateur non trouvé")
+                    }
+                    try {
+                        response = await fetch(`${apiUrl}/api/public/v1/farms/farmer/${user.id}`, options)
+                    } catch (error) {
+                        setBlockProcess(true);
+                        console.error("Erreur lors du chargement des données des fermes:", error)
+                        throw new Error("Erreur lors du chargement des données des fermes")
+                    }
+                    break
+
+                case "role":
+                    try {
+                        response = await fetch(`${apiUrl}/api/become-farmer`, {
+                            method: "POST",
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                                "Content-Type": "application/json",
+                            },
+                        })
+                    } catch (error) {
+                        setBlockProcess(true);
+                        console.error("Erreur lors de la mise à jour du rôle:", error)
+                        throw new Error("Erreur lors de la mise à jour du rôle")
+                    }
+                    break
+
+                case "products":
+                    // response = await fetch('/api/v1/products', options)
+                    // Simuler une bonne response de produits vides
+                    const emptyProducts = {
+                        data: [],
+                        total: 0,
+                        page: 1,
+                        limit: 10,
+                        pages: 1,
+                        message: "Catalogue produits initialisé",
+                    }
+                    response = new Response(JSON.stringify(emptyProducts), {
+                        status: 200,
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    })
+                    break
+
+                case "orders":
+                    // response = await fetch('/api/v1/orders', options)
+                    // Simuler une bonne response de commandes vides
+                    const emptyOrders = {
+                        data: [],
+                        total: 0,
+                        page: 1,
+                        limit: 10,
+                        pages: 1,
+                        message: "Aucune commande en attente",
+                    }
+                    response = new Response(JSON.stringify(emptyOrders), {
+                        status: 200,
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    })
+                    break
+
+                case "analytics":
+                    // response = await fetch('/api/v1/analytics', options)
+                    // Simuler une bonne response de données vides
+                    const emptyAnalytics = {
+                        data: [],
+                        total: 0,
+                        page: 1,
+                        limit: 10,
+                        pages: 1,
+                        message: "Statistiques initialisées",
+                    }
+                    response = new Response(JSON.stringify(emptyAnalytics), {
+                        status: 200,
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    })
+                    break
+
+                default:
+                    throw new Error("Étape inconnue")
+            }
+
+            if (!response.ok) {
+                console.log(response)
+                throw new Error(`Erreur HTTP: ${response.status}`)
+            }
+
+            return await response.json()
+        } catch (error) {
+            console.error(`Erreur lors du chargement de ${step.id}:`, error)
+            throw error
+        }
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoadingConnect(true)
-        setError("")
-        setSuccess("")
+
+        // Validation simple
+        if (!email || !password) {
+            return
+        }
+
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL
-            console.log("API URL:", apiUrl)
-
             if (!apiUrl) {
                 throw new Error("API URL non définie")
             }
@@ -48,107 +269,159 @@ export default function FermierLoginPage() {
             })
 
             if (!response.ok) {
-                console.log("Status:", response.status)
-                const text = await response.text()
-                console.log("Response:", text)
-
-                setLoadingConnect(false)
                 if (response.status === 401) {
                     setError("Identifiants invalides.")
                 } else {
                     setError("Erreur interne du serveur.")
                 }
-                return
+                throw new Error(`Erreur HTTP: ${response.status}`)
             }
 
             const res = await response.json()
-            // console.log("Login result:", res)
-            localStorage.setItem("jwt_token", res.token)
-            // Mettre à jour le contexte utilisateur
-            // refreshUser(res.token);
+
+            // Simuler l'authentification et stocker le token
+            if (typeof window !== "undefined") {
+                localStorage.setItem("jwt_token", res.token)
+            }
 
             setSuccess("Connexion réussie!")
-
-            // setIsLoading(true)
-            setTextMessage("Données utilisateur en cours...")
-
-            const userToken = res.token;
-            try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-                const res = await fetch(`${apiUrl}/api/current-user`, {
-                    headers: {
-                        Authorization: `Bearer ${userToken}`,
-                    },
-                });
-                if (res.ok) {
-                    const user = await res.json();
-                    localStorage.setItem("user", JSON.stringify(user));
-                } else {
-                    localStorage.removeItem("user");
-                }
-            } catch (e) {
-                localStorage.removeItem("user");
-            }
-
-            setTextMessage("Vérification du rôle...")
-            // On défini le role fermier
-            try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-                const res = await fetch(`${apiUrl}/api/become-farmer`, {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${userToken}`,
-                    },
-                });
-                if (res.ok) {
-                    console.log("Role fermier défini avec succès!");
-                } else {
-                    console.log("Erreur lors de la définition du role fermier.");
-                }
-            } catch (e) {
-                console.log("Erreur lors de la définition du role fermier.");
-            }
-
-            setTextMessage("Checking de fermes...")
-            // Récupération de fermes
-            try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-                const user = typeof window !== undefined && JSON.parse(localStorage.getItem("user") || "{}");
-                const res = await fetch(`${apiUrl}/api/public/v1/farms/farmer/${user.id}`, {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${userToken}`,
-                        "Content-Type": "application/json"
-                    },
-                });
-                if (res.ok) {
-                    console.log("Fermes récupérées avec succès!");
-                    const data = await res.json();
-                    const farmData = data || [];
-                    localStorage.setItem("farms", JSON.stringify(farmData));
-                } else {
-                    console.log("Erreur lors de la récupération des fermes.");
-                }
-            } catch (e) {
-                console.log("Erreur lors de la récupération des fermes.");
-            }
-
-            setTextMessage("Redirection...")
-            // Vous pouvez rediriger l'utilisateur ici
-            window.location.href = "/fermier"
-            // etc.
-        } catch (err) {
-            console.error("Erreur fetch:", err)
-            setError("Erreur de connexion. Veuillez réessayer.")
-        } finally {
-            setLoadingConnect(false)
+        } catch (error) {
+            console.error("Erreur lors de la connexion:", error)
+            setError("Erreur lors de la connexion")
+            return
         }
 
+        setShowLoadingModal(true)
+        setSteps(initialSteps.map((step) => ({ ...step, status: "pending" })))
+
+        // Démarrer la séquence de chargement
+        await startLoadingSequence()
+
+        setLoadingConnect(false)
+
+        // Redirection vers le dashboard
+        // Only redirect if all steps completed successfully
+        const allStepsSuccessful = steps.every(step => step.status === 'success');
+        if (allStepsSuccessful) {
+            window.location.href = "/fermier";
+        } else {
+            console.error("Login process incomplete - some steps failed");
+            setError("Une erreur est survenue lors de l'initialisation de votre compte");
+        }
+    }
+
+    const startLoadingSequence = async () => {
+        for (let i = 0; i < steps.length; i++) {
+            setCurrentStepIndex(i)
+
+            // Marquer l'étape courante comme en cours de chargement
+            setSteps((prev) =>
+                prev.map((step, index) => ({
+                    ...step,
+                    status: index === i ? "loading" : index < i ? "success" : "pending",
+                })),
+            )
+
+            // Vérifier si le processus a été bloqué
+            if (blockProcess) {
+                setSteps((prev) =>
+                    prev.map((step, index) => ({
+                        ...step,
+                        status: index === i ? "error" : index < i ? "success" : "pending",
+                        error: "Processus bloqué",
+                    })),
+                )
+                return
+            }
+
+            try {
+                // Appeler l'API pour cette étape
+                const data = await fetchStepData(steps[i])
+
+                if (!data) {
+                    throw new Error("Erreur lors du chargement des données")
+                }
+
+                console.log(`Données pour ${steps[i].id}:`, data)
+
+                switch (steps[i].id) {
+                    case "profile":
+                        // Stocker les données dans le localStorage
+                        if (typeof window !== "undefined") {
+                            localStorage.setItem("user", JSON.stringify(data))
+                            // Mettre à jour le contexte utilisateur
+                            setCurrentUser(data)
+                        }
+                        break
+
+                    case "farms":
+                        // Stocker les données dans le localStorage
+                        if (typeof window !== "undefined") {
+                            localStorage.setItem("farms", JSON.stringify(data))
+                            // Mettre à jour le contexte fermier
+                            setFarms(data)
+                        }
+                        break
+
+                    case "role":
+                        // Stocker les données dans le localStorage
+                        if (typeof window !== "undefined") {
+                            if (typeof window !== undefined) {
+                                const user = JSON.parse(localStorage.getItem("user") || "{}")
+                                user.role = "ROLE_FARMER"
+                                localStorage.setItem("user", JSON.stringify(user))
+                            }
+                        }
+                        break
+
+                    default:
+                        break
+                }
+
+                // Marquer l'étape comme terminée avec succès
+                setSteps((prev) =>
+                    prev.map((step, index) => ({
+                        ...step,
+                        status: index === i ? "success" : index < i ? "success" : "pending",
+                        data: index === i ? data : step.data,
+                    })),
+                )
+            } catch (error) {
+                // Marquer l'étape comme échouée
+                const errorMessage = error instanceof Error ? error.message : "Erreur inconnue"
+                setSteps((prev) =>
+                    prev.map((step, index) => ({
+                        ...step,
+                        status: index === i ? "error" : index < i ? "success" : "pending",
+                        error: index === i ? errorMessage : step.error,
+                    })),
+                )
+
+                // Arrêter la séquence en cas d'erreur
+                return
+            }
+
+            // Attendre un peu avant l'étape suivante pour l'UX
+            await new Promise((resolve) => setTimeout(resolve, 300))
+        }
+
+        // Attendre un peu avant la redirection
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+    }
+
+    const closeModal = () => {
+        setShowLoadingModal(false)
+        setLoadingConnect(false)
+        setCurrentStepIndex(-1)
+        setSteps(initialSteps.map((step) => ({ ...step, status: "pending" })))
+        localStorage.clear();
     }
 
     return (
         <>
-            {/* {isLoading && <Loader />} */}
+            {/* Modal de chargement */}
+            <LoadingModal isOpen={showLoadingModal} onClose={closeModal} steps={steps} currentStepIndex={currentStepIndex} />
+
             <div className="min-h-screen flex flex-col md:flex-row">
                 {/* Top/Left side - Hero Section */}
                 <div
@@ -318,12 +591,12 @@ export default function FermierLoginPage() {
                                         style={{
                                             backgroundColor: "var(--farm-green-dark)",
                                         }}
-                                        disabled={loadingConnect || textMessage === ""}
+                                        disabled={loadingConnect}
                                     >
                                         {loadingConnect ? (
                                             <div className="flex items-center space-x-2">
                                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                                <span>{textMessage}</span>
+                                                <span>Connexion...</span>
                                             </div>
                                         ) : (
                                             "Accéder à mon espace"

@@ -37,7 +37,9 @@ export default function RootLayout({
       </head>
 
       <body className="max-w-screen min-h-screen bg-[#f9f7f2] dark:bg-zinc-950 overflow-x-hidden"
-        cz-shortcut-listen="true">
+        cz-shortcut-listen="true"
+        data-new-gr-c-s-check-loaded="14.1242.0"
+        data-gr-ext-installed="">
           <UserProvider>
               <FarmProvider2>
                 <LocationProvider>

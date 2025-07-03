@@ -20,11 +20,18 @@ export const useUser = () => {
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const refreshUser = useCallback(async (forceRefresh: boolean = false) => {
-    if (typeof window === "undefined") return;
+    if (!isClient) return;
+    
     const token = localStorage.getItem("jwt_token");
     const userInStorage = localStorage.getItem("user");
+    
     if (!forceRefresh && userInStorage) {
       try {
         setCurrentUser(JSON.parse(userInStorage));
@@ -33,6 +40,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.removeItem("user");
       }
     }
+    
     if (token) {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -42,6 +50,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
             'Content-Type': 'application/json'
           },
         });
+        
         if (!res.ok) {
           const errorData = await res.json().catch(() => null);
           console.error('Erreur lors de la récupération du profil:', {
@@ -66,11 +75,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       setCurrentUser(null);
       localStorage.removeItem("user");
     }
-  }, []);
+  }, [isClient]);
 
   useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
+    if (isClient) {
+      refreshUser();
+    }
+  }, [refreshUser, isClient]);
 
   return (
     <UserContext.Provider value={{ currentUser, refreshUser, setCurrentUser }}>

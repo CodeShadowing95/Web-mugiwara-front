@@ -37,19 +37,23 @@ export const useCart = () => {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost";
 
-function getToken() {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem("jwt_token");
-  }
-  return null;
-}
-
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const getToken = () => {
+    if (!isClient) return null;
+    return localStorage.getItem("jwt_token");
+  };
 
   const fetchCart = async () => {
+    if (!isClient) return;
     setLoading(true);
     setError(null);
     try {
@@ -69,6 +73,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addToCart = async (productId: number, quantity: number) => {
+    if (!isClient) return;
     setLoading(true);
     setError(null);
     try {
@@ -94,6 +99,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateCartItem = async (itemId: number, quantity: number) => {
+    if (!isClient) return;
     setLoading(true);
     setError(null);
     try {
@@ -119,6 +125,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const removeCartItem = async (itemId: number) => {
+    if (!isClient) return;
     setLoading(true);
     setError(null);
     try {
@@ -142,6 +149,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const validateCart = async () => {
+    if (!isClient) return;
     setLoading(true);
     setError(null);
     try {
@@ -166,8 +174,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    fetchCart();
-  }, []);
+    if (isClient) {
+      fetchCart();
+    }
+  }, [isClient]);
 
   return (
     <CartContext.Provider
@@ -176,4 +186,4 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </CartContext.Provider>
   );
-}; 
+};

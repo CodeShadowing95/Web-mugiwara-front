@@ -32,9 +32,14 @@ export function FarmProvider2({ children }: { children: ReactNode }) {
   const [farms, setFarms] = useState<Farm[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const refreshNewFarm = useCallback(async () => {
-    if (typeof window === 'undefined') return;
+    if (!isClient) return;
 
     setLoading(true);
     setError(null);
@@ -93,10 +98,12 @@ export function FarmProvider2({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isClient, selectedFarm]);
 
   // Charger les données initiales
   useEffect(() => {
+    if (!isClient) return;
+
     const loadInitialData = async () => {
       const token = localStorage.getItem('jwt_token');
       if (!token) {
@@ -126,7 +133,7 @@ export function FarmProvider2({ children }: { children: ReactNode }) {
     };
 
     loadInitialData();
-  }, [refreshNewFarm]);
+  }, [refreshNewFarm, isClient]);
 
   // Gérer la sélection de ferme quand farms change
   useEffect(() => {

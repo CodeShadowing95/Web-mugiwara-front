@@ -3,25 +3,28 @@
 import { Tractor, Leaf, Apple, Carrot, Wheat } from "lucide-react"
 
 interface FarmLoaderProps {
-  size?: "sm" | "md" | "lg"
+  size?: "xs" | "sm" | "md" | "lg"
   variant?: "tractor" | "leaf" | "apple" | "carrot" | "wheat"
   className?: string
 }
 
 export function FarmLoader({ size = "md", variant = "tractor", className = "" }: FarmLoaderProps) {
   const sizeClasses = {
+    xs: "w-10 h-10",
     sm: "w-16 h-16",
     md: "w-24 h-24",
     lg: "w-32 h-32",
   }
 
   const iconSizes = {
+    xs: "w-4 h-4",
     sm: "w-6 h-6",
     md: "w-8 h-8",
     lg: "w-12 h-12",
   }
 
   const orbitSizes = {
+    xs: "w-2 h-2",
     sm: "w-3 h-3",
     md: "w-4 h-4",
     lg: "w-6 h-6",
@@ -40,7 +43,7 @@ export function FarmLoader({ size = "md", variant = "tractor", className = "" }:
   return (
     <div className={`relative ${sizeClasses[size]} ${className}`}>
       {/* Cercle principal */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-farm-orange to-farm-orange-dark flex items-center justify-center shadow-lg animate-pulse">
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[var(--farm-orange)] to-[var(--farm-orange)]-dark flex items-center justify-center shadow-lg animate-pulse">
         <IconComponent className={`${iconSizes[size]} text-white`} />
       </div>
 
