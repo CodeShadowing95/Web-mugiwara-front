@@ -127,7 +127,7 @@ const Navbar = () => {
                                         }`}
                                 >
                                     <Avatar className="h-10 w-10">        
-                                        <AvatarImage src="/placeholder.svg?height=40&width=40" alt={farm.name} />
+                                        <AvatarImage src={activeFarm.avatar} alt={activeFarm.avatar} />
                                         <AvatarFallback className="bg-[var(--farm-orange)] text-white font-bold">{getAvatarInitials(farm.name)}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1 min-w-0">

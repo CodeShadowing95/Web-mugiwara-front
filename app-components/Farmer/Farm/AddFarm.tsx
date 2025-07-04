@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import {
     ArrowLeft,
@@ -19,27 +19,35 @@ import {
     X,
     Check,
     AlertCircle,
+    SortAsc,
+    CheckIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useFarm2 } from "@/app/FarmContext2"
 import { diceBearAvatars } from "@/constants"
+import { FranceCity } from "@/types"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
 
 export default function AddFarmPage() {
+    const farm2Context = useFarm2()
     const [currentStep, setCurrentStep] = useState(1)
     const [isLoading, setIsLoading] = useState(false)
     const [uploadedImages, setUploadedImages] = useState<string[]>([])
     const [error, setError] = useState<string | null>(null)
-    const farm2Context = useFarm2()
-    
+    const [franceCities, setFranceCities] = useState<FranceCity[]>([])
+    const [tempCities, setTempCities] = useState<FranceCity[]>([])
+    const [filteredCities, setFilteredCities] = useState<FranceCity[]>([])
+
     if (!farm2Context) {
         return <div>Erreur : Contexte Farm2 non disponible</div>
     }
-    
+
     const { refreshNewFarm, setFarms, setSelectedFarm } = farm2Context
 
     // États du formulaire
@@ -142,7 +150,61 @@ export default function AddFarmPage() {
         "Magasins partenaires",
     ]
 
+    const fetchFranceCities = async () => {
+        const response = await fetch('https://geo.api.gouv.fr/communes?fields=nom,region,centre,codesPostaux')
+        const data = await response.json()
+        let locations: FranceCity[] = []
+        if (Array.isArray(data)) {
+            locations = data.map((item: any) => ({
+                nom: item.nom,
+                region: item.region,
+                codesPostaux: item.codesPostaux,
+                coordonnes: {
+                    lat: item.centre.coordinates[1],
+                    lng: item.centre.coordinates[0],
+                }
+            }))
+        }
+        return locations as FranceCity[]
+    }
+
+    useEffect(() => {
+        const fetchCities = async () => {
+            try {
+                const cities = await fetchFranceCities()
+                console.log("Villes chargées :", cities)
+                setFranceCities(cities)
+                setTempCities(cities)
+            } catch (error) {
+                console.error("Erreur lors du chargement des villes :", error)
+            }
+        }
+
+        fetchCities()
+    }, [])
+
     const handleInputChange = (field: string, value: any) => {
+        if (field === "zipCode") {
+            setFormData((prev) => ({...prev, region: "", city: "", coordinates: { lat: "", lng: "" } }))
+            if (value.length === 5) {
+                // const citiesFiltered = tempCities.filter(city => city.codesPostaux.includes(value))
+                // setFranceCities(citiesFiltered)
+                // setFilteredCities(citiesFiltered)
+                // const dept = value.substring(0, 2)
+                const dept = value
+                let citiesFilteredByDept = tempCities.filter(city => city.codesPostaux.some(code => code.startsWith(dept)))
+                if (citiesFilteredByDept.length === 0) {
+                    citiesFilteredByDept = tempCities.filter(city => city.codesPostaux.some(code => code.startsWith(dept.substring(0, 2))))
+                }
+                
+                setFranceCities(citiesFilteredByDept)
+                setFilteredCities(citiesFilteredByDept)
+                setFormData((prev) => ({...prev, region: citiesFilteredByDept[0].region.nom }))
+            } else {
+                setFranceCities(tempCities)
+                setFilteredCities([])
+            }
+        }
         setFormData((prev) => ({ ...prev, [field]: value }))
     }
 
@@ -196,8 +258,6 @@ export default function AddFarmPage() {
         // Envoi des données au serveur
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         const token = localStorage.getItem("jwt_token");
-        console.log("API URL:", apiUrl);
-        console.log("Token:", token);
 
         try {
             const response = await fetch(`${apiUrl}/api/v1/create-farm`, {
@@ -278,10 +338,10 @@ export default function AddFarmPage() {
         }
 
         // Simulation de l'envoi des données
-        // setTimeout(() => {
-        //     setIsLoading(false)
-        //     window.location.href = "/fermier"
-        // }, 2000)
+        setTimeout(() => {
+            setIsLoading(false)
+            window.location.href = "/fermier"
+        }, 2000)
     }
 
     const nextStep = () => {
@@ -391,7 +451,7 @@ export default function AddFarmPage() {
                                                 key={type.id}
                                                 onClick={() => handleArrayToggle("farmTypes", type.name)}
                                                 className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 ${formData.farmTypes.includes(type.name)
-                                                    ? "bg-farm-green/10 border-farm-green text-farm-green-dark"
+                                                    ? "bg-[var(--farm-green)]/10 border-farm-green text-farm-green-dark"
                                                     : "bg-white border-gray-200 hover:border-farm-green/50"
                                                     }`}
                                             >
@@ -409,7 +469,7 @@ export default function AddFarmPage() {
                                                 key={cert}
                                                 onClick={() => handleArrayToggle("certifications", cert)}
                                                 className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 ${formData.certifications.includes(cert)
-                                                        ? "bg-farm-green/10 border-farm-green text-farm-green-dark"
+                                                        ? "bg-[var(--farm-green)]/10 border-farm-green text-farm-green-dark"
                                                         : "bg-white border-gray-200 hover:border-farm-green/50"
                                                     }`}
                                             >
@@ -455,28 +515,67 @@ export default function AddFarmPage() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div>
-                                        <Label htmlFor="city" className="text-base font-medium text-farm-green-dark">
-                                            Ville *
-                                        </Label>
-                                        <Input
-                                            id="city"
-                                            placeholder="Aix-en-Provence"
-                                            value={formData.city}
-                                            onChange={(e) => handleInputChange("city", e.target.value)}
-                                            className="mt-2 h-12"
-                                        />
-                                    </div>
-                                    <div>
                                         <Label htmlFor="zipCode" className="text-base font-medium text-farm-green-dark">
                                             Code postal *
                                         </Label>
                                         <Input
                                             id="zipCode"
-                                            placeholder="13100"
+                                            placeholder="Ex: 13100"
                                             value={formData.zipCode}
-                                            onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                                            onChange={(e) => handleInputChange("zipCode", e.target.value.toString())}
                                             className="mt-2 h-12"
+                                            type="text"
+                                            max={5}
                                         />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="city" className="text-base font-medium text-farm-green-dark">
+                                            Ville *
+                                        </Label>
+                                        {/* <Input
+                                            id="city"
+                                            placeholder="Aix-en-Provence"
+                                            value={formData.city}
+                                            onChange={(e) => handleInputChange("city", e.target.value)}
+                                            className="mt-2 h-12"
+                                        /> */}
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    className="w-full h-12 px-4 mt-2 bg-white border border-gray-200 hover:border-farm-green focus:border-farm-green focus:ring-2 focus:ring-farm-green/20 transition-colors justify-between"
+                                                >
+                                                    {formData.city || "Sélectionnez une ville"}
+                                                    <MapPin className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-full p-0">
+                                                <Command>
+                                                    <CommandInput
+                                                        placeholder="Rechercher une ville..."
+                                                        className="h-9"
+                                                    />
+                                                    <CommandEmpty>Aucune ville trouvée.</CommandEmpty>
+                                                    <CommandGroup className="max-h-[300px] overflow-y-auto">
+                                                        {filteredCities.map((city) => (
+                                                            <CommandItem
+                                                                key={city.nom}
+                                                                value={city.nom}
+                                                                onSelect={(value) => {
+                                                                    handleInputChange("city", value)
+                                                                }}
+                                                            >
+                                                                {city.nom}
+                                                                <CheckIcon
+                                                                    className={`ml-auto h-4 w-4 ${formData.city === city.nom ? "opacity-100" : "opacity-0"}`}
+                                                                />
+                                                            </CommandItem>
+                                                        ))}
+                                                    </CommandGroup>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
                                     </div>
                                     <div>
                                         <Label htmlFor="region" className="text-base font-medium text-farm-green-dark">
@@ -484,10 +583,11 @@ export default function AddFarmPage() {
                                         </Label>
                                         <Input
                                             id="region"
-                                            placeholder="Provence-Alpes-Côte d'Azur"
+                                            placeholder="Ex: Provence-Alpes-Côte d'Azur"
                                             value={formData.region}
                                             onChange={(e) => handleInputChange("region", e.target.value)}
                                             className="mt-2 h-12"
+                                            readOnly
                                         />
                                     </div>
                                 </div>
@@ -608,7 +708,7 @@ export default function AddFarmPage() {
                                                 key={method}
                                                 onClick={() => handleArrayToggle("productionMethods", method)}
                                                 className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 ${formData.productionMethods.includes(method)
-                                                        ? "bg-farm-green/10 border-farm-green text-farm-green-dark"
+                                                        ? "bg-[var(--farm-green)]/10 border-farm-green text-farm-green-dark"
                                                         : "bg-white border-gray-200 hover:border-farm-green/50"
                                                     }`}
                                             >
@@ -657,7 +757,7 @@ export default function AddFarmPage() {
                                                 key={method}
                                                 onClick={() => handleArrayToggle("deliveryMethods", method)}
                                                 className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 ${formData.deliveryMethods.includes(method)
-                                                    ? "bg-farm-green/10 border-farm-green text-farm-green-dark"
+                                                    ? "bg-[var(--farm-green)]/10 border-farm-green text-farm-green-dark"
                                                     : "bg-white border-gray-200 hover:border-farm-green/50"
                                                     }`}
                                             >
@@ -742,8 +842,8 @@ export default function AddFarmPage() {
                                         <h3 className="font-medium text-farm-green-dark mb-4">Images ajoutées ({uploadedImages.length})</h3>
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                             {uploadedImages.map((image, index) => (
-                                                <div key={index} className="relative group overflow-hidden max-w-full" style={{maxWidth: '100%'}}>
-                                                    <div style={{width: '100%', aspectRatio: '4/3', overflow: 'hidden', borderRadius: '0.5rem'}}>
+                                                <div key={index} className="relative group overflow-hidden max-w-full" style={{ maxWidth: '100%' }}>
+                                                    <div style={{ width: '100%', aspectRatio: '4/3', overflow: 'hidden', borderRadius: '0.5rem' }}>
                                                         <img
                                                             src={image || "/placeholder.svg"}
                                                             alt={`Image ${index + 1}`}
@@ -799,7 +899,7 @@ export default function AddFarmPage() {
                         <Button
                             onClick={nextStep}
                             disabled={!isStepValid(currentStep)}
-                            className="bg-farm-green hover:bg-farm-green-dark text-white"
+                            className="bg-farm-green hover:bg-[var(--farm-green-dark)] text-white"
                         >
                             Suivant
                             <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
@@ -808,7 +908,7 @@ export default function AddFarmPage() {
                         <Button
                             onClick={handleSubmit}
                             disabled={isLoading || !isStepValid(currentStep)}
-                            className="bg-farm-green hover:bg-farm-green-dark text-white"
+                            className="bg-farm-green hover:bg-[var(--farm-green-dark)] text-white"
                         >
                             {isLoading ? (
                                 <div className="flex items-center">

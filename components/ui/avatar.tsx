@@ -36,6 +36,7 @@ function AvatarImage({
 
 function AvatarFallback({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
   return (
@@ -46,7 +47,9 @@ function AvatarFallback({
         className
       )}
       {...props}
-    />
+    >
+      {children || ''}
+    </AvatarPrimitive.Fallback>
   )
 }
 

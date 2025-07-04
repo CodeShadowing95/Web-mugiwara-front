@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import Loader from "@/app-components/Loader"
 import { LoadingModal } from "@/components/ui/loading-modal"
 import { useUser } from "@/app/UserContext"
 import { useFarm2 } from "@/app/FarmContext2"
@@ -87,7 +86,7 @@ export default function FermierLoginPage() {
         return <div>Erreur : Contexte fermier non disponible</div>
     }
 
-    const { setCurrentUser } = userContext
+    const { setCurrentUser, refreshUser } = userContext
     const { setFarms } = FarmContext2
 
     const [showPassword, setShowPassword] = useState(false)
@@ -351,6 +350,7 @@ export default function FermierLoginPage() {
                             localStorage.setItem("user", JSON.stringify(data))
                             // Mettre à jour le contexte utilisateur
                             setCurrentUser(data)
+                            refreshUser()
                         }
                         break
 

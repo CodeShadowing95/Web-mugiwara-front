@@ -130,3 +130,16 @@ export interface Media {
     uploadedAt: string;
     mediaType: MediaType;
 }
+
+export interface FranceCity {
+    nom: string;
+    coordonnes: {
+        lat: number;
+        lng: number;
+    };
+    region: {
+        code: string;
+        nom: string;
+    };
+    codesPostaux: string[];
+}

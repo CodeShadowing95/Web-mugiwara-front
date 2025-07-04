@@ -295,288 +295,287 @@ export default function ListFarm() {
 
 
     return (
-        <div className="min-h-screen bg-[var(--farm-beige-light)]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* En-tête de la page */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-farm-green-dark mb-2">Mes fermes</h1>
-                        <p className="text-gray-600">Gérez toutes vos exploitations depuis un seul endroit</p>
-                    </div>
-                    <div className="mt-4 md:mt-0">
-                        <Button asChild className="bg-[var(--farm-green)] hover:bg-[var(--farm-green-dark)] text-white">
-                            <Link href="/fermier/add-farm">
-                                <Plus className="w-4 h-4 mr-2" />
-                                Ajouter une ferme
-                            </Link>
-                        </Button>
-                    </div>
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[var(--farm-beige-light)]">
+            {/* En-tête de la page */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+                <div>
+                    <h1 className="text-3xl font-bold text-farm-green-dark mb-2">Mes fermes</h1>
+                    <p className="text-gray-600">Gérez toutes vos exploitations depuis un seul endroit</p>
                 </div>
-
-                {/* Statistiques rapides */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <Card className="border-0 shadow-md">
-                        <CardContent className="px-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-600">Total fermes</p>
-                                    <p className="text-2xl font-bold text-farm-green-dark">{userFarms.length}</p>
-                                </div>
-                                <div className="w-12 h-12 bg-[var(--farm-green)]/10 rounded-full flex items-center justify-center">
-                                    <Leaf className="w-6 h-6 text-farm-green" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="border-0 shadow-md">
-                        <CardContent className="px-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-600">Fermes actives</p>
-                                    <p className="text-2xl font-bold text-farm-green-dark">
-                                        {userFarms.filter((f) => f.status === "on").length}
-                                    </p>
-                                </div>
-                                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                                    <Power className="w-6 h-6 text-green-600" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="border-0 shadow-md">
-                        <CardContent className="px-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-600">Total produits</p>
-                                    <p className="text-2xl font-bold text-farm-green-dark">
-                                        {/* {farms.reduce((sum, farm) => sum + farm.products, 0)} */}
-                                        0
-                                    </p>
-                                </div>
-                                <div className="w-12 h-12 bg-[var(--farm-orange)]/10 rounded-full flex items-center justify-center">
-                                    <Package className="w-6 h-6 text-farm-orange" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="border-0 shadow-md">
-                        <CardContent className="px-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-600">Total clients</p>
-                                    <p className="text-2xl font-bold text-farm-green-dark">
-                                        {/* {farms.reduce((sum, farm) => sum + farm.customers, 0)} */}
-                                        0
-                                    </p>
-                                </div>
-                                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <Users className="w-6 h-6 text-blue-600" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                <div className="mt-4 md:mt-0">
+                    <Button asChild className="bg-[var(--farm-green)] hover:bg-[var(--farm-green-dark)] text-white">
+                        <Link href="/fermier/add-farm">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Ajouter une ferme
+                        </Link>
+                    </Button>
                 </div>
+            </div>
 
-                {/* Barre d'outils */}
-                <Card className="border-0 shadow-md mb-8">
+            {/* Statistiques rapides */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <Card className="border-0 shadow-md">
                     <CardContent className="px-6">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-                            {/* Recherche */}
-                            <div className="flex-1 max-w-md">
-                                <div className="relative">
-                                    <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                                    <Input
-                                        type="search"
-                                        placeholder="Rechercher une ferme..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="pl-10 h-11 bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
-                                    />
-                                </div>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-gray-600">Total fermes</p>
+                                <p className="text-2xl font-bold text-farm-green-dark">{userFarms.length}</p>
                             </div>
+                            <div className="w-12 h-12 bg-[var(--farm-green)]/10 rounded-full flex items-center justify-center">
+                                <Leaf className="w-6 h-6 text-farm-green" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card className="border-0 shadow-md">
+                    <CardContent className="px-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-gray-600">Fermes actives</p>
+                                <p className="text-2xl font-bold text-farm-green-dark">
+                                    {userFarms.filter((f) => f.status === "on").length}
+                                </p>
+                            </div>
+                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <Power className="w-6 h-6 text-green-600" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card className="border-0 shadow-md">
+                    <CardContent className="px-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-gray-600">Total produits</p>
+                                <p className="text-2xl font-bold text-farm-green-dark">
+                                    {/* {farms.reduce((sum, farm) => sum + farm.products, 0)} */}
+                                    0
+                                </p>
+                            </div>
+                            <div className="w-12 h-12 bg-[var(--farm-orange)]/10 rounded-full flex items-center justify-center">
+                                <Package className="w-6 h-6 text-farm-orange" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card className="border-0 shadow-md">
+                    <CardContent className="px-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-gray-600">Total clients</p>
+                                <p className="text-2xl font-bold text-farm-green-dark">
+                                    {/* {farms.reduce((sum, farm) => sum + farm.customers, 0)} */}
+                                    0
+                                </p>
+                            </div>
+                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                <Users className="w-6 h-6 text-blue-600" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
 
-                            {/* Filtres et options */}
-                            <div className="flex items-center space-x-4">
-                                {/* Filtre par statut */}
-                                <Select value={filterStatus} onValueChange={setFilterStatus}>
-                                    <SelectTrigger className="w-40 h-11">
-                                        <SelectValue placeholder="Statut" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">Tous les statuts</SelectItem>
-                                        <SelectItem value="active">Actives</SelectItem>
-                                        <SelectItem value="inactive">Inactives</SelectItem>
-                                        <SelectItem value="pending">En attente</SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                                {/* Filtre par type */}
-                                <Select value={filterType} onValueChange={setFilterType}>
-                                    <SelectTrigger className="w-40 h-11">
-                                        <SelectValue placeholder="Type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">Tous les types</SelectItem>
-                                        <SelectItem value="bio">Bio</SelectItem>
-                                        <SelectItem value="légumes">Légumes</SelectItem>
-                                        <SelectItem value="fruits">Fruits</SelectItem>
-                                        <SelectItem value="laitiers">Produits laitiers</SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                                {/* Tri */}
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" className="h-11">
-                                            {sortOrder === "asc" ? (
-                                                <SortAsc className="w-4 h-4 mr-2" />
-                                            ) : (
-                                                <SortDesc className="w-4 h-4 mr-2" />
-                                            )}
-                                            Trier
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-48">
-                                        <DropdownMenuLabel>Trier par</DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem onClick={() => setSortBy("name")}>
-                                            <span className={sortBy === "name" ? "font-medium" : ""}>Nom</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setSortBy("date")}>
-                                            <span className={sortBy === "date" ? "font-medium" : ""}>Date de création</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setSortBy("sales")}>
-                                            <span className={sortBy === "sales" ? "font-medium" : ""}>Ventes</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setSortBy("rating")}>
-                                            <span className={sortBy === "rating" ? "font-medium" : ""}>Note</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
-                                            {sortOrder === "asc" ? "Ordre décroissant" : "Ordre croissant"}
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-
-                                {/* Mode d'affichage */}
-                                <div className="flex items-center border border-gray-200 rounded-lg p-1">
-                                    <Button
-                                        variant={viewMode === "grid" ? "default" : "ghost"}
-                                        size="sm"
-                                        onClick={() => setViewMode("grid")}
-                                        className={viewMode === "grid" ? "bg-[var(--farm-green)] text-white" : ""}
-                                    >
-                                        <Grid3X3 className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                        variant={viewMode === "list" ? "default" : "ghost"}
-                                        size="sm"
-                                        onClick={() => setViewMode("list")}
-                                        className={viewMode === "list" ? "bg-[var(--farm-green)] text-white" : ""}
-                                    >
-                                        <List className="w-4 h-4" />
-                                    </Button>
-                                </div>
+            {/* Barre d'outils */}
+            <Card className="border-0 shadow-md mb-8">
+                <CardContent className="px-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                        {/* Recherche */}
+                        <div className="flex-1 max-w-md">
+                            <div className="relative">
+                                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                <Input
+                                    type="search"
+                                    placeholder="Rechercher une ferme..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="pl-10 h-11 bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
+                                />
                             </div>
                         </div>
 
-                        {/* Résultats de recherche */}
-                        {searchQuery && (
-                            <div className="mt-4 text-sm text-gray-600">
-                                {filteredFarms.length} résultat(s) pour "{searchQuery}"
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                        {/* Filtres et options */}
+                        <div className="flex items-center space-x-4">
+                            {/* Filtre par statut */}
+                            <Select value={filterStatus} onValueChange={setFilterStatus}>
+                                <SelectTrigger className="w-40 h-11">
+                                    <SelectValue placeholder="Statut" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tous les statuts</SelectItem>
+                                    <SelectItem value="active">Actives</SelectItem>
+                                    <SelectItem value="inactive">Inactives</SelectItem>
+                                    <SelectItem value="pending">En attente</SelectItem>
+                                </SelectContent>
+                            </Select>
 
-                {/* Liste des fermes */}
-                {viewMode === "grid" ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredFarms.map((farm) => (
-                            <Card key={farm.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 p-0">
-                                <div className="relative">
-                                    <img
-                                        src={farm.image || "/placeholder.svg"}
-                                        alt={farm.name}
-                                        className="w-full h-48 object-cover rounded-t-lg"
-                                    />
-                                    <div className="absolute top-4 left-4">{getStatusBadge(farm.status)}</div>
-                                    <div className="absolute top-4 right-4">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="secondary" size="sm" className="bg-white/90 hover:bg-white">
-                                                    <MoreVertical className="w-4 h-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-48">
-                                                {farm.id === 1 ? (
-                                                    <DropdownMenuItem className="text-blue-500">
-                                                        <CircleCheckBig className="w-4 h-4 mr-2" />
-                                                        Ferme montée
-                                                    </DropdownMenuItem>
+                            {/* Filtre par type */}
+                            <Select value={filterType} onValueChange={setFilterType}>
+                                <SelectTrigger className="w-40 h-11">
+                                    <SelectValue placeholder="Type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tous les types</SelectItem>
+                                    <SelectItem value="bio">Bio</SelectItem>
+                                    <SelectItem value="légumes">Légumes</SelectItem>
+                                    <SelectItem value="fruits">Fruits</SelectItem>
+                                    <SelectItem value="laitiers">Produits laitiers</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            {/* Tri */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" className="h-11">
+                                        {sortOrder === "asc" ? (
+                                            <SortAsc className="w-4 h-4 mr-2" />
+                                        ) : (
+                                            <SortDesc className="w-4 h-4 mr-2" />
+                                        )}
+                                        Trier
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                    <DropdownMenuLabel>Trier par</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => setSortBy("name")}>
+                                        <span className={sortBy === "name" ? "font-medium" : ""}>Nom</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSortBy("date")}>
+                                        <span className={sortBy === "date" ? "font-medium" : ""}>Date de création</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSortBy("sales")}>
+                                        <span className={sortBy === "sales" ? "font-medium" : ""}>Ventes</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSortBy("rating")}>
+                                        <span className={sortBy === "rating" ? "font-medium" : ""}>Note</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
+                                        {sortOrder === "asc" ? "Ordre décroissant" : "Ordre croissant"}
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            {/* Mode d'affichage */}
+                            <div className="flex items-center border border-gray-200 rounded-lg p-1">
+                                <Button
+                                    variant={viewMode === "grid" ? "default" : "ghost"}
+                                    size="sm"
+                                    onClick={() => setViewMode("grid")}
+                                    className={viewMode === "grid" ? "bg-[var(--farm-green)] text-white" : ""}
+                                >
+                                    <Grid3X3 className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                    variant={viewMode === "list" ? "default" : "ghost"}
+                                    size="sm"
+                                    onClick={() => setViewMode("list")}
+                                    className={viewMode === "list" ? "bg-[var(--farm-green)] text-white" : ""}
+                                >
+                                    <List className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Résultats de recherche */}
+                    {searchQuery && (
+                        <div className="mt-4 text-sm text-gray-600">
+                            {filteredFarms.length} résultat(s) pour "{searchQuery}"
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* Liste des fermes */}
+            {viewMode === "grid" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredFarms.map((farm) => (
+                        <Card key={farm.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 p-0">
+                            <div className="relative">
+                                <img
+                                    src={farm.image || "/placeholder.svg"}
+                                    alt={farm.name}
+                                    className="w-full h-48 object-cover rounded-t-lg"
+                                />
+                                <div className="absolute top-4 left-4">{getStatusBadge(farm.status)}</div>
+                                <div className="absolute top-4 right-4">
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="secondary" size="sm" className="bg-white/90 hover:bg-white">
+                                                <MoreVertical className="w-4 h-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-48">
+                                            {farm.id === 1 ? (
+                                                <DropdownMenuItem className="text-blue-500">
+                                                    <CircleCheckBig className="w-4 h-4 mr-2" />
+                                                    Ferme montée
+                                                </DropdownMenuItem>
+                                            ) : (
+                                                <DropdownMenuItem>
+                                                    <CircleArrowUp className="w-4 h-4 mr-2" />
+                                                    Monter la ferme
+                                                </DropdownMenuItem>
+                                            )}
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem>
+                                                <Eye className="w-4 h-4 mr-2" />
+                                                Voir les détails
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem>
+                                                <Edit className="w-4 h-4 mr-2" />
+                                                Modifier
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem onClick={() => toggleFarmStatus(farm.id)}>
+                                                {farm.isActive ? (
+                                                    <>
+                                                        <PowerOff className="w-4 h-4 mr-2" />
+                                                        Désactiver
+                                                    </>
                                                 ) : (
-                                                    <DropdownMenuItem>
-                                                        <CircleArrowUp className="w-4 h-4 mr-2" />
-                                                        Monter la ferme
-                                                    </DropdownMenuItem>
+                                                    <>
+                                                        <Power className="w-4 h-4 mr-2" />
+                                                        Activer
+                                                    </>
                                                 )}
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem>
-                                                    <Eye className="w-4 h-4 mr-2" />
-                                                    Voir les détails
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <Edit className="w-4 h-4 mr-2" />
-                                                    Modifier
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem onClick={() => toggleFarmStatus(farm.id)}>
-                                                    {farm.isActive ? (
-                                                        <>
-                                                            <PowerOff className="w-4 h-4 mr-2" />
-                                                            Désactiver
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Power className="w-4 h-4 mr-2" />
-                                                            Activer
-                                                        </>
-                                                    )}
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem className="text-red-600">
-                                                    <Trash2 className="w-4 h-4 mr-2" />
-                                                    Supprimer
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem className="text-red-600">
+                                                <Trash2 className="w-4 h-4 mr-2" />
+                                                Supprimer
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+                            </div>
+
+                            <CardContent className="p-6">
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="flex items-center space-x-3">
+                                        <Avatar className="h-12 w-12">
+                                            <AvatarFallback className={`${farm.color} text-white font-semibold`}>
+                                                {farm.avatar}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <h3 className="font-semibold text-farm-green-dark text-lg">{farm.name}</h3>
+                                            <p className="text-sm text-gray-600">{farm.type}</p>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <CardContent className="p-6">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex items-center space-x-3">
-                                            <Avatar className="h-12 w-12">
-                                                <AvatarFallback className={`${farm.color} text-white font-semibold`}>
-                                                    {farm.avatar}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <h3 className="font-semibold text-farm-green-dark text-lg">{farm.name}</h3>
-                                                <p className="text-sm text-gray-600">{farm.type}</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div className="flex items-center text-sm text-gray-600 mb-3">
+                                    <MapPin className="w-4 h-4 mr-1" />
+                                    {farm.location}
+                                </div>
 
-                                    <div className="flex items-center text-sm text-gray-600 mb-3">
-                                        <MapPin className="w-4 h-4 mr-1" />
-                                        {farm.location}
-                                    </div>
+                                <p className="text-sm text-gray-600 mb-4 line-clamp-2">{farm.description}</p>
 
-                                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{farm.description}</p>
-
-                                    {/* Certifications */}
-                                    {/* <div className="flex flex-wrap gap-2 mb-4">
+                                {/* Certifications */}
+                                {/* <div className="flex flex-wrap gap-2 mb-4">
                                         {farm.certifications.map((cert, index) => (
                                             <Badge key={index} variant="outline" className="text-xs">
                                                 <Award className="w-3 h-3 mr-1" />
@@ -585,172 +584,171 @@ export default function ListFarm() {
                                         ))}
                                     </div> */}
 
-                                    {/* Statistiques */}
-                                    <div className="grid grid-cols-2 gap-4 mb-4">
-                                        <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                            <p className="text-lg font-bold text-farm-green-dark">{farm.products}</p>
-                                            <p className="text-xs text-gray-600">Produits</p>
-                                        </div>
-                                        <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                            <p className="text-lg font-bold text-farm-green-dark">{farm.customers}</p>
-                                            <p className="text-xs text-gray-600">Clients</p>
-                                        </div>
+                                {/* Statistiques */}
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                                        <p className="text-lg font-bold text-farm-green-dark">{farm.products}</p>
+                                        <p className="text-xs text-gray-600">Produits</p>
                                     </div>
+                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                                        <p className="text-lg font-bold text-farm-green-dark">{farm.customers}</p>
+                                        <p className="text-xs text-gray-600">Clients</p>
+                                    </div>
+                                </div>
 
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-1">
-                                            <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                                            <span className="text-sm font-medium">{farm.rating}</span>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-sm font-bold text-farm-green-dark">{farm.totalSales}</p>
-                                            <p className="text-xs text-gray-600">Ventes totales</p>
-                                        </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-1">
+                                        <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                                        <span className="text-sm font-medium">{farm.rating}</span>
                                     </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-bold text-farm-green-dark">{farm.totalSales}</p>
+                                        <p className="text-xs text-gray-600">Ventes totales</p>
+                                    </div>
+                                </div>
 
-                                    <div className="mt-4 pt-4 border-t border-gray-100">
-                                        <p className="text-xs text-gray-500">Dernière activité: {farm.lastActivity}</p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                ) : (
-                    <Card className="border-0 shadow-lg">
-                        <CardContent className="p-0">
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="bg-gray-50 border-b border-gray-200">
-                                        <tr>
-                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Ferme
-                                            </th>
-                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Localisation
-                                            </th>
-                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Statut
-                                            </th>
-                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Produits
-                                            </th>
-                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Clients
-                                            </th>
-                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Ventes
-                                            </th>
-                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Note
-                                            </th>
-                                            <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Actions
-                                            </th>
+                                <div className="mt-4 pt-4 border-t border-gray-100">
+                                    <p className="text-xs text-gray-500">Dernière activité: {farm.lastActivity}</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            ) : (
+                <Card className="border-0 shadow-lg">
+                    <CardContent className="p-0">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-gray-50 border-b border-gray-200">
+                                    <tr>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Ferme
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Localisation
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Statut
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Produits
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Clients
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Ventes
+                                        </th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Note
+                                        </th>
+                                        <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {filteredFarms.map((farm) => (
+                                        <tr key={farm.id} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center">
+                                                    <Avatar className="h-10 w-10 mr-3">
+                                                        <AvatarFallback className={`${farm.color} text-white font-semibold`}>
+                                                            {farm.avatar}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div>
+                                                        <div className="text-sm font-medium text-gray-900">{farm.name}</div>
+                                                        <div className="text-sm text-gray-500">{farm.type}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-900">{farm.location}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(farm.status)}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-gray-900">{farm.products}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-gray-900">{farm.customers}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-gray-900">{farm.totalSales}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center">
+                                                    <Star className="w-4 h-4 text-yellow-500 fill-current mr-1" />
+                                                    <span className="text-sm font-medium">{farm.rating}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="sm">
+                                                            <MoreVertical className="w-4 h-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem>
+                                                            <Eye className="w-4 h-4 mr-2" />
+                                                            Voir les détails
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem>
+                                                            <Edit className="w-4 h-4 mr-2" />
+                                                            Modifier
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem onClick={() => toggleFarmStatus(farm.id)}>
+                                                            {farm.isActive ? (
+                                                                <>
+                                                                    <PowerOff className="w-4 h-4 mr-2" />
+                                                                    Désactiver
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Power className="w-4 h-4 mr-2" />
+                                                                    Activer
+                                                                </>
+                                                            )}
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem className="text-red-600">
+                                                            <Trash2 className="w-4 h-4 mr-2" />
+                                                            Supprimer
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {filteredFarms.map((farm) => (
-                                            <tr key={farm.id} className="hover:bg-gray-50 transition-colors">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center">
-                                                        <Avatar className="h-10 w-10 mr-3">
-                                                            <AvatarFallback className={`${farm.color} text-white font-semibold`}>
-                                                                {farm.avatar}
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                        <div>
-                                                            <div className="text-sm font-medium text-gray-900">{farm.name}</div>
-                                                            <div className="text-sm text-gray-500">{farm.type}</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-900">{farm.location}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(farm.status)}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm font-medium text-gray-900">{farm.products}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm font-medium text-gray-900">{farm.customers}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm font-medium text-gray-900">{farm.totalSales}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center">
-                                                        <Star className="w-4 h-4 text-yellow-500 fill-current mr-1" />
-                                                        <span className="text-sm font-medium">{farm.rating}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="sm">
-                                                                <MoreVertical className="w-4 h-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-                                                            <DropdownMenuItem>
-                                                                <Eye className="w-4 h-4 mr-2" />
-                                                                Voir les détails
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem>
-                                                                <Edit className="w-4 h-4 mr-2" />
-                                                                Modifier
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuSeparator />
-                                                            <DropdownMenuItem onClick={() => toggleFarmStatus(farm.id)}>
-                                                                {farm.isActive ? (
-                                                                    <>
-                                                                        <PowerOff className="w-4 h-4 mr-2" />
-                                                                        Désactiver
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        <Power className="w-4 h-4 mr-2" />
-                                                                        Activer
-                                                                    </>
-                                                                )}
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuSeparator />
-                                                            <DropdownMenuItem className="text-red-600">
-                                                                <Trash2 className="w-4 h-4 mr-2" />
-                                                                Supprimer
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
-                {/* Message si aucune ferme */}
-                {filteredFarms.length === 0 && (
-                    <Card className="border-0 shadow-lg">
-                        <CardContent className="p-12 text-center">
-                            <Leaf className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune ferme trouvée</h3>
-                            <p className="text-gray-600 mb-6">
-                                {searchQuery
-                                    ? `Aucune ferme ne correspond à "${searchQuery}".`
-                                    : "Vous n'avez pas encore ajouté de fermes."}
-                            </p>
-                            <Button asChild className="bg-[var(--farm-green)] hover:bg-[var(--farm-green-dark)] text-white">
-                                <Link href="/fermier/add-farm">
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    Ajouter votre première ferme
-                                </Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
-                )}
-            </div>
+            {/* Message si aucune ferme */}
+            {filteredFarms.length === 0 && (
+                <Card className="border-0 shadow-lg">
+                    <CardContent className="p-12 text-center">
+                        <Leaf className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune ferme trouvée</h3>
+                        <p className="text-gray-600 mb-6">
+                            {searchQuery
+                                ? `Aucune ferme ne correspond à "${searchQuery}".`
+                                : "Vous n'avez pas encore ajouté de fermes."}
+                        </p>
+                        <Button asChild className="bg-[var(--farm-green)] hover:bg-[var(--farm-green-dark)] text-white">
+                            <Link href="/fermier/add-farm">
+                                <Plus className="w-4 h-4 mr-2" />
+                                Ajouter votre première ferme
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+            )}
         </div>
     )
 }

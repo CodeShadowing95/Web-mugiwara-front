@@ -128,7 +128,7 @@ export default function FarmerHomepage() {
     }
 
     return (
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-farm-beige-light">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[var(--farm-beige-light)]">
             {/* Statistiques */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {stats.map((stat, index) => (
