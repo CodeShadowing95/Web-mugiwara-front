@@ -22,7 +22,7 @@ const CategoryCard = ({ categorie }: { categorie: Category }) => {
                             <Link key={key} href={`/category?item=${child.id}&q=${normalizedItem}`} className="group">
                                 <div className="aspect-square rounded-lg mb-2 overflow-hidden">
                                     <img
-                                        src={child.thumbnail && child.thumbnail.publicPath ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/${child.thumbnail.publicPath.replace(/^public\//, "")}` : "/vegetable2.png"}
+                                        src={child.thumbnail && child.thumbnail.publicPath ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/${child.thumbnail.publicPath.replace(/^public\//, "")}` : "/imgs/vegetable2.png"}
                                         alt={child.name}
                                         className="h-full w-full object-contain transition-transform group-hover:scale-105"
                                     />

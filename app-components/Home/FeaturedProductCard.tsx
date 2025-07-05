@@ -29,7 +29,7 @@ const FeaturedProductCard: React.FC<FeaturedProductCardProps> = ({ product }) =>
                 return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/${img.publicPath.replace(/^public\//, "")}`;
               }
             }
-            return "/vegetable.png";
+            return "/imgs/vegetable.png";
           })()}
           alt={product.name}
           fill

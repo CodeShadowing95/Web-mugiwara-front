@@ -80,11 +80,11 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
         id: img.id || index + 1,
         src: img.publicPath
           ? `${API_URL}/${img.publicPath.replace(/^public\//, "")}`
-          : "/sample.png",
+          : "/imgs/sample.png",
         alt: prod?.name || "Image du produit",
       }))
     : [
-        { id: 1, src: "/sample.png", alt: "Image du produit" },
+        { id: 1, src: "/imgs/sample.png", alt: "Image du produit" },
       ];
 
   const recipes = [
@@ -433,7 +433,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                     <div className="relative h-48 overflow-hidden">
                       <Image
                         // src={recipe.image || "/placeholder.svg"}
-                        src="/sample.png"
+                        src="/imgs/sample.png"
                         alt={recipe.title}
                         width={400}
                         height={300}
@@ -491,7 +491,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                           <div className="w-6 h-6 rounded-full overflow-hidden">
                             <Image
                               // src={recipe.authorImage || "/cook.jpg"}
-                              src="/cook.jpg"
+                              src="/imgs/cook.jpg"
                               alt={recipe.author}
                               width={24}
                               height={24}

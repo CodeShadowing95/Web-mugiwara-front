@@ -157,7 +157,7 @@ export default function CustomCart({ isScrolled }: { isScrolled: boolean }) {
                                     >
                                         <div className="relative h-20 w-20 rounded-lg bg-[#f7f4eb] flex items-center justify-center overflow-hidden">
                                             {(() => {
-                                                let imageSrc = "/sample.png";
+                                                let imageSrc = "/imgs/sample.png";
                                                 if (Array.isArray(product.product?.medias)) {
                                                     const images = product.product.medias.filter((media: any) => media.mediaType?.slug === "image");
                                                     if (images.length > 0 && images[0].publicPath) {

@@ -9,7 +9,7 @@ const EmptyFarm = () => {
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-2rem)] p-4 bg-gradient-to-b from-transparent to-farm-beige-light/20">
             <div className="w-80 h-80 mb-8 relative animate-float">
                 <img
-                    src="/farm2.png"
+                    src="/imgs/farm2.png"
                     alt="Illustration d'une ferme"
                     className="w-full h-full object-contain rounded-2xl opacity-90 drop-shadow-xl"
                     loading="eager"

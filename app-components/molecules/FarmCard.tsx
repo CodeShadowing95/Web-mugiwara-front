@@ -12,7 +12,7 @@ export default function FarmCard({ farm }: FarmCardProps) {
   return (
     <Card className="flex flex-col overflow-hidden pt-0">
       <img
-        src={farm.profileImage || "/farm.jpg"}
+        src={farm.profileImage || "/imgs/farm.jpg"}
         alt={farm.name}
         className="rounded-t-xl w-full h-48 object-cover m-0 p-0"
       />

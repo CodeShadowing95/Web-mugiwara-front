@@ -26,9 +26,9 @@ export default function BannerCarousel() {
             id: 1,
             title: "Des produits frais qui ont du goût.",
             subtitle: "Directement de nos producteurs locaux",
-            logoSrc: "vegetable.png",
-            imageSrc1: "vegetable2.png",
-            imageSrc2: "sample.png",
+            logoSrc: "/imgs/vegetable.png",
+            imageSrc1: "/imgs/c1.png",
+            // imageSrc2: "/imgs/sample.png",
             // bgColor: "from-[#5a7052] to-[#8fb573]",
             bgPattern: "url('/banner-carousel/hollowed-boxes.png') no-repeat center center/cover",
         },
@@ -36,9 +36,9 @@ export default function BannerCarousel() {
             id: 2,
             title: "Savourez les fruits de saison.",
             subtitle: "Cueillis à maturité pour une saveur optimale",
-            logoSrc: "vegetable.png",
-            imageSrc1: "vegetable2.png",
-            imageSrc2: "sample.png",
+            logoSrc: "/imgs/vegetable.png",
+            imageSrc1: "/imgs/c2.png",
+            // imageSrc2: "/imgs/sample.png",
             // bgColor: "from-[#e4a14e] to-[#f0c078]",
             bgPattern: "url('/banner-carousel/flat-mountains.png') no-repeat center 90%/cover",
         },
@@ -46,9 +46,9 @@ export default function BannerCarousel() {
             id: 3,
             title: "L'agriculture biologique à l'honneur.",
             subtitle: "Respectueux de l'environnement et de votre santé",
-            logoSrc: "vegetable.png",
-            imageSrc1: "vegetable2.png",
-            imageSrc2: "sample.png",
+            logoSrc: "/imgs/vegetable.png",
+            imageSrc1: "/imgs/c3.png",
+            // imageSrc2: "/imgs/sample.png",
             // bgColor: "from-[#3c5a3e] to-[#5a7052]",
             bgPattern: "url('/banner-carousel/leaves.png') no-repeat center center/cover",
         },
@@ -121,7 +121,7 @@ export default function BannerCarousel() {
                                     {slide.logoSrc && (
                                         <div className="mb-6">
                                             <img
-                                                src={slide.logoSrc || "/placeholder.svg"}
+                                                src={slide.logoSrc || "/imgs/vegetable.png"}
                                                 alt="Marché Fermier"
                                                 className="h-10 object-contain"
                                             />
@@ -135,14 +135,14 @@ export default function BannerCarousel() {
                                 <div className="md:w-1/2 flex justify-center md:justify-end relative">
                                     {slide.imageSrc1 && (
                                         <img
-                                            src={slide.imageSrc1 || "/placeholder.svg"}
+                                            src={slide.imageSrc1 || "/imgs/vegetable.png"}
                                             alt="Produit principal"
-                                            className="h-56 md:h-80 w-56 md:w-80 object-contain relative z-10 animate-float"
+                                            className="h-64 md:h-96 w-64 md:w-96 object-contain relative z-10 animate-float"
                                         />
                                     )}
                                     {slide.imageSrc2 && (
                                         <img
-                                            src={slide.imageSrc2 || "/placeholder.svg"}
+                                            src={slide.imageSrc2 || "/imgs/vegetable2.png"}
                                             alt="Produit secondaire"
                                             className="absolute right-0 bottom-0 h-44 md:h-64 w-44 md:w-64 object-contain z-20 animate-float-delayed"
                                         />

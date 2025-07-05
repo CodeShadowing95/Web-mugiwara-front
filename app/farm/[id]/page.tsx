@@ -31,7 +31,7 @@ export default async function FarmPage({ params, searchParams }: { params: { id:
           <div className="mx-10 md:w-1/2 flex items-center justify-center">
             <div className="w-full max-w-xs aspect-square overflow-hidden rounded-xl bg-white flex items-center justify-center">
               <ProductImage
-                src={farmData.profileImage || "/farm.jpg"}
+                src={farmData.profileImage || "/imgs/farm.jpg"}
                 alt={farmData.name}
                 className="w-full h-full object-cover"
               />

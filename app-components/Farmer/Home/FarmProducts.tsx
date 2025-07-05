@@ -34,7 +34,7 @@ const FarmProducts = () => {
             sales: 42,
             stock: 18,
             status: "disponible",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
         {
             id: 2,
@@ -44,7 +44,7 @@ const FarmProducts = () => {
             sales: 36,
             stock: 24,
             status: "disponible",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
         {
             id: 3,
@@ -54,7 +54,7 @@ const FarmProducts = () => {
             sales: 28,
             stock: 15,
             status: "disponible",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
         {
             id: 4,
@@ -64,7 +64,7 @@ const FarmProducts = () => {
             sales: 25,
             stock: 12,
             status: "disponible",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
         {
             id: 5,
@@ -74,7 +74,7 @@ const FarmProducts = () => {
             sales: 34,
             stock: 5,
             status: "stock_faible",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
         {
             id: 6,
@@ -84,7 +84,7 @@ const FarmProducts = () => {
             sales: 29,
             stock: 3,
             status: "stock_faible",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
         {
             id: 7,
@@ -94,7 +94,7 @@ const FarmProducts = () => {
             sales: 18,
             stock: 0,
             status: "rupture",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
         {
             id: 8,
@@ -104,7 +104,7 @@ const FarmProducts = () => {
             sales: 31,
             stock: 22,
             status: "disponible",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
         {
             id: 9,
@@ -114,7 +114,7 @@ const FarmProducts = () => {
             sales: 26,
             stock: 0,
             status: "rupture",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
         {
             id: 10,
@@ -124,7 +124,7 @@ const FarmProducts = () => {
             sales: 22,
             stock: 16,
             status: "disponible",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
         {
             id: 11,
@@ -134,7 +134,7 @@ const FarmProducts = () => {
             sales: 19,
             stock: 8,
             status: "disponible",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
         {
             id: 12,
@@ -144,7 +144,7 @@ const FarmProducts = () => {
             sales: 15,
             stock: 4,
             status: "stock_faible",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
         {
             id: 13,
@@ -154,7 +154,7 @@ const FarmProducts = () => {
             sales: 24,
             stock: 20,
             status: "disponible",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
         {
             id: 14,
@@ -164,7 +164,7 @@ const FarmProducts = () => {
             sales: 32,
             stock: 0,
             status: "rupture",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
         {
             id: 15,
@@ -174,7 +174,7 @@ const FarmProducts = () => {
             sales: 28,
             stock: 4,
             status: "stock_faible",
-            image: "/vegetable.png",
+            image: "/imgs/vegetable.png",
         },
     ]
     

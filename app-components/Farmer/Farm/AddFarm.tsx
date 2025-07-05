@@ -294,6 +294,7 @@ export default function AddFarmPage() {
 
             // Mise à jour du localStorage et du contexte
             localStorage.setItem('farms', JSON.stringify(updatedFarms))
+            localStorage.setItem('newFarm', JSON.stringify(true))
             setFarms(updatedFarms)
             setSelectedFarm(data)
             refreshNewFarm()

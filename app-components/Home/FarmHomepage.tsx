@@ -49,7 +49,7 @@ export default async function  FarmHomepage() {
                 <Button className="bg-[#3c5a3e] hover:bg-[#2a4029] text-white">Acheter maintenant</Button>
               </div>
               <div className="absolute bottom-0 right-0 w-40">
-                <img src="vegetable.png" alt="Panier de légumes" className="object-contain" />
+                <img src="/imgs/vegetable.png" alt="Panier de légumes" className="object-contain" />
               </div>
             </div>
           </div>
@@ -83,7 +83,7 @@ export default async function  FarmHomepage() {
                 >
                   <div className="aspect-video relative overflow-hidden">
                     <img
-                      src="farm.jpg"
+                      src="/imgs/farm.jpg"
                       alt={`${farm.name}`}
                       className="w-full h-full object-cover transition-transform group-hover:scale-105"
                     />

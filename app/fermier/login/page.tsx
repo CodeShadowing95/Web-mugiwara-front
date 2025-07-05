@@ -427,7 +427,7 @@ export default function FermierLoginPage() {
                 <div
                     className="w-full md:w-1/2 min-h-[30vh] md:min-h-screen relative overflow-hidden"
                     style={{
-                        background: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/farm.jpg') no-repeat center center`,
+                        background: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/imgs/farm.jpg') no-repeat center center`,
                         backgroundSize: "cover",
                     }}
                 >

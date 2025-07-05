@@ -13,9 +13,6 @@ const FermierLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const isAuthPage = pathname?.startsWith("/fermier/login") || pathname?.startsWith("/fermier/register");
   const [hasFarms, setHasFarms] = useState(false);
-  const [showBecomeFarmerModal, setShowBecomeFarmerModal] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [color, setColor] = useState<string>("success");
   const userContext = useUser()
   const farm2Context = useFarm2()
@@ -32,31 +29,33 @@ const FermierLayout = ({ children }: { children: React.ReactNode }) => {
   const { farms } = farm2Context;
 
   useEffect(() => {
-    if (farms && farms.length > 0) {
-      setHasFarms(true)
-    } else {
-      setHasFarms(false)
-    }
-  }, [farms]);
-
-  useEffect(() => {
-    if (!isAuthPage) {
-      const user = JSON.parse(localStorage.getItem("user") || "{}")
-      const userRoles = user?.roles;
-      if (!userRoles || !Array.isArray(userRoles) || !userRoles.includes("ROLE_FARMER")) {
-        setShowBecomeFarmerModal(true);
-      } else {
-        setShowBecomeFarmerModal(false);
+    if (typeof window !== undefined) {
+      const newlyCreated = JSON.parse(localStorage.getItem("newFarm") || "{}")
+      if (newlyCreated && Object.keys(newlyCreated).length > 0) {
+        setHasFarms(true);
+        localStorage.removeItem("newFarm");
       }
-      // const roles = Array.isArray(user.roles) ? user.roles : [];
-      // console.log("Roles:", roles);
-      // if (!roles.includes("ROLE_FARMER")) {
-      //   setShowBecomeFarmerModal(true);
-      // } else {
-      //   setShowBecomeFarmerModal(false);
-      // }
     }
-  }, [isAuthPage]);
+  }, []);
+
+  // useEffect(() => {
+  //   if (!isAuthPage) {
+  //     const user = JSON.parse(localStorage.getItem("user") || "{}")
+  //     const userRoles = user?.roles;
+  //     if (!userRoles || !Array.isArray(userRoles) || !userRoles.includes("ROLE_FARMER")) {
+  //       setShowBecomeFarmerModal(true);
+  //     } else {
+  //       setShowBecomeFarmerModal(false);
+  //     }
+  //     // const roles = Array.isArray(user.roles) ? user.roles : [];
+  //     // console.log("Roles:", roles);
+  //     // if (!roles.includes("ROLE_FARMER")) {
+  //     //   setShowBecomeFarmerModal(true);
+  //     // } else {
+  //     //   setShowBecomeFarmerModal(false);
+  //     // }
+  //   }
+  // }, [isAuthPage]);
 
   // const handleBecomeFarmer = async () => {
   //   setLoading(true);
@@ -105,31 +104,9 @@ const FermierLayout = ({ children }: { children: React.ReactNode }) => {
   //   }
   // };
 
-  let colorClass = "bg-green-100 text-green-800";
-  if (color === "danger") {
-    colorClass = "bg-red-100 text-red-800";
-  }
-
   return (
     <>
-      {/* <Modal
-        isOpen={showBecomeFarmerModal}
-        onClose={() => setShowBecomeFarmerModal(false)}
-        onConfirm={handleBecomeFarmer}
-        title="Confirmation"
-        confirmText={loading ? "En cours..." : "Confirmer"}
-      >
-        Vous devez devenir fermier pour accéder à cet espace. Continuer ?
-      </Modal>
-      {message && (
-        <div
-          className={`fixed top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded shadow z-50 ${colorClass}`}
-        >
-          {message}
-        </div>
-      )} */}
-
-      {hasFarms && (
+      {!isAuthPage &&
         <Toast
           title="Et si on cherchait Larry ? 😆"
           description="Ravi de vous revoir! Vous pouvez ajouter des fermes à partir de votre espace personnel."
@@ -137,13 +114,16 @@ const FermierLayout = ({ children }: { children: React.ReactNode }) => {
           icon={<CheckCircle className="w-6 h-6 text-orange-500" />}
           actionLabel="OK"
         />
-        // <Toast
-        //   title="Ferme ajoutée"
-        //   description="Une nouvelle ferme a été créée avec succès"
-        //   className="bg-green-100"
-        //   icon={<CheckCircle className="w-6 h-6 text-emerald-500" />}
-        //   actionLabel="OK"
-        // />
+      }
+      
+      {hasFarms && (
+        <Toast
+          title="Ferme ajoutée"
+          description="✅ Une nouvelle ferme a été créée avec succès"
+          className="bg-green-100"
+          icon={<CheckCircle className="w-6 h-6 text-emerald-500" />}
+          actionLabel="OK"
+        />
       )}
 
       {!isAuthPage && <Sidebar hasFarms={hasFarms} />}

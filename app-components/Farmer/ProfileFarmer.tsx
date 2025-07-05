@@ -198,7 +198,7 @@ export default function FermierProfilePage() {
                 {/* Avatar */}
                 <div className="relative">
                   <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
-                    <AvatarImage src={profileData.avatar || "/cook.jpg"} alt={profileData.firstName} />
+                    <AvatarImage src={profileData.avatar || "/imgs/cook.jpg"} alt={profileData.firstName} />
                     <AvatarFallback className="bg-farm-orange text-white text-4xl font-bold">
                       {userInitials}
                     </AvatarFallback>

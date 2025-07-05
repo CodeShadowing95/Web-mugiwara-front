@@ -144,7 +144,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, loading, error, tit
                         return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/${img.publicPath.replace(/^public\//, "")}`;
                       }
                     }
-                    return "/vegetable.png";
+                    return "/imgs/vegetable.png";
                   })()}
                   alt={produit.name}
                   className="h-48 w-48 object-contain transition-transform group-hover:scale-105"

@@ -80,7 +80,7 @@ export const productsCart = [
         description: "Ferme des Quatre Saisons",
         price: 4.95,
         quantity: 2,
-        image: "/farm.jpg",
+        image: "/imgs/farm.jpg",
         organic: true,
     },
     {
@@ -89,7 +89,7 @@ export const productsCart = [
         description: "Chèvrerie du Moulin",
         price: 6.5,
         quantity: 1,
-        image: "/farm.jpg",
+        image: "/imgs/farm.jpg",
         organic: false,
     },
     {
@@ -98,7 +98,7 @@ export const productsCart = [
         description: "Rucher des Collines",
         price: 8.75,
         quantity: 1,
-        image: "/farm.jpg",
+        image: "/imgs/farm.jpg",
         organic: true,
     },
 ]
