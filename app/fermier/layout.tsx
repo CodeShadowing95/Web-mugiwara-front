@@ -29,111 +29,25 @@ const FermierLayout = ({ children }: { children: React.ReactNode }) => {
   const { farms } = farm2Context;
 
   useEffect(() => {
-    if (typeof window !== undefined) {
-      const newlyCreated = JSON.parse(localStorage.getItem("newFarm") || "{}")
-      if (newlyCreated && Object.keys(newlyCreated).length > 0) {
-        setHasFarms(true);
-        localStorage.removeItem("newFarm");
-      }
+    if (farms && farms.length > 0) {
+      setHasFarms(true);
     }
-  }, []);
+  }, [farms]);
 
-  // useEffect(() => {
-  //   if (!isAuthPage) {
-  //     const user = JSON.parse(localStorage.getItem("user") || "{}")
-  //     const userRoles = user?.roles;
-  //     if (!userRoles || !Array.isArray(userRoles) || !userRoles.includes("ROLE_FARMER")) {
-  //       setShowBecomeFarmerModal(true);
-  //     } else {
-  //       setShowBecomeFarmerModal(false);
-  //     }
-  //     // const roles = Array.isArray(user.roles) ? user.roles : [];
-  //     // console.log("Roles:", roles);
-  //     // if (!roles.includes("ROLE_FARMER")) {
-  //     //   setShowBecomeFarmerModal(true);
-  //     // } else {
-  //     //   setShowBecomeFarmerModal(false);
-  //     // }
-  //   }
-  // }, [isAuthPage]);
-
-  // const handleBecomeFarmer = async () => {
-  //   setLoading(true);
-  //   setMessage(null);
-  //   setColor("success");
-  //   try {
-  //     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  //     const token = localStorage.getItem("jwt_token");
-  //     const res = await fetch(`${apiUrl}/api/become-farmer`, {
-  //       method: "POST",
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-  //     if (res.ok) {
-  //       setMessage("Vous êtes maintenant fermier ! Commencez à ajouter votre première ferme.");
-  //       setColor("success");
-  //       await refreshUser(true);
-  //     } else {
-  //       let errorMsg = "Erreur lors de la demande. Veuillez réessayer.";
-  //       setColor("danger");
-  //       try {
-  //         const data = await res.json();
-  //         if (res.status === 401) {
-  //           errorMsg = "Votre session a expiré. Veuillez vous reconnecter.";
-  //           setMessage(errorMsg);
-  //           setTimeout(() => {
-  //             window.location.href = "/fermier/login";
-  //           }, 1200);
-  //           return;
-  //         } else if (data.message) {
-  //           errorMsg = data.message;
-  //         }
-  //       } catch {
-  //         setMessage(errorMsg);
-  //         setTimeout(() => window.location.reload(), 1500);
-  //       }
-  //     }
-  //   } catch (e) {
-  //     setMessage("Erreur réseau. Veuillez réessayer.");
-  //     setColor("danger");
-  //     setTimeout(() => window.location.reload(), 1500);
-  //   } finally {
-  //     setLoading(false);
-  //     setShowBecomeFarmerModal(false);
-  //   }
-  // };
+  if (isAuthPage) {
+    return <>{children}</>
+  }
 
   return (
-    <>
-      {!isAuthPage &&
-        <Toast
-          title="Et si on cherchait Larry ? 😆"
-          description="Ravi de vous revoir! Vous pouvez ajouter des fermes à partir de votre espace personnel."
-          className="bg-orange-100"
-          icon={<CheckCircle className="w-6 h-6 text-orange-500" />}
-          actionLabel="OK"
-        />
-      }
-      
-      {hasFarms && (
-        <Toast
-          title="Ferme ajoutée"
-          description="✅ Une nouvelle ferme a été créée avec succès"
-          className="bg-green-100"
-          icon={<CheckCircle className="w-6 h-6 text-emerald-500" />}
-          actionLabel="OK"
-        />
-      )}
-
-      {!isAuthPage && <Sidebar hasFarms={hasFarms} />}
-      <div className={`flex-1 flex flex-col w-full ${isAuthPage ? '' : 'lg:w-[calc(100%-16rem)'} ]`}>
-        <div className={`${!isAuthPage && 'ml-64'}`}>
-          {!isAuthPage && hasFarms && <Navbar />}
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
+      <Sidebar hasFarms={hasFarms} />
+      <div className="flex-1 flex flex-col overflow-hidden ml-64">
+        {hasFarms && <Navbar />}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-gray-900">
           {children}
-        </div>
+        </main>
       </div>
-    </>
+    </div>
   )
 }
 

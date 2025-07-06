@@ -34,7 +34,7 @@ export default function BannerCarousel() {
         },
         {
             id: 2,
-            title: "Savourez les fruits de saison.",
+            title: "Fruits de saison : Fraîcheur garantie !",
             subtitle: "Cueillis à maturité pour une saveur optimale",
             logoSrc: "/imgs/vegetable.png",
             imageSrc1: "/imgs/c2.png",
@@ -100,7 +100,7 @@ export default function BannerCarousel() {
                     >
                         <div
                             className={
-                                "h-full w-full bg-gradient-to-r px-8 md:px-12 flex items-center relative overflow-hidden"
+                                "h-full w-full bg-gradient-to-r px-8 md:px-20 flex items-center relative overflow-hidden"
                             }
                             style={{
                                 background: `${slide.bgPattern}`,
@@ -158,19 +158,19 @@ export default function BannerCarousel() {
             <Button
                 variant="ghost"
                 size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-30 h-10 w-10 rounded-full bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-30 h-14 w-14 rounded-full bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
                 onClick={prevSlide}
             >
-                <ChevronLeft className="h-6 w-6" />
+                <ChevronLeft className="h-10 w-10" />
             </Button>
 
             <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-30 h-10 w-10 rounded-full bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-30 h-14 w-14 rounded-full bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
                 onClick={nextSlide}
             >
-                <ChevronRight className="h-6 w-6" />
+                <ChevronRight className="h-10 w-10" />
             </Button>
 
             {/* Indicateurs */}

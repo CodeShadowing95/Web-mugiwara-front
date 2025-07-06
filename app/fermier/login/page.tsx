@@ -2,9 +2,9 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Eye, EyeOff, Mail, Lock, Tractor, Wheat, Shovel, SunIcon, ArrowLeft, User, UserCog, Database, Apple, ShoppingCart, BarChart3 } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, Tractor, Wheat, Shovel, SunIcon, ArrowLeft, User, UserCog, Database, Apple, ShoppingCart, BarChart3, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { LoadingModal } from "@/components/ui/loading-modal"
 import { useUser } from "@/app/UserContext"
 import { useFarm2 } from "@/app/FarmContext2"
+import Toast from "@/app-components/Toast"
 
 interface LoadingStep {
     id: string
@@ -87,7 +88,7 @@ export default function FermierLoginPage() {
     }
 
     const { setCurrentUser, refreshUser } = userContext
-    const { setFarms } = FarmContext2
+    const { setFarms, setSelectedFarm } = FarmContext2
 
     const [showPassword, setShowPassword] = useState(false)
     const [email, setEmail] = useState("")
@@ -103,6 +104,17 @@ export default function FermierLoginPage() {
     const [currentStepIndex, setCurrentStepIndex] = useState(-1)
 
     const [blockProcess, setBlockProcess] = useState(false);
+    const [isNotLogged, setIsNotLogged] = useState(false);
+
+    useEffect(() => {
+        if (typeof window!== "undefined") {
+            const isNotLogged = localStorage.getItem("notlogged")
+            if (isNotLogged) {
+                setIsNotLogged(true)
+                localStorage.clear()
+            }
+        }
+    }, [isNotLogged])
 
     const fetchStepData = async (step: LoadingStep) => {
         try {
@@ -273,6 +285,11 @@ export default function FermierLoginPage() {
                 } else {
                     setError("Erreur interne du serveur.")
                 }
+                localStorage.clear()
+                // retirer le token des cookies
+                if (typeof window!== "undefined") {
+                    document.cookie = "jwt_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                }
                 throw new Error(`Erreur HTTP: ${response.status}`)
             }
 
@@ -280,7 +297,9 @@ export default function FermierLoginPage() {
 
             // Simuler l'authentification et stocker le token
             if (typeof window !== "undefined") {
+                // Enregistrer le token dans le localStorage et dans les cookies
                 localStorage.setItem("jwt_token", res.token)
+                document.cookie = `jwt_token=${res.token}; path=/; max-age=86400; secure; samesite=strict` // 24h expiry
             }
 
             setSuccess("Connexion réussie!")
@@ -312,6 +331,28 @@ export default function FermierLoginPage() {
     const startLoadingSequence = async () => {
         for (let i = 0; i < steps.length; i++) {
             setCurrentStepIndex(i)
+            const step = steps[i]
+            step.status = "loading"
+            setSteps([...steps])
+
+            try {
+                await fetchStepData(step)
+                step.status = "success"
+                setSteps([...steps])
+
+                // Si c'est la dernière étape et qu'elle est réussie, rediriger
+                if (i === steps.length - 1) {
+                    window.location.href = "/fermier"
+                }
+            } catch (error) {
+                step.status = "error"
+                step.error = error instanceof Error ? error.message : "Une erreur est survenue"
+                setSteps([...steps])
+                break
+            }
+
+            // Petite pause entre chaque étape
+            await new Promise(resolve => setTimeout(resolve, 1000))
 
             // Marquer l'étape courante comme en cours de chargement
             setSteps((prev) =>
@@ -360,6 +401,10 @@ export default function FermierLoginPage() {
                             localStorage.setItem("farms", JSON.stringify(data))
                             // Mettre à jour le contexte fermier
                             setFarms(data)
+                            // Sélectionner la première ferme par défaut
+                            if (data.length > 0) {
+                                setSelectedFarm(data[0])
+                            }
                         }
                         break
 
@@ -419,6 +464,17 @@ export default function FermierLoginPage() {
 
     return (
         <>
+            {/* Toast */}
+            {isNotLogged && (
+                <Toast
+                    title="Non connecté"
+                    description="Vous devez vous connecter afin d'accéder à votre espace personnel."
+                    className="bg-red-200"
+                    icon={<CheckCircle className="w-6 h-6 text-red-500" />}
+                    actionLabel="OK"
+                />
+            )}
+
             {/* Modal de chargement */}
             <LoadingModal isOpen={showLoadingModal} onClose={closeModal} steps={steps} currentStepIndex={currentStepIndex} />
 

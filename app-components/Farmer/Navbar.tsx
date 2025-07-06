@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,60 +23,22 @@ const Navbar = () => {
     }
 
     const { farms, selectedFarm, setSelectedFarm } = farm2Context;
-    const [activeFarm, setActiveFarm] = useState<Farm>(selectedFarm as Farm)
 
-    // Données des fermes de l'utilisateur
-    const userFarms = [
-        {
-            id: 1,
-            name: "Ferme des Oliviers",
-            location: "Provence, France",
-            isActive: true,
-            avatar: "FO",
-            color: "bg-farm-green",
-        },
-        {
-            id: 2,
-            name: "Les Jardins de Marie",
-            location: "Loire, France",
-            isActive: false,
-            avatar: "JM",
-            color: "bg-farm-orange",
-        },
-        {
-            id: 3,
-            name: "Élevage du Soleil",
-            location: "Normandie, France",
-            isActive: false,
-            avatar: "ES",
-            color: "bg-blue-600",
-        },
-    ]
+    // Initialiser activeFarm avec selectedFarm s'il existe, sinon avec la première ferme disponible
+    const [activeFarm, setActiveFarm] = useState<Farm | null>(() => {
+        return selectedFarm || (farms.length > 0 ? farms[0] : null);
+    });
 
-    const colors = [
-        'bg-slate-600',
-        'bg-gray-600',
-        'bg-zinc-600',
-        'bg-neutral-600',
-        'bg-stone-600',
-        'bg-red-600',
-        'bg-orange-600',
-        'bg-amber-600',
-        'bg-yellow-600',
-        'bg-lime-600',
-        'bg-green-600',
-        'bg-emerald-600',
-        'bg-teal-600',
-        'bg-cyan-600',
-        'bg-sky-600',
-        'bg-blue-600',
-        'bg-indigo-600',
-        'bg-violet-600',
-        'bg-purple-600',
-        'bg-fuchsia-600',
-        'bg-pink-600',
-        'bg-rose-600'
-    ];
+    // Mettre à jour activeFarm quand selectedFarm ou farms change
+    useEffect(() => {
+        if (selectedFarm) {
+            setActiveFarm(selectedFarm);
+        } else if (farms.length > 0) {
+            setActiveFarm(farms[0]);
+            setSelectedFarm(farms[0]);
+            localStorage.setItem('selectedFarm', JSON.stringify(farms[0]));
+        }
+    }, [selectedFarm, farms, setSelectedFarm]);
 
     const handleFarm = (f: Farm) => {
         setSelectedFarm(f);
@@ -103,14 +65,14 @@ const Navbar = () => {
                                 className="flex items-center space-x-2 hover:bg-farm-green/5 p-3 rounded-lg border border-transparent hover:border-farm-green/20 transition-all duration-200"
                             >
                                 <Avatar className="h-10 w-10">
-                                    <AvatarImage src={activeFarm.avatar} alt={activeFarm.avatar} />
-                                    {/* <AvatarFallback className={`${activeFarm.color} text-white font-semibold`}>
-                                        {activeFarm.name.split(' ').map(word => word[0]).join('')}
+                                    <AvatarImage src={activeFarm?.avatar} alt={activeFarm?.avatar} />
+                                    {/* <AvatarFallback className={`${activeFarm?.color} text-white font-semibold`}>
+                                        {activeFarm?.name.split(' ').map(word => word[0]).join('')}
                                     </AvatarFallback> */}
                                 </Avatar>
                                 <div className="text-left hidden sm:block">
-                                    <p className="font-semibold text-farm-green-dark text-sm">{activeFarm.name}</p>
-                                    <p className="text-xs text-gray-500">{activeFarm.address}</p>
+                                    <p className="font-semibold text-farm-green-dark text-sm">{activeFarm?.name}</p>
+                                    <p className="text-xs text-gray-500">{activeFarm?.address}</p>
                                 </div>
                                 <ChevronDown className="w-4 h-4 text-gray-400" />
                             </Button>
@@ -123,23 +85,23 @@ const Navbar = () => {
                             {farms.map((farm) => (
                                 <DropdownMenuItem
                                     key={farm.id}
-                                    className={`flex items-center space-x-2 p-3 rounded-lg cursor-pointer transition-colors ${farm.id === activeFarm.id ? "bg-[var(--farm-green)]/10 border border-farm-green/20" : "hover:bg-gray-50"
+                                    className={`flex items-center space-x-2 p-3 rounded-lg cursor-pointer transition-colors ${farm.id === activeFarm?.id ? "bg-[var(--farm-green)]/10 border border-farm-green/20" : "hover:bg-gray-50"
                                         }`}
                                 >
                                     <Avatar className="h-10 w-10">        
-                                        <AvatarImage src={activeFarm.avatar} alt={activeFarm.avatar} />
+                                        <AvatarImage src={farm?.id === activeFarm?.id ? activeFarm?.avatar : farm?.avatar} alt={farm?.id === activeFarm?.id ? activeFarm?.avatar : farm?.avatar} />
                                         <AvatarFallback className="bg-[var(--farm-orange)] text-white font-bold">{getAvatarInitials(farm.name)}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-center space-x-2">
                                             <p className="font-medium text-gray-900 text-sm truncate">{farm.name}</p>
-                                            {farm.id === activeFarm.id && (
+                                            {farm.id === activeFarm?.id && (
                                                 <Badge className="bg-farm-green text-white text-xs border-0">Actuelle</Badge>
                                             )}
                                         </div>
                                         <p className="text-xs text-gray-500">{farm.address}</p>
                                     </div>
-                                    {farm.id !== activeFarm.id && (
+                                    {farm.id !== activeFarm?.id && (
                                         <Button
                                             variant="ghost"
                                             size="sm"

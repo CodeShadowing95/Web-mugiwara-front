@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useUser } from "./UserContext";
 
 interface CartItem {
   id: number;
@@ -35,13 +36,12 @@ export const useCart = () => {
   return context;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost";
-
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const { currentUser } = useUser();
 
   useEffect(() => {
     setIsClient(true);
@@ -52,14 +52,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return localStorage.getItem("jwt_token");
   };
 
+  const checkUserRole = () => {
+    if (!currentUser) throw new Error("Non authentifié");
+    if (currentUser.role === "ROLE_FARMER") throw new Error("Les fermiers n'ont pas accès au panier");
+  };
+
   const fetchCart = async () => {
     if (!isClient) return;
     setLoading(true);
     setError(null);
     try {
+      checkUserRole();
       const token = getToken();
       if (!token) throw new Error("Non authentifié");
-      const res = await fetch(`${API_URL}/api/cart`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cart`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Erreur lors de la récupération du panier");
@@ -67,6 +73,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       setCart(data);
     } catch (e: any) {
       setError(e.message);
+      setCart(null);
     } finally {
       setLoading(false);
     }
@@ -77,9 +84,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
+      checkUserRole();
       const token = getToken();
       if (!token) throw new Error("Non authentifié");
-      const res = await fetch(`${API_URL}/api/cart/items`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cart/items`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -103,9 +111,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
+      checkUserRole();
       const token = getToken();
       if (!token) throw new Error("Non authentifié");
-      const res = await fetch(`${API_URL}/api/cart/items/${itemId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cart/items/${itemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -114,7 +123,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         body: JSON.stringify({ quantity }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erreur lors de la modification");
+      if (!res.ok) throw new Error(data.error || "Erreur lors de la mise à jour");
       await fetchCart();
     } catch (e: any) {
       setError(e.message);
@@ -129,9 +138,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
+      checkUserRole();
       const token = getToken();
       if (!token) throw new Error("Non authentifié");
-      const res = await fetch(`${API_URL}/api/cart/items/${itemId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cart/items/${itemId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -153,9 +163,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
+      checkUserRole();
       const token = getToken();
       if (!token) throw new Error("Non authentifié");
-      const res = await fetch(`${API_URL}/api/cart/validate`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cart/validate`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -174,14 +185,23 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    if (isClient) {
+    if (isClient && !currentUser?.role) {
       fetchCart();
     }
   }, [isClient]);
 
   return (
     <CartContext.Provider
-      value={{ cart, loading, error, fetchCart, addToCart, updateCartItem, removeCartItem, validateCart }}
+      value={{
+        cart,
+        loading,
+        error,
+        fetchCart,
+        addToCart,
+        updateCartItem,
+        removeCartItem,
+        validateCart,
+      }}
     >
       {children}
     </CartContext.Provider>

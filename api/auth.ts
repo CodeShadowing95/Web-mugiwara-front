@@ -17,7 +17,7 @@ export const login = async (username: string, password: string) => {
   const data = await res.json();
   
   // Stocker le token dans les cookies
-  document.cookie = `token=${data.token}; path=/; max-age=86400; secure; samesite=strict`;
+  document.cookie = `jwt_token=${data.token}; path=/; max-age=86400; secure; samesite=strict`;
   
   // Stocker aussi dans localStorage pour les requêtes API
   setToken(data.token);

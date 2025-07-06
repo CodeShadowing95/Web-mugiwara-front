@@ -43,7 +43,7 @@ export function middleware(request: NextRequest) {
   // Si c'est une route protégée du fermier
   if (isFarmerRoute) {
     // Récupérer le token depuis les cookies
-    const token = request.cookies.get('token');
+    const token = request.cookies.get('jwt_token');
 
     // Si pas de token, rediriger vers la page de connexion fermier
     if (!token) {

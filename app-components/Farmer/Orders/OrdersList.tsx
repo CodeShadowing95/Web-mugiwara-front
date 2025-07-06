@@ -685,7 +685,7 @@ export default function OrdersList() {
                                                             {/* Informations principales */}
                                                             <div className="flex items-center space-x-4">
                                                                 <Avatar className="h-12 w-12">
-                                                                    <AvatarImage src={`/placeholder.svg?height=48&width=48`} />
+                                                                    <AvatarImage src={`https://api.dicebear.com/9.x/shapes/svg?seed=Felix?height=48&width=48`} />
                                                                     <AvatarFallback className="bg-[var(--farm-green)] text-white font-semibold">
                                                                         {order.customer.avatar}
                                                                     </AvatarFallback>

@@ -91,7 +91,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
     {
       id: 1,
       title: "Salade de tomates anciennes et burrata",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://api.dicebear.com/9.x/shapes/svg?seed=Felix?height=300&width=400",
       description:
         "Une salade fraîche et colorée, parfaite pour l'été, qui met en valeur la saveur des tomates anciennes.",
       prepTime: "15 min",
@@ -99,12 +99,12 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
       difficulty: "Facile",
       servings: 4,
       author: "Chef Marie",
-      authorImage: "/placeholder.svg?height=50&width=50",
+      authorImage: "https://api.dicebear.com/9.x/shapes/svg?seed=Felix?height=50&width=50",
     },
     {
       id: 2,
       title: "Tarte rustique aux tomates anciennes",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://api.dicebear.com/9.x/shapes/svg?seed=Felix?height=300&width=400",
       description:
         "Une tarte savoureuse avec une pâte croustillante et des tomates juteuses, parfumée au basilic et à l'huile d'olive.",
       prepTime: "20 min",
@@ -112,12 +112,12 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
       difficulty: "Moyen",
       servings: 6,
       author: "Chef Thomas",
-      authorImage: "/placeholder.svg?height=50&width=50",
+      authorImage: "https://api.dicebear.com/9.x/shapes/svg?seed=Felix?height=50&width=50",
     },
     {
       id: 3,
       title: "Gazpacho de tomates anciennes",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://api.dicebear.com/9.x/shapes/svg?seed=Felix?height=300&width=400",
       description:
         "Une soupe froide rafraîchissante, idéale pour les journées chaudes d'été, qui concentre toutes les saveurs des tomates.",
       prepTime: "15 min",
@@ -125,12 +125,12 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
       difficulty: "Facile",
       servings: 4,
       author: "Chef Sophie",
-      authorImage: "/placeholder.svg?height=50&width=50",
+      authorImage: "https://api.dicebear.com/9.x/shapes/svg?seed=Felix?height=50&width=50",
     },
     {
       id: 4,
       title: "Pâtes fraîches sauce tomates anciennes",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://api.dicebear.com/9.x/shapes/svg?seed=Felix?height=300&width=400",
       description:
         "Des pâtes al dente nappées d'une sauce tomate maison aux herbes fraîches et à l'ail, un classique revisité.",
       prepTime: "10 min",
@@ -138,7 +138,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
       difficulty: "Moyen",
       servings: 4,
       author: "Chef Marco",
-      authorImage: "/placeholder.svg?height=50&width=50",
+      authorImage: "https://api.dicebear.com/9.x/shapes/svg?seed=Felix?height=50&width=50",
     },
   ];
 
@@ -432,7 +432,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                   >
                     <div className="relative h-48 overflow-hidden">
                       <Image
-                        // src={recipe.image || "/placeholder.svg"}
+                        // src={recipe.image || "https://api.dicebear.com/9.x/shapes/svg?seed=Felix"}
                         src="/imgs/sample.png"
                         alt={recipe.title}
                         width={400}
@@ -590,7 +590,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                 <div className="md:w-1/4 flex-shrink-0">
                   <div className="rounded-xl overflow-hidden bg-farm-beige-light dark:bg-gray-900 p-4 flex items-center justify-center">
                     <Image
-                      src={"/placeholder.svg"}
+                      src={"https://api.dicebear.com/9.x/shapes/svg?seed=Felix"}
                       alt={prod.farm.name}
                       width={150}
                       height={150}
@@ -706,7 +706,7 @@ export default function ProductDetail({ product2 }: ProductDetailProps) {
                           <div className="w-10 h-10 rounded-full overflow-hidden bg-farm-beige dark:bg-gray-700">
                             {user ? (
                               <Image
-                                src={"/placeholder.svg"}
+                                src={"https://api.dicebear.com/9.x/shapes/svg?seed=Felix"}
                                 alt={`${user.persona.firstName} ${user.persona.lastName?.charAt(0)}`}
                                 width={40}
                                 height={40}

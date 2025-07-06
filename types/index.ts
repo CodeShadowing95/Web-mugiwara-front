@@ -26,7 +26,7 @@ export interface Farm {
     updatedAt: string;
 
     color?: string;
-    status?: string;
+    status: string;
     distance?: number;
     rating?: number;
     reviews?: Review[];
@@ -56,6 +56,7 @@ export interface Persona {
     phone_number: string;
     birth_date: string;
     gender: string;
+    role: string;
 }
 
 export interface Category {

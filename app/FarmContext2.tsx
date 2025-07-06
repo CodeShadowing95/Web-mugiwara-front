@@ -50,55 +50,36 @@ export function FarmProvider2({ children }: { children: ReactNode }) {
       const userInStorage = localStorage.getItem('user');
       const user = userInStorage ? JSON.parse(userInStorage) : null;
 
-      if (!token) {
-        return;
+      if (!token || !user) {
+        throw new Error('Non authentifié');
       }
 
-      if (!user?.id) {
-        toast.error('Informations utilisateur non disponibles');
-        return;
-      }
-
-      const res = await fetch(`${apiUrl}/api/public/v1/farms/farmer/${user.id}`, {
+      const response = await fetch(`${apiUrl}/api/public/v1/farms/farmer/${user.id}`, {
         headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
       });
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
-        toast.error(errorData?.message || 'Erreur lors de la récupération des fermes');
-        return;
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des fermes');
       }
 
-      const data = await res.json();
-      const farmData = data || [];
+      const data = await response.json();
+      setFarms(data);
+      localStorage.setItem('farms', JSON.stringify(data));
 
-      setFarms(farmData);
-
-      // Conserver la ferme sélectionnée si elle existe toujours dans la liste
-      if (selectedFarm) {
-        const farmStillExists = farmData.find((farm: Farm) => farm.id === selectedFarm.id);
-        if (farmStillExists) {
-          setSelectedFarm(farmStillExists);
-        }
-      } else if (farmData.length > 0) {
-        setSelectedFarm(farmData[0]);
+      // Si aucune ferme n'est sélectionnée et qu'il y a des fermes disponibles, sélectionner la première
+      if (data.length > 0 && !selectedFarm) {
+        setSelectedFarm(data[0]);
+        localStorage.setItem('selectedFarm', JSON.stringify(data[0]));
       }
-    } catch (error) {
-      console.error('Erreur refreshNewFarm:', error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : 'Une erreur est survenue lors du chargement des fermes'
-      );
-      setFarms([]);
-      setSelectedFarm(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      toast.error('Erreur lors de la récupération des fermes');
     } finally {
       setLoading(false);
     }
-  }, [isClient, selectedFarm]);
+  }, [isClient]); // Supprimer selectedFarm des dépendances
 
   // Charger les données initiales
   useEffect(() => {

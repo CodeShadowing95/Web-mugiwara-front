@@ -68,7 +68,7 @@ export default function FermierProfilePage() {
     lastName: "Durand",
     email: "pierre.durand@ferme-oliviers.fr",
     phone: "06 12 34 56 78",
-    avatar: "/placeholder.svg?height=120&width=120&text=PD",
+    avatar: "https://api.dicebear.com/9.x/shapes/svg?seed=Felix?height=120&width=120&text=PD",
 
     // Informations ferme
     farmName: "Ferme des Oliviers",

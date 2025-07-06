@@ -294,7 +294,7 @@ const FarmProducts = () => {
                                     {/* Image container */}
                                     <div className="relative aspect-square overflow-hidden">
                                         <img
-                                            src={product.image || "/placeholder.svg"}
+                                            src={product.image || "https://api.dicebear.com/9.x/shapes/svg?seed=Felix"}
                                             alt={product.name}
                                             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                                         />

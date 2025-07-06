@@ -85,6 +85,9 @@ export default function AddFarmPage() {
         // Images
         profileImage: "",
         galleryImages: [] as string[],
+
+        rating: 0.0,
+        totalSales: 0,
     })
 
     const steps = [
@@ -172,7 +175,6 @@ export default function AddFarmPage() {
         const fetchCities = async () => {
             try {
                 const cities = await fetchFranceCities()
-                console.log("Villes chargées :", cities)
                 setFranceCities(cities)
                 setTempCities(cities)
             } catch (error) {
@@ -199,7 +201,7 @@ export default function AddFarmPage() {
                 
                 setFranceCities(citiesFilteredByDept)
                 setFilteredCities(citiesFilteredByDept)
-                setFormData((prev) => ({...prev, region: citiesFilteredByDept[0].region.nom }))
+                setFormData((prev) => ({...prev, region: citiesFilteredByDept[0].region.nom, coordinates: { lat: String(citiesFilteredByDept[0].coordonnes.lat), lng: String(citiesFilteredByDept[0].coordonnes.lng) } }))
             } else {
                 setFranceCities(tempCities)
                 setFilteredCities([])
@@ -230,7 +232,7 @@ export default function AddFarmPage() {
                 .map(file => {
                     // En production, on utiliserait une URL signée du serveur
                     // Pour la simulation, on utilise le nom réel du fichier
-                    return `/placeholder.svg?height=200&width=300&text=${encodeURIComponent(file.name)}`
+                    return `https://api.dicebear.com/9.x/shapes/svg?seed=Felix?height=200&width=300&text=${encodeURIComponent(file.name)}`
                 })
 
             if (newImages.length > 0) {
@@ -253,7 +255,13 @@ export default function AddFarmPage() {
         const avatarName = diceBearAvatars[Math.floor(Math.random() * diceBearAvatars.length)]
         formData.avatar = `https://api.dicebear.com/9.x/shapes/svg?seed=${avatarName}`
 
-        console.log("Formulaire soumis :", formData);
+        // Convertir le tableau farmTypes en chaîne de caractères
+        const formDataToSubmit = {
+            ...formData,
+            farmTypes: formData.farmTypes.join(',')
+        }
+
+        console.log("Formulaire soumis :", formDataToSubmit);
 
         // Envoi des données au serveur
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -266,7 +274,7 @@ export default function AddFarmPage() {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(formDataToSubmit),
             })
 
             if (!response.ok) {
@@ -327,10 +335,10 @@ export default function AddFarmPage() {
 
                 profileImage: "",
                 galleryImages: uploadedImages,
+                
+                rating: 0.0,
+                totalSales: 0,
             })
-
-            // Redirection vers la page de fermier
-            window.location.href = "/fermier"
         } catch (error) {
             console.error("Erreur lors de l'envoi des données :", error)
             setIsLoading(false)
@@ -846,7 +854,7 @@ export default function AddFarmPage() {
                                                 <div key={index} className="relative group overflow-hidden max-w-full" style={{ maxWidth: '100%' }}>
                                                     <div style={{ width: '100%', aspectRatio: '4/3', overflow: 'hidden', borderRadius: '0.5rem' }}>
                                                         <img
-                                                            src={image || "/placeholder.svg"}
+                                                            src={image || "https://api.dicebear.com/9.x/shapes/svg?seed=Felix"}
                                                             alt={`Image ${index + 1}`}
                                                             className="w-full h-full object-cover rounded-lg"
                                                             style={{ display: 'block', maxWidth: '100%', maxHeight: '100%' }}

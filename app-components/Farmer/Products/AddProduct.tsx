@@ -199,7 +199,7 @@ export default function AddProduct() {
         const files = event.target.files
         if (files) {
             const newImages = Array.from(files).map(
-                (file, index) => `/placeholder.svg?height=200&width=300&text=Image${uploadedImages.length + index + 1}`,
+                (file, index) => `https://api.dicebear.com/9.x/shapes/svg?seed=Felix?height=200&width=300&text=Image${uploadedImages.length + index + 1}`,
             )
             setUploadedImages((prev) => [...prev, ...newImages])
         }
@@ -750,7 +750,7 @@ export default function AddProduct() {
                                             {uploadedImages.map((image, index) => (
                                                 <div key={index} className="relative group">
                                                     <img
-                                                        src={image || "/placeholder.svg"}
+                                                        src={image || "https://api.dicebear.com/9.x/shapes/svg?seed=Felix"}
                                                         alt={`Image ${index + 1}`}
                                                         className="w-full h-32 object-cover rounded-lg"
                                                     />
@@ -916,7 +916,7 @@ export default function AddProduct() {
                                             <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
                                                 {uploadedImages.length > 0 ? (
                                                     <img
-                                                        src={uploadedImages[0] || "/placeholder.svg"}
+                                                        src={uploadedImages[0] || "https://api.dicebear.com/9.x/shapes/svg?seed=Felix"}
                                                         alt="Produit"
                                                         className="w-full h-full object-cover rounded-lg"
                                                     />

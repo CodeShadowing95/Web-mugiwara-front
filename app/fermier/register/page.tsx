@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {useUser} from "@/app/UserContext";
+import { useUser } from "@/context/UserContext"
 
 export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false)
@@ -74,7 +74,7 @@ export default function RegisterPage() {
             }
             const res = await response.json()
             localStorage.setItem("jwt_token", res.token)
-            await refreshUser(true);
+            await refreshUser();
             setSuccess("Inscription réussie ! Redirection...")
             setTimeout(() => {
                 window.location.href = "/fermier"

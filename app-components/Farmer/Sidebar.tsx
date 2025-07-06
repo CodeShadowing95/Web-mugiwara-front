@@ -6,6 +6,8 @@ import { BarChart3, ChevronDown, Home, Leaf, LogOut, Package, Settings, Shopping
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/app/UserContext';
+import { useFarm2 } from '@/app/FarmContext2';
+import { User } from '@/types';
 
 
 interface SidebarProps {
@@ -15,12 +17,17 @@ interface SidebarProps {
 const Sidebar = ({ hasFarms } : SidebarProps) => {
     const router = useRouter()
     const userContext = useUser()
+    const farmContext = useFarm2()
     
     if (!userContext) {
         return <div>Erreur : Contexte utilisateur non disponible</div>
     }
+    if (!farmContext) {
+        return <div>Erreur : Contexte ferme non disponible</div>
+    }
     
-    const { currentUser } = userContext
+    const { currentUser } = userContext as { currentUser: User }
+    const { selectedFarm } = farmContext
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [selectedMenu, setSelectedMenu] = useState(typeof window !== "undefined" ? localStorage.getItem("selectedMenu") || "dashboard" : "dashboard")
     const [hasRedirected, setHasRedirected] = useState(false) // ← pour éviter double redirection
@@ -32,10 +39,16 @@ const Sidebar = ({ hasFarms } : SidebarProps) => {
         localStorage.setItem("selectedMenu", menu)
     }
 
+    const handleLogout = () => {
+        localStorage.clear()
+        document.cookie = 'jwt_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        router.push("/fermier/login")
+    }
+
     // Chargement initial
     useEffect(() => {
       const menu = localStorage.getItem('selectedMenu') || 'dashboard'
-      console.log("Actual user: ", currentUser);
+    //   console.log("Actual user: ", currentUser);
       
       setSelectedMenu(menu)
     }, [])
@@ -176,11 +189,7 @@ const Sidebar = ({ hasFarms } : SidebarProps) => {
                         Profil
                     </Link>
                     <div
-                        onClick={() => {
-                            // localStorage.removeItem("newFarmData");
-                            localStorage.clear();
-                            router.push('/fermier/login');
-                        }}
+                        onClick={handleLogout}
                         className="cursor-pointer flex items-center px-4 py-3 text-white/80 hover:bg-white/5 border-l-4 border-transparent"
                     >
                         <LogOut className="w-5 h-5 mr-3" />
@@ -188,18 +197,17 @@ const Sidebar = ({ hasFarms } : SidebarProps) => {
                     </div>
                 </nav>
 
-                
                 {/* Profil fermier */}
                 {hasFarms ? (
                     <div className="p-4 border-t border-white/10">
                         <div className="flex items-center">
                             <Avatar className="h-10 w-10 mr-3">
-                                <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Ferme des Oliviers" />
-                                <AvatarFallback className="bg-farm-orange text-white">FO</AvatarFallback>
+                                <AvatarImage src="/imgs/user.png" alt={selectedFarm?.name} />
+                                <AvatarFallback className="bg-farm-orange text-white">{userInitials}</AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white truncate">Ferme des Oliviers</p>
-                                <p className="text-xs text-white/60 truncate">Pierre Durand</p>
+                                <p className="text-sm font-medium text-white truncate">{selectedFarm?.name}</p>
+                                <p className="text-xs text-white/60 truncate">{currentUser.persona.firstName} {currentUser.persona.lastName}</p>
                             </div>
                             <ChevronDown className="w-4 h-4 ml-2 text-white/60" />
                         </div>
@@ -208,7 +216,7 @@ const Sidebar = ({ hasFarms } : SidebarProps) => {
                     <div className="p-4 border-t border-white/10">
                         <div className="flex items-center">
                             <Avatar className="h-10 w-10 mr-3">
-                                <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Ferme des Oliviers" />
+                                <AvatarImage src="/imgs/user.png" alt="Ferme des Oliviers" />
                                 <AvatarFallback className="bg-farm-orange text-white font-bold">{userInitials}</AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">

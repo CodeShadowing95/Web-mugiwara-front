@@ -20,7 +20,7 @@ export default function ProductGallery({ images, tags, currentImageIndex, onImag
     <div className="space-y-4">
       <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-gray-800 aspect-square">
         <ProductImage
-          src={images[currentImageIndex].src || "/placeholder.svg"}
+          src={images[currentImageIndex].src || "https://api.dicebear.com/9.x/shapes/svg?seed=Felix"}
           alt={images[currentImageIndex].alt}
           isZoomed={isZoomed}
           zoomPosition={zoomPosition}

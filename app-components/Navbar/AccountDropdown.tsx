@@ -5,7 +5,8 @@ import { User, Settings, LogOut, ShoppingCart, Heart, Package, ChevronDown, Trac
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
-import { useUser } from "@/app/UserContext";
+import { useUser } from "@/context/UserContext"
+// import { useUser } from "@/app/UserContext";
 
 export default function AccountDropdown() {
   const [isOpen, setIsOpen] = useState(false)
@@ -32,7 +33,7 @@ export default function AccountDropdown() {
       {currentUser ? (
         <Button variant="ghost" size="sm" className="h-10 flex items-end gap-1 text-[#5a7052] hover:bg-[#f7f4eb] hover:text-[#3c5a3e]">
           <div className="flex flex-col text-gray-800 dark:text-gray-200">
-            <p className="text-xs text-gray-500 dark:text-gray-400 text-nowrap">Bonjour, {currentUser.persona.firstName + ' ' + currentUser.persona.lastName}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 text-nowrap">Bonjour, {currentUser.firstName + ' ' + currentUser.lastName}</p>
             <p className="text-sm font-semibold self-start">Comptes & Listes</p>
           </div>
           <ChevronDown className="w-5 h-5 flex shrink-0" />
@@ -55,8 +56,8 @@ export default function AccountDropdown() {
         {currentUser ? (
           <>
           <div className="p-3 border-b border-[#e8e1d4]">
-            <div className="font-medium text-[#3c5a3e]">{currentUser.persona.firstName + ' ' + currentUser.persona.lastName}</div>
-            <div className="text-sm text-[#6b6b6b]">{currentUser.persona.email}</div>
+            <div className="font-medium text-[#3c5a3e]">{currentUser.firstName + ' ' + currentUser.lastName}</div>
+            <div className="text-sm text-[#6b6b6b]">{currentUser.email}</div>
           </div>
 
           <div className="py-1">

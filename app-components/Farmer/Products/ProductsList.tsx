@@ -704,7 +704,7 @@ export default function ProductsManagement() {
                                 >
                                     <div className="relative">
                                         <img
-                                            src={product.image || "/placeholder.svg"}
+                                            src={product.image || "https://api.dicebear.com/9.x/shapes/svg?seed=Felix"}
                                             alt={product.name}
                                             className="w-full h-48 object-cover rounded-t-lg"
                                         />
@@ -890,7 +890,7 @@ export default function ProductsManagement() {
                                                         <div className="flex items-center">
                                                             <img
                                                                 className="h-12 w-12 rounded-lg object-cover mr-4"
-                                                                src={product.image || "/placeholder.svg"}
+                                                                src={product.image || "https://api.dicebear.com/9.x/shapes/svg?seed=Felix"}
                                                                 alt={product.name}
                                                             />
                                                             <div>

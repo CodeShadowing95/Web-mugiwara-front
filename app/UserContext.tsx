@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -24,6 +26,17 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     setIsClient(true);
+    // Initialiser currentUser depuis localStorage au montage
+    const userInStorage = localStorage.getItem("user");
+    if (userInStorage) {
+      try {
+        const parsedUser = JSON.parse(userInStorage);
+        setCurrentUser(parsedUser);
+      } catch (error) {
+        console.error("Erreur lors de la lecture de l'utilisateur depuis localStorage:", error);
+        localStorage.removeItem("user");
+      }
+    }
   }, []);
 
   const refreshUser = useCallback(async (forceRefresh: boolean = false) => {
@@ -34,57 +47,58 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     
     if (!forceRefresh && userInStorage) {
       try {
-        setCurrentUser(JSON.parse(userInStorage));
+        const parsedUser = JSON.parse(userInStorage);
+        setCurrentUser(parsedUser);
         return;
       } catch {
         localStorage.removeItem("user");
       }
     }
-    
-    if (token) {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const res = await fetch(`${apiUrl}/api/current-user`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-        });
-        
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => null);
-          console.error('Erreur lors de la récupération du profil:', {
-            status: res.status,
-            statusText: res.statusText,
-            error: errorData
-          });
-          setCurrentUser(null);
-          localStorage.removeItem("user");
-          localStorage.removeItem("jwt_token");
-          throw new Error(errorData?.message || `Erreur HTTP: ${res.status}`);
-        }
-        
-        const user = await res.json();
-        setCurrentUser(user);
-        localStorage.setItem("user", JSON.stringify(user));
-      } catch (e) {
-        setCurrentUser(null);
-        localStorage.removeItem("user");
-      }
-    } else {
+
+    if (!token) {
       setCurrentUser(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/current-user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération des données utilisateur");
+      }
+
+      const userData = await response.json();
+      localStorage.setItem("user", JSON.stringify(userData));
+      setCurrentUser(userData);
+    } catch (error) {
+      console.error("Erreur lors du rafraîchissement de l'utilisateur:", error);
       localStorage.removeItem("user");
+      localStorage.removeItem("jwt_token");
+      setCurrentUser(null);
     }
   }, [isClient]);
 
-  useEffect(() => {
-    if (isClient) {
-      refreshUser();
+  const handleSetCurrentUser = useCallback((user: any) => {
+    setCurrentUser(user);
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
     }
-  }, [refreshUser, isClient]);
+  }, []);
 
   return (
-    <UserContext.Provider value={{ currentUser, refreshUser, setCurrentUser }}>
+    <UserContext.Provider
+      value={{
+        currentUser,
+        refreshUser,
+        setCurrentUser: handleSetCurrentUser,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

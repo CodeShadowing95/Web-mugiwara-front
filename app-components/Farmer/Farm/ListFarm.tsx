@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useUser } from "@/app/UserContext"
 import { Farm } from "@/types"
+import { useFarm2 } from "@/app/FarmContext2"
 
 export default function ListFarm() {
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
@@ -54,10 +55,17 @@ export default function ListFarm() {
 
     const [userFarms, setUserFarms] = useState<Farm[]>([])
     const userContext = useUser()
+    const farmContext = useFarm2()
 
     if (!userContext) {
         return <div>Erreur : Contexte utilisateur non disponible</div>
     }
+
+    if (!farmContext) {
+        return <div>Erreur : Contexte ferme non disponible</div>
+    }
+
+    const { farms: farmsByUser } = farmContext
     const { currentUser, refreshUser } = userContext
 
     // Données des fermes
@@ -164,57 +172,57 @@ export default function ListFarm() {
         },
     ])
 
-    const fetchFarms = async () => {
-        try {
-            const token = localStorage.getItem('jwt_token')
-            if (!token) {
-                throw new Error('Token d\'authentification non trouvé')
-            }
+    // const fetchFarms = async () => {
+    //     try {
+    //         const token = localStorage.getItem('jwt_token')
+    //         if (!token) {
+    //             throw new Error('Token d\'authentification non trouvé')
+    //         }
 
-            const options = {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            }
+    //         const options = {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Authorization': `Bearer ${token}`,
+    //                 'Content-Type': 'application/json'
+    //             }
+    //         }
 
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-            const response = await fetch(`${apiUrl}/api/public/v1/farms/farmer/${currentUser?.id}`, options)
-            if (!response.ok) {
-                throw new Error('Erreur lors de la récupération des données de l\'utilisateur')
-            }
+    //         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    //         const response = await fetch(`${apiUrl}/api/public/v1/farms/farmer/${currentUser?.id}`, options)
+    //         if (!response.ok) {
+    //             throw new Error('Erreur lors de la récupération des données de l\'utilisateur')
+    //         }
 
-            const data = await response.json()
-            setUserFarms(data)
-        } catch (error) {
-            console.error('Erreur lors de la récupération des données de l\'utilisateur :', error)
-        }
-    }
+    //         const data = await response.json()
+    //         setUserFarms(data)
+    //     } catch (error) {
+    //         console.error('Erreur lors de la récupération des données de l\'utilisateur :', error)
+    //     }
+    // }
 
-    const getActiveFarms = () => {
-        return farms.filter((farm) => farm.status === "on")
-    }
+    // const getActiveFarms = () => {
+    //     return farms.filter((farm) => farm.status === "on")
+    // }
 
-    useEffect(() => {
-        try {
-            fetchFarms()
-        } catch (error) {
-            console.error('Impossible d\'accéder à la requête :', error)
-        }
-    }, [])
+    // useEffect(() => {
+    //     try {
+    //         fetchFarms()
+    //     } catch (error) {
+    //         console.error('Impossible d\'accéder à la requête :', error)
+    //     }
+    // }, [])
 
     // Filtrage et tri des fermes
     const getFilteredAndSortedFarms = () => {
-        let filtered = farms
+        let filtered = farmsByUser
 
         // Filtrage par recherche
         if (searchQuery.trim()) {
             filtered = filtered.filter(
                 (farm) =>
                     farm.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    farm.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    farm.type.toLowerCase().includes(searchQuery.toLowerCase()),
+                    farm.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    farm.type?.toLowerCase().includes(searchQuery.toLowerCase()),
             )
         }
 
@@ -225,7 +233,7 @@ export default function ListFarm() {
 
         // Filtrage par type
         if (filterType !== "all") {
-            filtered = filtered.filter((farm) => farm.type.toLowerCase().includes(filterType.toLowerCase()))
+            filtered = filtered.filter((farm) => farm.type?.toLowerCase().includes(filterType.toLowerCase()))
         }
 
         // Tri
@@ -238,12 +246,12 @@ export default function ListFarm() {
                     bValue = b.name.toLowerCase()
                     break
                 case "date":
-                    aValue = new Date(a.joinDate).getTime()
-                    bValue = new Date(b.joinDate).getTime()
+                    aValue = new Date(a.createdAt).getTime()
+                    bValue = new Date(b.createdAt).getTime()
                     break
                 case "sales":
-                    aValue = Number.parseFloat(a.totalSales.replace(/[€\s]/g, "").replace(",", "."))
-                    bValue = Number.parseFloat(b.totalSales.replace(/[€\s]/g, "").replace(",", "."))
+                    aValue = a.totalSales ? Number.parseFloat(a.totalSales.replace(/[€\s]/g, "").replace(",", ".")) : 0
+                    bValue = b.totalSales ? Number.parseFloat(b.totalSales.replace(/[€\s]/g, "").replace(",", ".")) : 0
                     break
                 case "rating":
                     aValue = a.rating
@@ -254,9 +262,9 @@ export default function ListFarm() {
             }
 
             if (sortOrder === "asc") {
-                return aValue < bValue ? -1 : aValue > bValue ? 1 : 0
+                return aValue && bValue ? (aValue < bValue ? -1 : aValue > bValue ? 1 : 0) : 0
             } else {
-                return aValue > bValue ? -1 : aValue < bValue ? 1 : 0
+                return aValue && bValue ? (aValue > bValue ? -1 : aValue < bValue ? 1 : 0) : 0
             }
         })
 
@@ -279,10 +287,10 @@ export default function ListFarm() {
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case "active":
-                return <Badge className="bg-green-100 text-green-800 border-green-200">Active</Badge>
-            case "inactive":
-                return <Badge className="bg-gray-100 text-gray-800 border-gray-200">Inactive</Badge>
+            case "on":
+                return <Badge className="bg-green-100 text-green-800 border-green-200">Disponible</Badge>
+            case "off":
+                return <Badge className="bg-gray-100 text-gray-800 border-gray-200">Indisponible</Badge>
             case "pending":
                 return <Badge className="bg-orange-100 text-orange-800 border-orange-200">En attente</Badge>
             default:
@@ -319,7 +327,7 @@ export default function ListFarm() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-600">Total fermes</p>
-                                <p className="text-2xl font-bold text-farm-green-dark">{userFarms.length}</p>
+                                <p className="text-2xl font-bold text-farm-green-dark">{farmsByUser.length}</p>
                             </div>
                             <div className="w-12 h-12 bg-[var(--farm-green)]/10 rounded-full flex items-center justify-center">
                                 <Leaf className="w-6 h-6 text-farm-green" />
@@ -333,7 +341,7 @@ export default function ListFarm() {
                             <div>
                                 <p className="text-sm text-gray-600">Fermes actives</p>
                                 <p className="text-2xl font-bold text-farm-green-dark">
-                                    {userFarms.filter((f) => f.status === "on").length}
+                                    {farmsByUser.filter((f) => f.status === "on").length}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -490,14 +498,14 @@ export default function ListFarm() {
 
             {/* Liste des fermes */}
             {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredFarms.map((farm) => (
                         <Card key={farm.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 p-0">
                             <div className="relative">
                                 <img
-                                    src={farm.image || "/placeholder.svg"}
+                                    src="/imgs/farm.jpg"
                                     alt={farm.name}
-                                    className="w-full h-48 object-cover rounded-t-lg"
+                                    className="w-full h-40 object-cover rounded-t-lg"
                                 />
                                 <div className="absolute top-4 left-4">{getStatusBadge(farm.status)}</div>
                                 <div className="absolute top-4 right-4">
@@ -530,7 +538,7 @@ export default function ListFarm() {
                                             </DropdownMenuItem>
                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem onClick={() => toggleFarmStatus(farm.id)}>
-                                                {farm.isActive ? (
+                                                {farm.status === "on" ? (
                                                     <>
                                                         <PowerOff className="w-4 h-4 mr-2" />
                                                         Désactiver
@@ -552,12 +560,16 @@ export default function ListFarm() {
                                 </div>
                             </div>
 
-                            <CardContent className="p-6">
+                            <CardContent className="px-6 pb-6">
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-center space-x-3">
                                         <Avatar className="h-12 w-12">
-                                            <AvatarFallback className={`${farm.color} text-white font-semibold`}>
-                                                {farm.avatar}
+                                            <AvatarFallback>
+                                                <img 
+                                                    src={farm.avatar} 
+                                                    alt={`Avatar de ${farm.name}`}
+                                                    className={`w-full h-full object-cover ${farm.color}`}
+                                                />
                                             </AvatarFallback>
                                         </Avatar>
                                         <div>
@@ -569,29 +581,31 @@ export default function ListFarm() {
 
                                 <div className="flex items-center text-sm text-gray-600 mb-3">
                                     <MapPin className="w-4 h-4 mr-1" />
-                                    {farm.location}
+                                    {farm.address}
                                 </div>
 
                                 <p className="text-sm text-gray-600 mb-4 line-clamp-2">{farm.description}</p>
 
                                 {/* Certifications */}
                                 {/* <div className="flex flex-wrap gap-2 mb-4">
-                                        {farm.certifications.map((cert, index) => (
-                                            <Badge key={index} variant="outline" className="text-xs">
-                                                <Award className="w-3 h-3 mr-1" />
-                                                {cert}
-                                            </Badge>
-                                        ))}
-                                    </div> */}
+                                    {farm.certifications.map((cert, index) => (
+                                        <Badge key={index} variant="outline" className="text-xs">
+                                            <Award className="w-3 h-3 mr-1" />
+                                            {cert}
+                                        </Badge>
+                                    ))}
+                                </div> */}
 
                                 {/* Statistiques */}
                                 <div className="grid grid-cols-2 gap-4 mb-4">
                                     <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                        <p className="text-lg font-bold text-farm-green-dark">{farm.products}</p>
+                                        {/* <p className="text-lg font-bold text-farm-green-dark">{farm.products}</p> */}
+                                        <p className="text-lg font-bold text-farm-green-dark">0</p>
                                         <p className="text-xs text-gray-600">Produits</p>
                                     </div>
                                     <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                        <p className="text-lg font-bold text-farm-green-dark">{farm.customers}</p>
+                                        {/* <p className="text-lg font-bold text-farm-green-dark">{farm.customers}</p> */}
+                                        <p className="text-lg font-bold text-farm-green-dark">0</p>
                                         <p className="text-xs text-gray-600">Clients</p>
                                     </div>
                                 </div>
@@ -599,16 +613,16 @@ export default function ListFarm() {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-1">
                                         <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                                        <span className="text-sm font-medium">{farm.rating}</span>
+                                        <span className="text-sm font-medium">{farm.rating || 0.0}</span>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-sm font-bold text-farm-green-dark">{farm.totalSales}</p>
+                                        <p className="text-sm font-bold text-farm-green-dark">{farm.totalSales || 0}</p>
                                         <p className="text-xs text-gray-600">Ventes totales</p>
                                     </div>
                                 </div>
 
                                 <div className="mt-4 pt-4 border-t border-gray-100">
-                                    <p className="text-xs text-gray-500">Dernière activité: {farm.lastActivity}</p>
+                                    <p className="text-xs text-gray-500">Dernière activité: {new Date(farm.updatedAt).toLocaleDateString()} à {new Date(farm.updatedAt).toLocaleTimeString()}</p>
                                 </div>
                             </CardContent>
                         </Card>
@@ -664,14 +678,16 @@ export default function ListFarm() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-gray-900">{farm.location}</div>
+                                                <div className="text-sm text-gray-900">{farm.address}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(farm.status)}</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-900">{farm.products}</div>
+                                                {/* <div className="text-sm font-medium text-gray-900">{farm.products}</div> */}
+                                                <div className="text-sm font-medium text-gray-900">0</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-900">{farm.customers}</div>
+                                                {/* <div className="text-sm font-medium text-gray-900">{farm.customers}</div> */}
+                                                <div className="text-sm font-medium text-gray-900">0</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-sm font-medium text-gray-900">{farm.totalSales}</div>
@@ -700,7 +716,7 @@ export default function ListFarm() {
                                                         </DropdownMenuItem>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem onClick={() => toggleFarmStatus(farm.id)}>
-                                                            {farm.isActive ? (
+                                                            {farm.status === "on" ? (
                                                                 <>
                                                                     <PowerOff className="w-4 h-4 mr-2" />
                                                                     Désactiver

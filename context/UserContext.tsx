@@ -9,11 +9,15 @@ const UserContext = createContext<{
   loading: boolean;
   error: Error | null;
   refreshUser: () => void;
+  currentUser: Persona | null;
+  setCurrentUser: (user: Persona | null) => void;
 }>({
   user: null,
   loading: true,
   error: null,
   refreshUser: () => {},
+  currentUser: null,
+  setCurrentUser: () => {},
 });
 
 export const useUser = () => useContext(UserContext);
@@ -41,7 +45,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, loading, error: null, refreshUser }}>
+    <UserContext.Provider value={{ user, loading, error, refreshUser, currentUser: user, setCurrentUser: setUser }}>
       {children}
     </UserContext.Provider>
   );

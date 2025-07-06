@@ -109,8 +109,17 @@ export default async function  FarmHomepage() {
         </div>
 
         {/* Secondary Banner */}
-        <div className="bg-[#f7f4eb] rounded-xl p-6 md:p-8 shadow-sm border border-[#e8e1d4] mb-8">
-          <div className="flex flex-col md:flex-row items-center">
+        <div className="relative bg-[#f7f4eb] rounded-xl p-6 md:p-8 shadow-sm border border-[#e8e1d4] mb-8 overflow-hidden">
+          {/* Background image with overlay */}
+          <div className="absolute inset-0">
+            <img
+              src="/imgs/landscape.jpg" 
+              alt="Farm background"
+              className="w-full h-full object-cover opacity-50"
+            />
+          </div>
+          
+          <div className="relative flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 mb-6 md:mb-0 md:pr-8">
               <h2 className="text-2xl md:text-3xl font-bold text-[#3c5a3e] mb-4">
                 Livraison directe de la ferme à votre table
@@ -121,11 +130,11 @@ export default async function  FarmHomepage() {
               </p>
               <Button className="bg-[#8fb573] hover:bg-[#7a9c62] text-white">En savoir plus</Button>
             </div>
-            <div className="md:w-1/2 flex justify-center">
+            <div className="absolute -top-full right-6 flex justify-end">
               <img
-                src="/placeholder.svg?height=300&width=400"
+                src="/imgs/livraison2.png"
                 alt="Livraison de produits fermiers"
-                className="rounded-lg max-h-[250px] object-cover"
+                className="rounded-lg object-cover"
               />
             </div>
           </div>
