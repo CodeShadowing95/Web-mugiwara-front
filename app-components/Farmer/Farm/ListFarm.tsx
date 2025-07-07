@@ -3,12 +3,10 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
-    ArrowLeft,
     Search,
     Plus,
     Grid3X3,
     List,
-    MapPin,
     Users,
     Package,
     Star,
@@ -19,13 +17,8 @@ import {
     Power,
     PowerOff,
     Leaf,
-    Award,
     SortAsc,
     SortDesc,
-    Target,
-    CircleArrowUp,
-    CircleArrowDown,
-    CircleCheckBig,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -42,8 +35,9 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useUser } from "@/app/UserContext"
-import { Farm } from "@/types"
 import { useFarm2 } from "@/app/FarmContext2"
+import FarmCard from "@/app-components/molecules/FarmCard"
+import FarmCardDetail from "@/app-components/FarmCardDetail"
 
 export default function ListFarm() {
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
@@ -53,7 +47,6 @@ export default function ListFarm() {
     const [filterStatus, setFilterStatus] = useState("all")
     const [filterType, setFilterType] = useState("all")
 
-    const [userFarms, setUserFarms] = useState<Farm[]>([])
     const userContext = useUser()
     const farmContext = useFarm2()
 
@@ -65,152 +58,7 @@ export default function ListFarm() {
         return <div>Erreur : Contexte ferme non disponible</div>
     }
 
-    const { farms: farmsByUser } = farmContext
-    const { currentUser, refreshUser } = userContext
-
-    // Données des fermes
-    const [farms, setFarms] = useState([
-        {
-            id: 1,
-            name: "Ferme des Oliviers",
-            location: "Aix-en-Provence, Provence-Alpes-Côte d'Azur",
-            type: "Bio & Légumes",
-            isActive: true,
-            avatar: "FO",
-            color: "bg-[var(--farm-green)]",
-            description: "Exploitation familiale depuis 3 générations, spécialisée dans l'agriculture biologique.",
-            products: 28,
-            customers: 156,
-            rating: 4.8,
-            totalSales: "24 580 €",
-            monthlyOrders: 89,
-            joinDate: "2022-03-15",
-            // certifications: ["AB", "HVE"],
-            image: "/imgs/farm.jpg",
-            status: "active",
-            lastActivity: "Il y a 2 heures",
-        },
-        {
-            id: 2,
-            name: "Les Jardins de Marie",
-            location: "Tours, Centre-Val de Loire",
-            type: "Fruits & Légumes",
-            isActive: false,
-            avatar: "JM",
-            color: "bg-[var(--farm-orange)]",
-            description: "Ferme spécialisée dans les fruits de saison et légumes primeurs.",
-            products: 15,
-            customers: 89,
-            rating: 4.6,
-            totalSales: "12 340 €",
-            monthlyOrders: 45,
-            joinDate: "2021-07-22",
-            // certifications: ["AB"],
-            image: "/imgs/farm.jpg",
-            status: "inactive",
-            lastActivity: "Il y a 5 jours",
-        },
-        {
-            id: 3,
-            name: "Élevage du Soleil",
-            location: "Caen, Normandie",
-            type: "Produits laitiers",
-            isActive: true,
-            avatar: "ES",
-            color: "bg-blue-600",
-            description: "Élevage de vaches laitières et production de fromages fermiers.",
-            products: 12,
-            customers: 67,
-            rating: 4.9,
-            totalSales: "18 920 €",
-            monthlyOrders: 34,
-            joinDate: "2020-11-08",
-            // certifications: ["Label Rouge", "AOP"],
-            image: "/imgs/farm.jpg",
-            status: "active",
-            lastActivity: "Il y a 1 heure",
-        },
-        {
-            id: 4,
-            name: "Maraîchage Bio du Midi",
-            location: "Montpellier, Occitanie",
-            type: "Légumes Bio",
-            isActive: true,
-            avatar: "MB",
-            color: "bg-green-600",
-            description: "Production de légumes biologiques en circuit court.",
-            products: 22,
-            customers: 134,
-            rating: 4.7,
-            totalSales: "16 750 €",
-            monthlyOrders: 67,
-            joinDate: "2023-01-12",
-            // certifications: ["AB", "Demeter"],
-            image: "/imgs/farm.jpg",
-            status: "active",
-            lastActivity: "Il y a 30 minutes",
-        },
-        {
-            id: 5,
-            name: "Vergers de Bretagne",
-            location: "Rennes, Bretagne",
-            type: "Fruits",
-            isActive: false,
-            avatar: "VB",
-            color: "bg-red-600",
-            description: "Vergers traditionnels avec pommes, poires et fruits rouges.",
-            products: 8,
-            customers: 45,
-            rating: 4.4,
-            totalSales: "8 430 €",
-            monthlyOrders: 23,
-            joinDate: "2022-09-03",
-            // certifications: ["HVE"],
-            image: "/imgs/farm.jpg",
-            status: "pending",
-            lastActivity: "Il y a 2 semaines",
-        },
-    ])
-
-    // const fetchFarms = async () => {
-    //     try {
-    //         const token = localStorage.getItem('jwt_token')
-    //         if (!token) {
-    //             throw new Error('Token d\'authentification non trouvé')
-    //         }
-
-    //         const options = {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Authorization': `Bearer ${token}`,
-    //                 'Content-Type': 'application/json'
-    //             }
-    //         }
-
-    //         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    //         const response = await fetch(`${apiUrl}/api/public/v1/farms/farmer/${currentUser?.id}`, options)
-    //         if (!response.ok) {
-    //             throw new Error('Erreur lors de la récupération des données de l\'utilisateur')
-    //         }
-
-    //         const data = await response.json()
-    //         setUserFarms(data)
-    //     } catch (error) {
-    //         console.error('Erreur lors de la récupération des données de l\'utilisateur :', error)
-    //     }
-    // }
-
-    // const getActiveFarms = () => {
-    //     return farms.filter((farm) => farm.status === "on")
-    // }
-
-    // useEffect(() => {
-    //     try {
-    //         fetchFarms()
-    //     } catch (error) {
-    //         console.error('Impossible d\'accéder à la requête :', error)
-    //     }
-    // }, [])
+    const { farms: farmsByUser, setFarms, selectedFarm } = farmContext
 
     // Filtrage et tri des fermes
     const getFilteredAndSortedFarms = () => {
@@ -272,17 +120,17 @@ export default function ListFarm() {
     }
 
     const toggleFarmStatus = (farmId: number) => {
-        setFarms((prev) =>
-            prev.map((farm) =>
-                farm.id === farmId
-                    ? {
-                        ...farm,
-                        isActive: !farm.isActive,
-                        status: farm.isActive ? "inactive" : "active",
-                    }
-                    : farm,
-            ),
-        )
+        const updatedFarms = farmsByUser.map((farm) => {
+            if (farm.id === farmId) {
+                return {
+                    ...farm,
+                    status: farm.status === "on"? "off" : "on",
+                }
+            }
+            return farm
+        })
+
+        setFarms(updatedFarms)
     }
 
     const getStatusBadge = (status: string) => {
@@ -299,8 +147,6 @@ export default function ListFarm() {
     }
 
     const filteredFarms = getFilteredAndSortedFarms()
-
-
 
     return (
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[var(--farm-beige-light)]">
@@ -498,134 +344,9 @@ export default function ListFarm() {
 
             {/* Liste des fermes */}
             {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredFarms.map((farm) => (
-                        <Card key={farm.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 p-0">
-                            <div className="relative">
-                                <img
-                                    src="/imgs/farm.jpg"
-                                    alt={farm.name}
-                                    className="w-full h-40 object-cover rounded-t-lg"
-                                />
-                                <div className="absolute top-4 left-4">{getStatusBadge(farm.status)}</div>
-                                <div className="absolute top-4 right-4">
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="secondary" size="sm" className="bg-white/90 hover:bg-white">
-                                                <MoreVertical className="w-4 h-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-48">
-                                            {farm.id === 1 ? (
-                                                <DropdownMenuItem className="text-blue-500">
-                                                    <CircleCheckBig className="w-4 h-4 mr-2" />
-                                                    Ferme montée
-                                                </DropdownMenuItem>
-                                            ) : (
-                                                <DropdownMenuItem>
-                                                    <CircleArrowUp className="w-4 h-4 mr-2" />
-                                                    Monter la ferme
-                                                </DropdownMenuItem>
-                                            )}
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem>
-                                                <Eye className="w-4 h-4 mr-2" />
-                                                Voir les détails
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem>
-                                                <Edit className="w-4 h-4 mr-2" />
-                                                Modifier
-                                            </DropdownMenuItem>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem onClick={() => toggleFarmStatus(farm.id)}>
-                                                {farm.status === "on" ? (
-                                                    <>
-                                                        <PowerOff className="w-4 h-4 mr-2" />
-                                                        Désactiver
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Power className="w-4 h-4 mr-2" />
-                                                        Activer
-                                                    </>
-                                                )}
-                                            </DropdownMenuItem>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem className="text-red-600">
-                                                <Trash2 className="w-4 h-4 mr-2" />
-                                                Supprimer
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
-                            </div>
-
-                            <CardContent className="px-6 pb-6">
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex items-center space-x-3">
-                                        <Avatar className="h-12 w-12">
-                                            <AvatarFallback>
-                                                <img 
-                                                    src={farm.avatar} 
-                                                    alt={`Avatar de ${farm.name}`}
-                                                    className={`w-full h-full object-cover ${farm.color}`}
-                                                />
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <h3 className="font-semibold text-farm-green-dark text-lg">{farm.name}</h3>
-                                            <p className="text-sm text-gray-600">{farm.type}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center text-sm text-gray-600 mb-3">
-                                    <MapPin className="w-4 h-4 mr-1" />
-                                    {farm.address}
-                                </div>
-
-                                <p className="text-sm text-gray-600 mb-4 line-clamp-2">{farm.description}</p>
-
-                                {/* Certifications */}
-                                {/* <div className="flex flex-wrap gap-2 mb-4">
-                                    {farm.certifications.map((cert, index) => (
-                                        <Badge key={index} variant="outline" className="text-xs">
-                                            <Award className="w-3 h-3 mr-1" />
-                                            {cert}
-                                        </Badge>
-                                    ))}
-                                </div> */}
-
-                                {/* Statistiques */}
-                                <div className="grid grid-cols-2 gap-4 mb-4">
-                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                        {/* <p className="text-lg font-bold text-farm-green-dark">{farm.products}</p> */}
-                                        <p className="text-lg font-bold text-farm-green-dark">0</p>
-                                        <p className="text-xs text-gray-600">Produits</p>
-                                    </div>
-                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                        {/* <p className="text-lg font-bold text-farm-green-dark">{farm.customers}</p> */}
-                                        <p className="text-lg font-bold text-farm-green-dark">0</p>
-                                        <p className="text-xs text-gray-600">Clients</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-1">
-                                        <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                                        <span className="text-sm font-medium">{farm.rating || 0.0}</span>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-sm font-bold text-farm-green-dark">{farm.totalSales || 0}</p>
-                                        <p className="text-xs text-gray-600">Ventes totales</p>
-                                    </div>
-                                </div>
-
-                                <div className="mt-4 pt-4 border-t border-gray-100">
-                                    <p className="text-xs text-gray-500">Dernière activité: {new Date(farm.updatedAt).toLocaleDateString()} à {new Date(farm.updatedAt).toLocaleTimeString()}</p>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <FarmCardDetail key={farm.id} farm={farm} />
                     ))}
                 </div>
             ) : (

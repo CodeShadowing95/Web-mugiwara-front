@@ -44,6 +44,7 @@ const Navbar = () => {
         setSelectedFarm(f);
         setActiveFarm(f);
         localStorage.setItem('selectedFarm', JSON.stringify(f));
+        router.push(`/fermier/mes-fermes`);
     }
 
     return (

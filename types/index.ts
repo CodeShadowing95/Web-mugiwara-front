@@ -14,6 +14,7 @@ export interface Farm {
     email: string;
     website: string;
     farmSize: string;
+    farmTypes: string;
     // productionMethods: string[];
     mainProducts: string[];
     seasonality: string;
